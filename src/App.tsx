@@ -101,9 +101,10 @@ function App() {
 
   return(
     <>
+    <p>aaaa</p>
+    <p>aaaa</p>
       <Canvas id='canvas'>
           <TorusList />
-
           <axesHelper scale={10}/>
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
