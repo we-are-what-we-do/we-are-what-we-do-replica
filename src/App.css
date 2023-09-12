@@ -1,10 +1,9 @@
-body {
-  user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 100%;
+#canvas {
+  margin: 0;
+  padding: 0;
   height: 100vh;
+  overflow: hidden;
+  user-select: none;
 }
 
 button {

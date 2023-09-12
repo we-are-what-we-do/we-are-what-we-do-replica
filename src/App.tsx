@@ -1,10 +1,10 @@
 import "./App.css";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Text } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
 import TorusList from './components/TorusList';
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "./redux/store";
-import { pushTorusInfo } from "./redux/features/torusInfo-slice";
+import { initHandle, pushTorusInfo } from "./redux/features/torusInfo-slice";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -29,7 +29,7 @@ function App() {
 
     //Dの文字
     if (num <= 10) {
-      pX = -5;   
+      pX = -7;   
       pY -= 0.6; 
     } else if (num == 11) {  
       pX += 0.5; 
@@ -49,25 +49,25 @@ function App() {
 
     //Eの文字
     } else if (num == 34) { 
-      pX = 2;
+      pX = 0;
       pY = 2.4;
     } else if (num <= 43) {
-      pX = 2;
+      pX = 0;
       pY -= 0.6;
     } else if (num == 44) {
-      pX = 2.5;
+      pX = 0.5;
       pY = 2.4;
     } else if (num >= 45 && num <= 49) {
       pX += 0.5;
       pY = 2.4; 
     } else if (num == 50) {
-      pX = 2.5;
+      pX = 0.5;
       pY = -0.4;
     } else if (num >= 51 && num <= 55) {
       pX += 0.5;
       pY = -0.4;
     } else if (num == 56) {
-      pX = 2.5;
+      pX = 0.5;
       pY = -3.4;
     } else if (num >= 57 && num <= 61) {
       pX += 0.5;
@@ -75,13 +75,16 @@ function App() {
 
     //Iの文字
     } else if (num == 62) {
-      pX = 9;
+      pX = 7;
       pY = 2.5;
     } else if (num >= 63 && num <= 71) {
-      pX = 9;
+      pX = 7;
       pY -= 0.65;
     } else {
-      return;
+      dispatch(initHandle());
+      num = 1;
+      pX = -7;   
+      pY = 2.4; 
     }
     num++;
 
@@ -100,20 +103,22 @@ function App() {
   };
 
   return(
-    <>
-    <p>aaaa</p>
-    <p>aaaa</p>
-      <Canvas id='canvas'>
+    <div id='canvas'>
+      <Canvas camera={{ position: [0,0,10] }}>
           <TorusList />
           <axesHelper scale={10}/>
           <ambientLight intensity={0.5} />
           <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
           <pointLight position={[-10, -10, -10]} />
           <OrbitControls/>
+
+          <Text position={[0, 5, 0]} >
+            React Three Fiber
+          </Text>
       </Canvas>
 
       <button onClick={addTorus}>追加</button>
-    </>
+    </div>
   );
 }
 export default App;
