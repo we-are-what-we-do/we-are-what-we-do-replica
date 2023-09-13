@@ -16,9 +16,10 @@ export const torusInfo = createSlice({
     name: "torusDetails",
     initialState: { value: torusStore },
     reducers: {
-        pushTorusInfo: ((state, action) => { state.value.push(action.payload)}),
+        pushTorusInfo: ((state, action) => { state.value.push(action.payload); console.log(torusInfo)}),
+        initHandle: () => { return { value: torusStore }},
     }
 });
 
-export const { pushTorusInfo } = torusInfo.actions;
+export const { pushTorusInfo, initHandle } = torusInfo.actions;
 export default torusInfo.reducer;
