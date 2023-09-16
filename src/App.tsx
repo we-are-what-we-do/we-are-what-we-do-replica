@@ -6,8 +6,8 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "./redux/store";
 import { initHandle, pushTorusInfo } from "./redux/features/torusInfo-slice";
 // import Camera from "./components/Camera";
-import Camera2 from "./components/Camera2";
-import Geolocation2 from "./components/GeoLocation";
+import Camera from "./components/Camera";
+import Geolocation from "./components/GeoLocation";
 import { useEffect, useState } from 'react';
 
 
