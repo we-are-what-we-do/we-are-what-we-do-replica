@@ -1,5 +1,5 @@
 // Geolocation.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface PositionState {
   latitude: number | null;
@@ -14,65 +14,44 @@ const Geolocation: React.FC = () => {
     error: null
   });
 
-  const [showPermissionDialog, setShowPermissionDialog] = useState(true);
-  const [showPermissionDenied, setShowPermissionDenied] = useState(false);
-
-  const handlePermission = (isGranted: boolean) => {
-    if (isGranted) {
-      if (!navigator.geolocation) {
-        setPosition(prev => ({ ...prev, error: 'Geolocation is not supported by your browser' }));
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setPosition({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            error: null
-          });
-        },
-        (error) => {
-          setPosition(prev => ({ ...prev, error: error.message }));
-        }
-      );
-      setShowPermissionDialog(false);
-    } else {
-      setShowPermissionDenied(true);
-
-      // 3秒後にダイアログを消す
-      setTimeout(() => {
-        setShowPermissionDenied(false);
-        setShowPermissionDialog(false);
-      }, 3000);
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setPosition(prev => ({ ...prev, error: 'Geolocation is not supported by your browser' }));
+      return;
     }
-  };
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log(`Latitude: ${position.coords.latitude}`);
+        console.log(`Longitude: ${position.coords.longitude}`);
+
+        setPosition({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          error: null
+        });
+      },
+      (error) => {
+        console.error("Error occurred while fetching location:", error.message);
+        setPosition(prev => ({ ...prev, error: error.message }));
+      }
+    );
+  }, []);
 
   return (
     <div>
-      {showPermissionDialog ? (
+      {position.error ? (
         <div>
-          <p>GPSの取得を許可しますか？</p>
-          <button onClick={() => handlePermission(true)}>許可する</button>
-          <button onClick={() => handlePermission(false)}>許可しない</button>
-        </div>
-      ) : showPermissionDenied ? (
-        <div>
+          {/* <p>Error: {position.error}</p> */}
           <p>リングを追加するには、GPSの許可が必要です</p>
-          console.log("リングを追加するには、GPSの許可が必要です");
         </div>
-      ) : position.error ? (
-        <div>
-          <p>システムエラー</p>
-          <p>Error: {position.error}</p>
-        </div>
-      ) : position.latitude && position.longitude ? (
+      ) : (
         <>
           <p>現在地</p>
           <p>Latitude: {position.latitude}</p>
           <p>Longitude: {position.longitude}</p>
         </>
-      ) : null}
+      )}
     </div>
   );
 };
