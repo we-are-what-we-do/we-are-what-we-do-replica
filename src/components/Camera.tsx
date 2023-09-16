@@ -37,4 +37,4 @@ const Camera: React.FC = () => {
   );
 };
 
-export default Camera2;
+export default Camera;
