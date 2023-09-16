@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useAppSelector } from "../redux/store";
 import { Mesh } from "three";
-import { useFrame } from "react-three-fiber";
+// import { useFrame } from "react-three-fiber";
 
   function Torus() {
 
