@@ -138,9 +138,9 @@ function App() {
 
       <div className="Test">
           <h1>カメラアクセス</h1>
-          <Camera2 />
+          <Camera />
           <h1>GPSアクセス</h1>
-          <Geolocation2 />
+          <Geolocation />
           <h1>IPアドレス</h1>
           {ip ? <p>Your IP address is: {ip}</p> : <p>Loading...</p>}
       </div>
