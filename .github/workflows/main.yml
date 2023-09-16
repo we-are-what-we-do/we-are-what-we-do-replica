@@ -2,7 +2,7 @@ name: Build React on S3
 on:
   push:
       branches:
-        - feature-shon-fetch-db
+        - main
 jobs:
   build:
     runs-on: ubuntu-latest
