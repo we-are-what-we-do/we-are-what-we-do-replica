@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const Camera2: React.FC = () => {
+const Camera: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isCameraAccessible, setIsCameraAccessible] = useState<boolean | null>(null);
 
