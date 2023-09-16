@@ -2,7 +2,7 @@ name: Build React on S3
 on:
   push:
       branches:
-        - main
+        - feature-shon-fetch-db
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,4 +21,4 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: # S3のwe-are-what-we-doバケットにデプロイ
-          aws s3 cp --recursive --region ap-northeast-1 dist s3://we-are-what-we-do/dist
+          aws s3 cp --recursive --region ap-northeast-1 dist s3://we-are-what-we-do
