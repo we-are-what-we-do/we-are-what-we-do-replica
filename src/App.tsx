@@ -5,6 +5,11 @@ import TorusList from './components/TorusList';
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "./redux/store";
 import { initHandle, pushTorusInfo } from "./redux/features/torusInfo-slice";
+// import Camera from "./components/Camera";
+import Camera from "./components/Camera";
+import Geolocation from "./components/GeoLocation";
+import { useEffect, useState } from 'react';
+
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -101,21 +106,46 @@ function App() {
     ));
   };
 
+  const [ip, setIp] = useState<string>("");
+
+  useEffect(() => {
+    fetch('https://api.ipify.org?format=json') // 外部APIを使って公開IPアドレスを取得
+      .then(response => response.json())
+      .then(data => {
+        setIp(data.ip);
+        console.log(`Your IP is: ${data.ip}`);
+      })
+      .catch(error => {
+        console.error("There was an error fetching the IP address:", error);
+      });
+  }, []);
+
   return(
-    <div id='canvas'>
-      <Canvas camera={{ position: [0,0,10] }}>
-          <TorusList />
-          <axesHelper scale={10}/>
-          <ambientLight intensity={0.5} />
-          <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-          <pointLight position={[-10, -10, -10]} />
-          <OrbitControls/>
-          <Text position={[0, 5, 0]} >
-            React Three Fiber
-          </Text>
-      </Canvas>
-      <button onClick={addTorus}>追加</button>
-    </div>
+    // <div id='canvas'>
+    //   <Canvas camera={{ position: [0,0,10] }}>
+    //       <TorusList />
+    //       <axesHelper scale={10}/>
+    //       <ambientLight intensity={0.5} />
+    //       <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
+    //       <pointLight position={[-10, -10, -10]} />
+    //       <OrbitControls/>
+    //       <Text position={[0, 5, 0]} >
+    //         React Three Fiber
+    //       </Text>
+    //   </Canvas>
+    //   <button onClick={addTorus}>追加</button>
+    // </div>
+
+      <div className="Test">
+          <h1>カメラアクセス</h1>
+          <Camera />
+          <h1>GPSアクセス</h1>
+          <Geolocation />
+          <h1>IPアドレス</h1>
+          {ip ? <p>Your IP address is: {ip}</p> : <p>Loading...</p>}
+      </div>
+    
+
   );
 }
 export default App;
