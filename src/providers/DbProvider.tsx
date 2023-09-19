@@ -1,11 +1,13 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useState, ReactNode } from 'react';
 import { Point } from 'geojson';
 
 
 /* 型定義 */
 // contextに渡すデータの型
 type DbContent = {
-    getLocationConfig: () => Promise<Points>
+    ringData: RingsData;
+    initializeRingData: (getLocationFunc: () => string) => Promise<void>;
+    getLocationConfig: () => Promise<Points>;
     getRingData: (location: string) => Promise<RingsData>;
     postRingData:(data: RingData) => Promise<Response>;
     postNftImage: (base64Data: string) => Promise<Response>;
@@ -112,6 +114,8 @@ async function postNftImage(base64Data: string): Promise<Response>{
 
 /* Provider */
 const initialData: DbContent = {
+    ringData: {},
+    initializeRingData: () => Promise.resolve(),
     getLocationConfig,
     getRingData,
     postRingData,
@@ -121,14 +125,23 @@ const initialData: DbContent = {
 export const DbContext = createContext<DbContent>(initialData);
 
 export function DbProvider({children}: {children: ReactNode}){
+    // リングのデータを管理する
+    const [ringData, setRingData] = useState<RingsData>({});
 
-    useEffect(() => {
-
-    }, [])
+    // リングのデータを入力する関数
+    // 現在いるピンの位置(リングのデータを取得したいピンの位置)を取得する関数を、引数に渡してください
+    async function initializeRingData(getLocationFunc: () => string): Promise<void>{
+        let newRingsData: RingsData = {};
+        const location: string = getLocationFunc();
+        newRingsData = await getRingData(location);
+        setRingData(newRingsData || {});
+    }
 
     return (
         <DbContext.Provider
             value={{
+                ringData,
+                initializeRingData,
                 getLocationConfig,
                 getRingData,
                 postRingData,
