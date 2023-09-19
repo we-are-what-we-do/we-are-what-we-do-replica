@@ -21,24 +21,6 @@ type RingData = {
 //     [id: string]: RingData;
 // };
 
-// ピンのデータの型
-type LocationConfig = {
-    "location": string; // 撮影場所(英名)
-    "locationJp": string; // 撮影場所(和名)
-    "latitude": number; // 緯度
-    "longitude": number; // 経度
-    "ringSize": number; // リングの大きさ
-};
-// type LocationsConfig = {
-//     [id: string]: LocationConfig;
-// };
-
-// DEIの設定データの型
-type DeiConfig = {
-
-};
-
-
 /* 関数定義 */
 
 
