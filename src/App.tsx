@@ -1,109 +1,74 @@
 import "./App.css";
 import { OrbitControls, Text } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
-import TorusList from './components/TorusList';
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "./redux/store";
-import { initHandle, pushTorusInfo } from "./redux/features/torusInfo-slice";
-// import Camera from "./components/Camera";
-import Camera from "./components/Camera";
-import Geolocation from "./components/GeoLocation";
-import { useEffect, useState } from 'react';
+import { pushTorusInfo, resetHandle } from "./redux/features/torusInfo-slice";
+import { v4 as uuidv4 } from 'uuid';
+import { RingPosition, positionArray } from "./torusPosition";
+import TorusList from './components/TorusList';
 
 
 function App() {
+  let rX: number;//回転x軸
+  let rY: number;//回転y軸
+  let torusScale: number;//torusの大きさ
+
+  let shufflePosition: RingPosition[];//シャッフル後の全てのリングpositionを格納
+  let randomPosition: RingPosition | undefined; //配列から取り出したリング
+
+  let num = 0;
+
   const dispatch = useDispatch<AppDispatch>();
 
-  let pX  = 0;    //横の位置
-  let pY  = 3;    //縦の位置
-  let rX: number; //Xのrotate
-  let rY: number; //Yのrotate
-  let torusScale = 0.08; //torusの大きさ
-  let num = 1;
+  //配列の中をシャッフルする
+  function shuffleArray(sourceArray: RingPosition[]) {
+    const array = sourceArray.concat();
+    const arrayLength = array.length;
+
+    for (let i = arrayLength - 1; i >= 0; i--) {
+        const randomIndex = Math.floor(Math.random() * (i + 1));
+        [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
+    }
+    return array;
+  }
+  shufflePosition = shuffleArray(positionArray);
+
 
   const addTorus = () => { 
     const color = 0xffffff * Math.random();
-
-    if (num % 2 == 0) {                   //偶数
+    torusScale = 0.08;
+    randomPosition = shufflePosition.pop();
+    
+    if (num % 2 == 0) {                   //偶数の時の角度
       rX = Math.floor(Math.random());
       rY = Math.floor(Math.random());
-    } else {                              //奇数
+    } else {                              //奇数の時の角度
       rX = Math.floor(Math.random() * 2); 
       rY = Math.floor(Math.random() * 5);
-    }    
-
-    //Dの文字
-    if (num <= 10) {
-      pX = -7;   
-      pY -= 0.6; 
-    } else if (num == 11) {  
-      pX += 0.5; 
-      pY += 5.5;
-    } else if (num >= 12 && num <= 15) {
-      pX += 0.5;
-    } else if (num >= 16 && num <= 20) {
-      pX += 0.3;
-      pY -= 0.4;
-    } else if (num >= 21 && num <= 22) {
-      pY -= 0.6;
-    } else if (num >= 23 && num <= 28) {
-      pX -= 0.2;
-      pY -= 0.4;
-    } else if (num >= 29 && num <= 33) {
-      pX -= 0.5;
-
-    //Eの文字
-    } else if (num == 34) { 
-      pX = 0;
-      pY = 2.4;
-    } else if (num <= 43) {
-      pX = 0;
-      pY -= 0.6;
-    } else if (num == 44) {
-      pX = 0.5;
-      pY = 2.4;
-    } else if (num >= 45 && num <= 49) {
-      pX += 0.5;
-      pY = 2.4; 
-    } else if (num == 50) {
-      pX = 0.5;
-      pY = -0.4;
-    } else if (num >= 51 && num <= 55) {
-      pX += 0.5;
-      pY = -0.4;
-    } else if (num == 56) {
-      pX = 0.5;
-      pY = -3.4;
-    } else if (num >= 57 && num <= 61) {
-      pX += 0.5;
-      pY = -3.2;
-
-    //Iの文字
-    } else if (num == 62) {
-      pX = 7;
-      pY = 2.5;
-    } else if (num >= 63 && num <= 71) {
-      pX = 7;
-      pY -= 0.65;
-    } else {
-      dispatch(initHandle());
-      num = 1;
-      pX = -7;   
-      pY = 2.4; 
     }
-    num++;
 
+    //配列内シャッフルして最後から取り出していく
+    if (num == 71) {
+      dispatch(resetHandle());
+      shufflePosition = shuffleArray(positionArray);
+      randomPosition = shufflePosition.pop();
+      num = 0;
+    }
+
+    //リング情報をオブジェクトに詰め込みstoreへ送る
     dispatch(pushTorusInfo(
       {
-        id: num,
+        id: uuidv4(),
         color: color,
         rotateX: rX,
         rotateY: rY,
-        positionX: pX,
-        positionY: pY,
+        positionX: randomPosition?.positionX,
+        positionY: randomPosition?.positionY,
         scale: torusScale, 
       }
     ));
+    num++;
   };
 
   const [ip, setIp] = useState<string>("");
@@ -121,30 +86,17 @@ function App() {
   }, []);
 
   return(
-    // <div id='canvas'>
-    //   <Canvas camera={{ position: [0,0,10] }}>
-    //       <TorusList />
-    //       <axesHelper scale={10}/>
-    //       <ambientLight intensity={0.5} />
-    //       <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-    //       <pointLight position={[-10, -10, -10]} />
-    //       <OrbitControls/>
-    //       <Text position={[0, 5, 0]} >
-    //         React Three Fiber
-    //       </Text>
-    //   </Canvas>
-    //   <button onClick={addTorus}>追加</button>
-    // </div>
-
-      <div className="Test">
-          <h1>カメラアクセス</h1>
-          <Camera />
-          <h1>GPSアクセス</h1>
-          <Geolocation />
-          <h1>IPアドレス</h1>
-          {ip ? <p>Your IP address is: {ip}</p> : <p>Loading...</p>}
-      </div>
-    
+    <div id='canvas'>
+      <Canvas camera={{ position: [0,0,10] }}>
+          <TorusList />
+          <axesHelper scale={10}/>
+          <OrbitControls/>
+          <Text position={[0, 5, 0]} >
+            React Three Fiber
+          </Text>
+      </Canvas>
+      <button onClick={addTorus}>追加</button>
+    </div>
 
   );
 }
