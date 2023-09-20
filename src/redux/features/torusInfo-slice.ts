@@ -10,16 +10,16 @@ export type TorusInfo = {
     scale: number,
 }
 
-const torusStore: TorusInfo[] = [];
+const torusStore: TorusInfo[] = [];//オブジェクト形式で受け取ったリング情報を格納していく
 
 export const torusInfo = createSlice({
     name: "torusDetails",
     initialState: { value: torusStore },
     reducers: {
-        pushTorusInfo: ((state, action) => { state.value.push(action.payload); console.log(torusInfo)}),
-        initHandle: () => { return { value: torusStore }},
+        pushTorusInfo: ((state, action) => { state.value.push(action.payload) }),
+        resetHandle: () => { return { value: torusStore } },
     }
 });
 
-export const { pushTorusInfo, initHandle } = torusInfo.actions;
+export const { pushTorusInfo, resetHandle } = torusInfo.actions;
 export default torusInfo.reducer;

@@ -1,15 +1,10 @@
 import { useRef } from "react";
 import { useAppSelector } from "../redux/store";
 import { Mesh } from "three";
-import { useFrame } from "react-three-fiber";
 
   function Torus() {
-
-    const torusInfo = useAppSelector((state) => state.torusInfo.value);
-
+    const torusInfo = useAppSelector((state) => state.torusInfo.value);//格納されたリング情報リスト
     const ref = useRef<Mesh>(null!);
-
-    // useFrame(() => (ref.current.rotation.x += 0.05));
 
     return (
       <>
@@ -23,7 +18,7 @@ import { useFrame } from "react-three-fiber";
              scale={torus.scale}
              >
               <torusGeometry args={[5, 1.5, 8, 50]} />
-              <meshBasicMaterial color={torus.color} />
+              <meshBasicMaterial color={torus.color} wireframe />
             </mesh>
           )
         })}
