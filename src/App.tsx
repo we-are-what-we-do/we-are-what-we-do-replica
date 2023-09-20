@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RingPosition, positionArray } from "./torusPosition";
 import TorusList from './components/TorusList';
 
+
 function App() {
   let rX: number;//回転x軸
   let rY: number;//回転y軸
@@ -70,6 +71,20 @@ function App() {
     num++;
   };
 
+  const [ip, setIp] = useState<string>("");
+
+  useEffect(() => {
+    fetch('https://api.ipify.org?format=json') // 外部APIを使って公開IPアドレスを取得
+      .then(response => response.json())
+      .then(data => {
+        setIp(data.ip);
+        console.log(`Your IP is: ${data.ip}`);
+      })
+      .catch(error => {
+        console.error("There was an error fetching the IP address:", error);
+      });
+  }, []);
+
   return(
     <div id='canvas'>
       <Canvas camera={{ position: [0,0,10] }}>
@@ -82,6 +97,7 @@ function App() {
       </Canvas>
       <button onClick={addTorus}>追加</button>
     </div>
+
   );
 }
 export default App;
