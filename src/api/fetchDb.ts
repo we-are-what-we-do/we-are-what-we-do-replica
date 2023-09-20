@@ -107,19 +107,25 @@ export async function postNftImage(base64Data: string): Promise<Response>{
 }
 
 // RingsData型をTorusInfo型配列に変換する関数
-export function convertTorusInfo(data: RingsData): TorusInfo[]{
+export function convertToTorusMany(data: RingsData): TorusInfo[]{
     const result: TorusInfo[] = new Array;
     Object.entries(data).forEach(([_key, value], index) => {
-        const newTorusInfo: TorusInfo = {
-            id: index,
-            color: value.ringColor,
-            rotateX: value.rotateX,
-            rotateY: value.rotateY,
-            positionX: value.positionX,
-            positionY: value.positionY,
-            scale: value.scale
-        };
+        const newTorusInfo: TorusInfo = convertToTorus(value, index);
         result.push(newTorusInfo);
     });
     return result;
+}
+
+// RingData型をTorusInfo型に変換する関数
+export function convertToTorus(data: RingData, index: number): TorusInfo{
+    const newTorusInfo: TorusInfo = {
+        id: index,
+        color: data.ringColor,
+        rotateX: data.rotateX,
+        rotateY: data.rotateY,
+        positionX: data.positionX,
+        positionY: data.positionY,
+        scale: data.scale
+    };
+    return newTorusInfo;
 }
