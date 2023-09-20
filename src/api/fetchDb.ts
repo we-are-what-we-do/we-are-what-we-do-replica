@@ -109,7 +109,7 @@ export async function postNftImage(base64Data: string): Promise<Response>{
 // RingsData型をTorusInfo型配列に変換する関数
 export function convertTorusInfo(data: RingsData): TorusInfo[]{
     const result: TorusInfo[] = new Array;
-    Object.entries(data).forEach(([key, value], index) => {
+    Object.entries(data).forEach(([_key, value], index) => {
         const newTorusInfo: TorusInfo = {
             id: index,
             color: value.ringColor,
