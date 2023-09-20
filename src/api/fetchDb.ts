@@ -1,4 +1,5 @@
 import { Point } from 'geojson';
+import { TorusInfo } from "./../redux/features/torusInfo-slice";
 
 
 /* 型定義 */
@@ -8,11 +9,15 @@ export type RingData = {
     "locationJp": string; // 撮影場所日本語
     "latitude": number; // 撮影地点の緯度
     "longitude": number; // 撮影地点の経度
-    "user_ip": string; // IPアドレス
-    "ring_count": number; // リング数
-    "ring_degree": number; // リング角度
-    "ring_color": string; // リング色
-    "creationdate":  number // 最終更新日時(タイムスタンプ)
+    "userIp": string; // IPアドレス
+    "ringCount": number; // リング数
+    "rotateX": number; // リング角度(右手親指)
+    "rotateY": number; // リング角度(右手人差し指)
+    "positionX": number; // リング位置(横方向)
+    "positionY": number; // リング位置(縦方向)
+    "ringColor": number; // リング色
+    "scale": number; //リングの大きさ
+    "creationDate":  number // 撮影日時
 };
 export type RingsData = {
     [id: string]: RingData;
@@ -99,4 +104,22 @@ export async function postNftImage(base64Data: string): Promise<Response>{
     const data: { image: string } = { image: base64Data };
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
+}
+
+// RingsData型をTorusInfo型配列に変換する関数
+export function convertTorusInfo(data: RingsData): TorusInfo[]{
+    const result: TorusInfo[] = new Array;
+    Object.entries(data).forEach(([key, value], index) => {
+        const newTorusInfo: TorusInfo = {
+            id: index,
+            color: value.ringColor,
+            rotateX: value.rotateX,
+            rotateY: value.rotateY,
+            positionX: value.positionX,
+            positionY: value.positionY,
+            scale: value.scale
+        };
+        result.push(newTorusInfo);
+    });
+    return result;
 }
