@@ -4,14 +4,15 @@ import { Point } from 'geojson';
 /* 型定義 */
 // リングの型
 export type RingData = {
-    "location": string; // 撮影場所(英名)
-    "locationJp": string; // 撮影場所(和名)
-    "ringCount": number; // リング数
-    "ipAddress": string; // IPアドレス
-    "angleX": number; // 角度(右手親指)
-    "angleY": number; // 角度(右手人差し指)
-    "color": string; // 色("#"抜きのカラーコード)
-    "lastUpdated":  number // 最終更新日時(タイムスタンプ)
+    "location": string; // 撮影場所
+    "locationJp": string; // 撮影場所日本語
+    "latitude": number; // 撮影地点の緯度
+    "longitude": number; // 撮影地点の経度
+    "user_ip": string; // IPアドレス
+    "ring_count": number; // リング数
+    "ring_degree": number; // リング角度
+    "ring_color": string; // リング色
+    "creationdate":  number // 最終更新日時(タイムスタンプ)
 };
 export type RingsData = {
     [id: string]: RingData;
