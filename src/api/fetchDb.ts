@@ -35,7 +35,7 @@ export type ToriByLocation = {
 
 
 /* 関数定義 */
-const apiDomain: string = "https://api.wawwd.net/api/" // アプリケーションサーバーのドメイン
+const apiDomain: string = "https://wawwdtestdb-default-rtdb.firebaseio.com/api/" // アプリケーションサーバーのドメイン
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{

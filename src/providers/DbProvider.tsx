@@ -12,7 +12,7 @@ import {
 // contextに渡すデータの型
 type DbContent = {
     toriByLocation: ToriByLocation;
-    initializeRingData: (location: string) => Promise<void>;
+    initializeRingData: (location?: string) => Promise<void>;
     addTorus: (location: string, newTorus: TorusInfo) => void;
 };
 
