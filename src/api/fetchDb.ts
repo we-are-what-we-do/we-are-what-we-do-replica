@@ -28,9 +28,14 @@ export type Points = {
     [id: string]: Point;
 };
 
+// locationごとのリング群の型
+export type ToriByLocation = {
+    [location: string]: TorusInfo[];
+}
+
 
 /* 関数定義 */
-const apiDomain: string = "https://api.wawwd.net/api/" // アプリケーションサーバーのドメイン
+const apiDomain: string = "https://api.wawwd.net/api/"; // アプリケーションサーバーのドメイン
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
@@ -110,12 +115,14 @@ export async function postNftImage(base64Data: string): Promise<Response>{
     return response;
 }
 
-// RingsData型をTorusInfo型配列に変換する関数
-export function convertToTorusMany(data: RingsData): TorusInfo[]{
-    const result: TorusInfo[] = new Array;
+// RingsData型をToriByLocation型に変換する関数
+export function convertToTori(data: RingsData): ToriByLocation{
+    const result: ToriByLocation = {};
     Object.entries(data).forEach(([_key, value], index) => {
-        const newTorusInfo: TorusInfo = convertToTorus(value, index);
-        result.push(newTorusInfo);
+        const location: string = value.location;
+        if(!result[location]) result[location] = new Array;
+        const newLocalTorus: TorusInfo = convertToTorus(value, index);
+        result[location].push(newLocalTorus);
     });
     return result;
 }
