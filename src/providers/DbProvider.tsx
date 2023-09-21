@@ -33,17 +33,20 @@ export function DbProvider({children}: {children: ReactNode}){
     // リングのデータを、サーバーから取得したデータで初期化する関数
     async function initializeRingData(location?: string): Promise<void>{
         const ringsData: RingsData = await getRingData(location) || {};
+        console.log("RingsData:", ringsData)
         let newTori: ToriByLocation = convertToTori(ringsData);
+        console.log("ToriByLocation:", newTori)
         setTori(newTori);
     }
 
     // torusArrayに新しいtorusデータを一つ追加する関数
     function addTorus(location: string, newTorus: TorusInfo): void{
         setTori((prevTori) => {
-            const newArray: TorusInfo[] = prevTori[location] || [];
+            const newTori: ToriByLocation = Object.assign({}, prevTori);
+            const newArray: TorusInfo[] = prevTori[location]?.slice() || [];
             newArray.push(newTorus);
-            prevTori[location] = newArray;
-            return prevTori;
+            newTori[location] = newArray;
+            return newTori;
         });
     };
 
