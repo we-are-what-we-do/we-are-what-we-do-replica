@@ -30,8 +30,7 @@ export function DbProvider({children}: {children: ReactNode}){
     const [torusArray, setTorusArray] = useState<TorusInfo[]>([]);
 
     // リングのデータを、サーバーから取得したデータで初期化する関数
-    // 現在いるピンの位置(リングのデータを取得したいピンの位置)のidを、引数に渡してください
-    async function initializeRingData(location: string): Promise<void>{
+    async function initializeRingData(location?: string): Promise<void>{
         const ringsData: RingsData = await getRingData(location) || {};
         let newTorusArray: TorusInfo[] = convertToTorusMany(ringsData);
         setTorusArray(newTorusArray);
