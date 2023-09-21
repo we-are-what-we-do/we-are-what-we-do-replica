@@ -35,7 +35,7 @@ export type ToriByLocation = {
 
 
 /* 関数定義 */
-const apiDomain: string = "https://api.wawwd.net/api/" // アプリケーションサーバーのドメイン
+const apiDomain: string = "https://wawwdtestdb-default-rtdb.firebaseio.com/api/"; // アプリケーションサーバーのドメイン
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
@@ -56,7 +56,7 @@ async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promis
 
 // ピンの全設定データを取得する関数
 export async function getLocationConfig(): Promise<Points>{
-    const apiEndpoint: string = "location-config";
+    const apiEndpoint: string = "location-config" + ".json";
     const response: Response = await makeGetRequest(apiEndpoint);
     const result: Points = await response.json();
     return result;
@@ -64,7 +64,7 @@ export async function getLocationConfig(): Promise<Points>{
 
 // ピン一か所から、リングのデータを取得する関数
 export async function getRingData(location?: string): Promise<RingsData> {
-    const apiEndpoint: string = "ring-data";
+    const apiEndpoint: string = "ring-data" + ".json";
     let queryParams: string = "";
     if(location){
         // ピンが指定されている場合、その一か所からのみリングのデータを取得する
@@ -102,7 +102,7 @@ async function makePostRequest(apiEndpoint: string, data: Object): Promise<Respo
 
 // リングのデータを送信する関数
 export async function postRingData(data: RingData): Promise<Response>{
-    const apiEndpoint: string = "ring-data"; // リングのデータを送信するための、APIのエンドポイント
+    const apiEndpoint: string = "ring-data" + ".json"; // リングのデータを送信するための、APIのエンドポイント
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }
@@ -118,10 +118,11 @@ export async function postNftImage(base64Data: string): Promise<Response>{
 // RingsData型をToriByLocation型に変換する関数
 export function convertToTori(data: RingsData): ToriByLocation{
     const result: ToriByLocation = {};
-    Object.entries(data).forEach(([key, value], index) => {
-        if(!result[key]) result[key] = new Array;
+    Object.entries(data).forEach(([_key, value], index) => {
+        const location: string = value.location;
+        if(!result[location]) result[location] = new Array;
         const newLocalTorus: TorusInfo = convertToTorus(value, index);
-        result[key].push(newLocalTorus);
+        result[location].push(newLocalTorus);
     });
     return result;
 }
