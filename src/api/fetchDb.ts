@@ -58,9 +58,13 @@ export async function getLocationConfig(): Promise<Points>{
 }
 
 // ピン一か所から、リングのデータを取得する関数
-export async function getRingData(location: string): Promise<RingsData>{
+export async function getRingData(location?: string): Promise<RingsData> {
     const apiEndpoint: string = "ring-data";
-    const queryParams: string = `?id=${location}`;
+    let queryParams: string = "";
+    if(location){
+        // ピンが指定されている場合、その一か所からのみリングのデータを取得する
+        queryParams = `?id=${location}`;
+    }
     const response: Response = await makeGetRequest(apiEndpoint, queryParams);
     const result: RingsData = await response.json();
     return result;
