@@ -35,7 +35,7 @@ export function DbProvider({children}: {children: ReactNode}){
 
     // リングのデータを、サーバーから取得したデータで初期化する関数
     async function initializeRingData(location?: string): Promise<void>{
-        const newRingsData: RingsData = await getRingData(location) || {};
+        const newRingsData: RingsData = await getRingData(location) ?? {};
         let newTori: ToriByLocation = convertToTori(ringsData);
         setRingsData(newRingsData);
         setTori(newTori);
@@ -45,7 +45,7 @@ export function DbProvider({children}: {children: ReactNode}){
     function addTorus(location: string, newTorus: TorusInfo): void{
         setTori((prevTori) => {
             const newTori: ToriByLocation = Object.assign({}, prevTori);
-            const newArray: TorusInfo[] = prevTori[location]?.slice() || [];
+            const newArray: TorusInfo[] = prevTori[location]?.slice() ?? [];
             newArray.push(newTorus);
             newTori[location] = newArray;
             return newTori;
