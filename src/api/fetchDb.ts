@@ -40,7 +40,7 @@ const apiDomain: string = "https://api.wawwd.net/api/"; // アプリケーショ
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
     try {
-        const response = await fetch(apiDomain + apiEndpoint + (queryParams || ''));
+        const response = await fetch(apiDomain + apiEndpoint + (queryParams ?? ''));
         if(response.ok){
             return response;
         }else{
