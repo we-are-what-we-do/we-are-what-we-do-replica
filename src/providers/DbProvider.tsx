@@ -11,6 +11,7 @@ import {
 /* 型定義 */
 // contextに渡すデータの型
 type DbContent = {
+    ringsData: RingsData;
     toriByLocation: ToriByLocation;
     initializeRingData: (location?: string) => Promise<void>;
     addTorus: (location: string, newTorus: TorusInfo) => void;
@@ -19,6 +20,7 @@ type DbContent = {
 
 /* Provider */
 const initialData: DbContent = {
+    ringsData: {},
     toriByLocation: {},
     initializeRingData: () => Promise.resolve(),
     addTorus: () => {}
@@ -28,14 +30,14 @@ export const DbContext = createContext<DbContent>(initialData);
 
 export function DbProvider({children}: {children: ReactNode}){
     // リングのデータを管理する
+    const [ringsData, setRingsData] = useState<RingsData>({});
     const [toriByLocation, setTori] = useState<ToriByLocation>({});
 
     // リングのデータを、サーバーから取得したデータで初期化する関数
     async function initializeRingData(location?: string): Promise<void>{
-        const ringsData: RingsData = await getRingData(location) || {};
-        console.log("RingsData:", ringsData)
+        const newRingsData: RingsData = await getRingData(location) || {};
         let newTori: ToriByLocation = convertToTori(ringsData);
-        console.log("ToriByLocation:", newTori)
+        setRingsData(newRingsData);
         setTori(newTori);
     }
 
@@ -53,6 +55,7 @@ export function DbProvider({children}: {children: ReactNode}){
     return (
         <DbContext.Provider
             value={{
+                ringsData,
                 toriByLocation,
                 initializeRingData,
                 addTorus
