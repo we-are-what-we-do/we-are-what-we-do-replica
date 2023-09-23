@@ -3,8 +3,7 @@ import { TorusInfo } from "./../redux/features/torusInfo-slice";
 import {
     RingsData,
     getRingData,
-    convertToTori,
-    ToriByLocation
+    convertToTori
 } from "./../api/fetchDb";
 
 
@@ -12,18 +11,18 @@ import {
 // contextに渡すデータの型
 type DbContent = {
     ringsData: RingsData;
-    toriByLocation: ToriByLocation;
+    toriData: TorusInfo[];
     initializeRingData: (location?: string) => Promise<void>;
-    addTorus: (location: string, newTorus: TorusInfo) => void;
+    addTorusData: (newTorus: TorusInfo) => void;
 };
 
 
 /* Provider */
 const initialData: DbContent = {
     ringsData: {},
-    toriByLocation: {},
+    toriData: [],
     initializeRingData: () => Promise.resolve(),
-    addTorus: () => {}
+    addTorusData: () => {}
 };
 
 export const DbContext = createContext<DbContent>(initialData);
@@ -31,23 +30,21 @@ export const DbContext = createContext<DbContent>(initialData);
 export function DbProvider({children}: {children: ReactNode}){
     // リングのデータを管理する
     const [ringsData, setRingsData] = useState<RingsData>({});
-    const [toriByLocation, setTori] = useState<ToriByLocation>({});
+    const [toriData, setTori] = useState<TorusInfo[]>([]);
 
     // リングのデータを、サーバーから取得したデータで初期化する関数
     async function initializeRingData(location?: string): Promise<void>{
         const newRingsData: RingsData = await getRingData(location) ?? {};
-        let newTori: ToriByLocation = convertToTori(ringsData);
+        let newTori: TorusInfo[] = convertToTori(ringsData);
         setRingsData(newRingsData);
         setTori(newTori);
     }
 
     // torusArrayに新しいtorusデータを一つ追加する関数
-    function addTorus(location: string, newTorus: TorusInfo): void{
+    function addTorusData(newTorus: TorusInfo): void{
         setTori((prevTori) => {
-            const newTori: ToriByLocation = Object.assign({}, prevTori);
-            const newArray: TorusInfo[] = prevTori[location]?.slice() ?? [];
-            newArray.push(newTorus);
-            newTori[location] = newArray;
+            const newTori: TorusInfo[] = prevTori.slice();
+            newTori.push(newTorus);
             return newTori;
         });
     };
@@ -56,9 +53,9 @@ export function DbProvider({children}: {children: ReactNode}){
         <DbContext.Provider
             value={{
                 ringsData,
-                toriByLocation,
+                toriData,
                 initializeRingData,
-                addTorus
+                addTorusData
             }}
         >
             {children}
