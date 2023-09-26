@@ -89,38 +89,6 @@ function App() {
       });
   }, []);
 
-
-
-  // //現在地とピンに設定された緯度経度を比較
-  // async function fetchGeoJSONPointData() {
-  //   //現在地の緯度経度を取得
-  //   const setPosition = (latitude: number, longitude: number) => {
-  //     console.log(`Your latitude is: ${latitude}`);
-  //     console.log(`Your longitude is: ${longitude}`);
-  //   };
-
-  //   //ピンに設定された緯度経度を取得
-  //   try {
-  //     const geoJSONData: FeatureCollection<Point> = await getLocationConfig();
-  //     // console.log(geoJSONData);　// 取得したデータをコンソールに出力
-  //     // FeatureCollectionの中の各Featureの緯度と経度をコンソールに出力
-  //     geoJSONData.features.forEach((feature, index) => {
-  //       const [longitude, latitude] = feature.geometry.coordinates;
-  //       console.log(`Feature ${index + 1}: Latitude: ${latitude}, Longitude: ${longitude}`);
-  //     });
-  
-  //     // 現在地と比較
-
-  
-  //   } catch (error) {
-  //     console.error("Error fetching GeoJSON Point data:", error);
-  //   }
-  // }
-  // // GeoJSON Pointデータを取得
-  // fetchGeoJSONPointData();
-
-
-
 // 環境変数(REACT_APP_RADIUS)から半径の値を取得 
 // 環境変数が数値でない、または設定されていない場合はデフォルト値として 1000m を使用
 // const RADIUS = process.env.REACT_APP_RADIUS ? parseInt(process.env.REACT_APP_RADIUS) : 1000;
