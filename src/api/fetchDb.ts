@@ -35,12 +35,13 @@ export type ToriByLocation = {
 
 
 /* 関数定義 */
-const apiDomain: string = "https://api.wawwd.net/api/"; // アプリケーションサーバーのドメイン
+// const apiDomain: string = "https://api.wawwd.net/api/"; // アプリケーションサーバーのドメイン
+const apiDomain: string = "https://we-are-what-we-do.s3.ap-northeast-1.amazonaws.com/test/"; // アプリケーションサーバーのドメインテスト
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
     try {
-        const response = await fetch(apiDomain + apiEndpoint + (queryParams || ''));
+        const response = await fetch(apiDomain + apiEndpoint + (queryParams ?? ''));
         if(response.ok){
             return response;
         }else{
