@@ -57,7 +57,7 @@ async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promis
 
 // ピンの全設定データを取得する関数
 export async function getLocationConfig(): Promise<Points>{
-    const apiEndpoint: string = "location-config";
+    const apiEndpoint: string = "location-config2";
     const response: Response = await makeGetRequest(apiEndpoint);
     const result: Points = await response.json();
     return result;
