@@ -7,7 +7,11 @@ import { pushTorusInfo, resetHandle } from "./redux/features/torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
 import { RingPosition, positionArray } from "./torusPosition";
 import TorusList from './components/TorusList';
-
+import { useEffect, useState } from 'react';
+import  Geolocation_test  from './components/GeoLocation_test';
+import { getLocationConfig } from './api/fetchDb';
+import { FeatureCollection, Point } from 'geojson';
+import { haversineDistance } from './api/distanceCalculations';
 
 function App() {
   let rX: number;//回転x軸
@@ -85,6 +89,90 @@ function App() {
       });
   }, []);
 
+
+
+  // //現在地とピンに設定された緯度経度を比較
+  // async function fetchGeoJSONPointData() {
+  //   //現在地の緯度経度を取得
+  //   const setPosition = (latitude: number, longitude: number) => {
+  //     console.log(`Your latitude is: ${latitude}`);
+  //     console.log(`Your longitude is: ${longitude}`);
+  //   };
+
+  //   //ピンに設定された緯度経度を取得
+  //   try {
+  //     const geoJSONData: FeatureCollection<Point> = await getLocationConfig();
+  //     // console.log(geoJSONData);　// 取得したデータをコンソールに出力
+  //     // FeatureCollectionの中の各Featureの緯度と経度をコンソールに出力
+  //     geoJSONData.features.forEach((feature, index) => {
+  //       const [longitude, latitude] = feature.geometry.coordinates;
+  //       console.log(`Feature ${index + 1}: Latitude: ${latitude}, Longitude: ${longitude}`);
+  //     });
+  
+  //     // 現在地と比較
+
+  
+  //   } catch (error) {
+  //     console.error("Error fetching GeoJSON Point data:", error);
+  //   }
+  // }
+  // // GeoJSON Pointデータを取得
+  // fetchGeoJSONPointData();
+
+
+
+// 環境変数(REACT_APP_RADIUS)から半径の値を取得 
+// 環境変数が数値でない、または設定されていない場合はデフォルト値として 1000m を使用
+// const RADIUS = process.env.REACT_APP_RADIUS ? parseInt(process.env.REACT_APP_RADIUS) : 1000;
+const RADIUS = 1000;
+
+// 現在地の取得とピンの位置を比較する関数
+async function fetchGeoJSONPointData() {
+  // 現在地の緯度経度を取得するPromiseを返す関数
+  const getCurrentLocation = (): Promise<[number, number]> => {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          reject(error);
+        }
+      );
+    });
+  };
+
+  try {
+    // 現在地の緯度と経度を取得
+    const [currentLat, currentLon] = await getCurrentLocation();
+
+    console.log(`Your latitude is: ${currentLat}`);
+    console.log(`Your longitude is: ${currentLon}`);
+
+    // ピンの位置情報を取得
+    const geoJSONData: FeatureCollection<Point> = await getLocationConfig();
+
+    // 各ピンの位置と現在地との距離をチェック
+    geoJSONData.features.forEach((feature, index) => {
+      const [longitude, latitude] = feature.geometry.coordinates;
+      const distance = haversineDistance(currentLat, currentLon, latitude, longitude);
+
+      if (distance <= RADIUS) {
+        console.log(`Feature ${index + 1} is within ${RADIUS} meters of your current location.`);
+      } else {
+        console.log(`Feature ${index + 1} is ${distance} meters away from your current location.`);
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching GeoJSON Point data or getting current location:", error);
+  }
+}
+
+// GeoJSON Pointデータと現在地の比較を実行
+fetchGeoJSONPointData();
+
+
+
   return(
     <div id='canvas'>
       <Canvas camera={{ position: [0,0,10] }}>
@@ -96,6 +184,7 @@ function App() {
           </Text>
       </Canvas>
       <button onClick={addTorus}>追加</button>
+      {/* <Geolocation_test setPosition={setPosition} /> */}
     </div>
 
   );
