@@ -8,10 +8,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { RingPosition, positionArray } from "./torusPosition";
 import TorusList from './components/TorusList';
 import { useEffect, useState } from 'react';
-import  Geolocation_test  from './components/GeoLocation_test';
+// import  Geolocation_test  from './components/GeoLocation_test';
 import { getLocationConfig } from './api/fetchDb';
 import { FeatureCollection, Point } from 'geojson';
 import { haversineDistance } from './api/distanceCalculations';
+import { LocationDataProvider } from './providers/LocationDataProvider';
+
 
 function App() {
   let rX: number;//回転x軸
@@ -95,7 +97,11 @@ function App() {
 const RADIUS = 1000;
 
 // 現在地の取得とピンの位置を比較する関数
-async function fetchGeoJSONPointData() {
+async function fetchGeoJSONPointData() : Promise<number> {
+
+  // 結果の配列　デフォルト0
+  let result = 0; 
+
   // 現在地の緯度経度を取得するPromiseを返す関数
   const getCurrentLocation = (): Promise<[number, number]> => {
     return new Promise((resolve, reject) => {
@@ -124,8 +130,9 @@ async function fetchGeoJSONPointData() {
     geoJSONData.features.forEach((feature, index) => {
       const [longitude, latitude] = feature.geometry.coordinates;
       const distance = haversineDistance(currentLat, currentLon, latitude, longitude);
-
+      console.log(`Location is: ${feature.properties.location}`);
       if (distance <= RADIUS) {
+        result = 1; // 条件に合致した場合、resultを1に設定
         console.log(`Feature ${index + 1} is within ${RADIUS} meters of your current location.`);
       } else {
         console.log(`Feature ${index + 1} is ${distance} meters away from your current location.`);
@@ -134,27 +141,30 @@ async function fetchGeoJSONPointData() {
   } catch (error) {
     console.error("Error fetching GeoJSON Point data or getting current location:", error);
   }
+  return result; 
 }
 
 // GeoJSON Pointデータと現在地の比較を実行
-fetchGeoJSONPointData();
+const result = fetchGeoJSONPointData();
+console.log(result);
 
 
 
   return(
-    <div id='canvas'>
-      <Canvas camera={{ position: [0,0,10] }}>
-          <TorusList />
-          <axesHelper scale={10}/>
-          <OrbitControls/>
-          <Text position={[0, 5, 0]} >
-            React Three Fiber
-          </Text>
-      </Canvas>
-      <button onClick={addTorus}>追加</button>
-      {/* <Geolocation_test setPosition={setPosition} /> */}
-    </div>
-
+    <LocationDataProvider> 
+      <div id='canvas'>
+        <Canvas camera={{ position: [0,0,10] }}>
+            <TorusList />
+            <axesHelper scale={10}/>
+            <OrbitControls/>
+            <Text position={[0, 5, 0]} >
+              React Three Fiber
+            </Text>
+        </Canvas>
+        <button onClick={addTorus}>追加</button>
+        {/* <Geolocation_test setPosition={setPosition} /> */}
+      </div>
+    </LocationDataProvider>
   );
 }
 export default App;
