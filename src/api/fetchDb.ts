@@ -11,6 +11,7 @@ export type RingData = {
     "longitude": number; // 撮影地点の経度
     "userIp": string; // IPアドレス
     "ringCount": number; // リング数
+    "orbitIndex": number; // リング軌道内の順番(DEI中の何個目か、0~70)
     "rotateX": number; // リング角度(右手親指)
     "rotateY": number; // リング角度(右手人差し指)
     "positionX": number; // リング位置(横方向)
