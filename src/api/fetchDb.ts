@@ -30,12 +30,12 @@ export type Points = {
 
 
 /* 関数定義 */
-const apiDomain: string = "https://api.wawwd.net/api/" // アプリケーションサーバーのドメイン
+const apiDomain: string = "https://api.wawwd.net/api/"; // アプリケーションサーバーのドメイン
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
     try {
-        const response = await fetch(apiDomain + apiEndpoint + (queryParams || ''));
+        const response = await fetch(apiDomain + apiEndpoint + (queryParams ?? ''));
         if(response.ok){
             return response;
         }else{
@@ -58,9 +58,13 @@ export async function getLocationConfig(): Promise<Points>{
 }
 
 // ピン一か所から、リングのデータを取得する関数
-export async function getRingData(location: string): Promise<RingsData>{
+export async function getRingData(location?: string): Promise<RingsData> {
     const apiEndpoint: string = "ring-data";
-    const queryParams: string = `?id=${location}`;
+    let queryParams: string = "";
+    if(location){
+        // ピンが指定されている場合、その一か所からのみリングのデータを取得する
+        queryParams = `?id=${location}`;
+    }
     const response: Response = await makeGetRequest(apiEndpoint, queryParams);
     const result: RingsData = await response.json();
     return result;
@@ -106,12 +110,12 @@ export async function postNftImage(base64Data: string): Promise<Response>{
     return response;
 }
 
-// RingsData型をTorusInfo型配列に変換する関数
-export function convertToTorusMany(data: RingsData): TorusInfo[]{
+// RingsData型をTorusInfo[]型に変換する関数
+export function convertToTori(data: RingsData): TorusInfo[]{
     const result: TorusInfo[] = new Array;
     Object.entries(data).forEach(([_key, value], index) => {
-        const newTorusInfo: TorusInfo = convertToTorus(value, index);
-        result.push(newTorusInfo);
+        const newLocalTorus: TorusInfo = convertToTorus(value, index);
+        result.push(newLocalTorus);
     });
     return result;
 }
