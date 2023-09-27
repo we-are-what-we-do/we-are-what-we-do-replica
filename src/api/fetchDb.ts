@@ -109,7 +109,7 @@ export async function postNftImage(base64Data: string): Promise<Response>{
 // RingsData型をTorusInfo[]型に変換する関数
 export function convertToTori(data: RingsData): TorusInfo[]{
     const result: TorusInfo[] = new Array;
-    Object.entries(data).forEach(([_key, value], _index) => {
+    Object.entries(data).forEach(([_key, value], _index) => { // TODO 全データを舐めるのは止めた方がいいかも
         const newLocalTorus: TorusInfo = convertToTorus(value, value.ringCount);
         result.push(newLocalTorus);
     });
