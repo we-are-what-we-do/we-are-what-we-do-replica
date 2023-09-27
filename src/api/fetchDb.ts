@@ -35,7 +35,8 @@ export type ToriByLocation = {
 
 
 /* 関数定義 */
-const apiDomain: string = "https://api.wawwd.net/api/"; // アプリケーションサーバーのドメイン
+// const apiDomain: string = "https://api.wawwd.net/api/"; // アプリケーションサーバーのドメイン
+const apiDomain: string = "https://we-are-what-we-do.s3.ap-northeast-1.amazonaws.com/test/"; // アプリケーションサーバーのドメインテスト
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
@@ -56,7 +57,7 @@ async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promis
 
 // ピンの全設定データを取得する関数
 export async function getLocationConfig(): Promise<Points>{
-    const apiEndpoint: string = "location-config";
+    const apiEndpoint: string = "location-config2";
     const response: Response = await makeGetRequest(apiEndpoint);
     const result: Points = await response.json();
     return result;
