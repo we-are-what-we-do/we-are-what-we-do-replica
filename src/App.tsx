@@ -1,4 +1,5 @@
 import "./App.css";
+import { useEffect, useState } from "react";
 import { OrbitControls, Text } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
 import { useDispatch } from "react-redux";

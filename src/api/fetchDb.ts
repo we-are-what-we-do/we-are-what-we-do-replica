@@ -114,8 +114,8 @@ export async function postNftImage(base64Data: string): Promise<Response>{
 // RingsData型をTorusInfo[]型に変換する関数
 export function convertToTori(data: RingsData): TorusInfo[]{
     const result: TorusInfo[] = new Array;
-    Object.entries(data).forEach(([_key, value], index) => {
-        const newLocalTorus: TorusInfo = convertToTorus(value, index);
+    Object.entries(data).forEach(([_key, value], _index) => {
+        const newLocalTorus: TorusInfo = convertToTorus(value, value.ringCount);
         result.push(newLocalTorus);
     });
     return result;
@@ -133,4 +133,15 @@ export function convertToTorus(data: RingData, index: number): TorusInfo{
         scale: data.scale
     };
     return newTorusInfo;
+}
+
+// 全データの中から、直前に追加されたリングのデータを取得する関数
+export function getLatestRing(data: RingsData): RingData | null{
+    let latestRing: RingData | null = null;
+    Object.entries(data).forEach(([_key, value], _index) => {
+        if((latestRing === null) || (value.ringCount > latestRing.ringCount)){
+            latestRing = value;
+        }
+    });
+    return latestRing;
 }
