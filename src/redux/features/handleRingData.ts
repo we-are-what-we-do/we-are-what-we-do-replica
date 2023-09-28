@@ -1,3 +1,4 @@
+import { RingPosition } from "../../torusPosition";
 import { TorusInfo } from "./torusInfo-slice";
 
 /* 型定義 */
@@ -58,3 +59,37 @@ export function getLatestRing(data: RingsData): RingData | null{
     });
     return latestRing;
 }
+
+// 全データの中から、リングの軌道内位置情報のみを取得する関数
+export function getOrbitIndexes(data: RingsData): number[]{
+    let result: number[] = new Array;
+    Object.entries(data).forEach(([_key, value]) => {
+        result.push(value.orbitIndex);
+    });
+    return result;
+}
+
+// 指定したインデックス以外の要素からランダムな要素を取得する関数
+export function getRandomPositionExceptIndexes(positionArray: RingPosition[], excludedIndexes: number[]) {
+    // ランダムに選択される要素のインデックスを決定する
+    const eligibleIndexes = positionArray
+        .map((_, index) => index)
+        .filter(index => !excludedIndexes.includes(index));
+
+    if (eligibleIndexes.length === 0) {
+      // すべての要素が除外された場合、nullを返す
+        return null;
+    }
+
+    const randomIndex = eligibleIndexes[Math.floor(Math.random() * eligibleIndexes.length)];
+    const randomValue = positionArray[randomIndex];
+
+    return { index: randomIndex, value: randomValue };
+}
+  
+  const inputArray = ["a", "b", "c", "d", "e"];
+  const excludedIndexes = [0, 2];
+  const randomElement = getRandomPositionExceptIndexes(inputArray, excludedIndexes);
+  
+  console.log(randomElement);
+  
