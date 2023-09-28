@@ -72,7 +72,8 @@ async function makePostRequest(apiEndpoint: string, data: Object): Promise<Respo
 
 // リングのデータを送信する関数
 export async function postRingData(data: RingData): Promise<Response>{
-    const apiEndpoint: string = "ring-data"; // リングのデータを送信するための、APIのエンドポイント
+    // const apiEndpoint: string = "ring-data"; // リングのデータを送信するための、APIのエンドポイント
+    const apiEndpoint: string = "ring-data.json"; // 仮エンドポイント
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }

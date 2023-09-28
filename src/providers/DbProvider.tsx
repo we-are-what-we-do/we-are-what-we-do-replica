@@ -50,6 +50,8 @@ export function DbProvider({children}: {children: ReactNode}){
         setRingsData(newRingsData);
         setLatestRing(newLatestRing);
         setTori(newTori);
+
+        console.log("サーバーからデータを取得しました:\n", newRingsData); // TODO 後で消す
     }
 
     // torusArrayに新しいtorusデータを一つ追加する関数

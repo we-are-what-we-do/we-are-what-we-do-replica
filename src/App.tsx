@@ -10,6 +10,7 @@ import { RingPosition, positionArray } from "./torusPosition";
 import TorusList from './components/TorusList';
 import { DbContext } from "./providers/DbProvider";
 import { RingData, RingPositionWithIndex, RingsData, convertToTorus, getRandomPositionExceptIndexes } from "./redux/features/handleRingData";
+import { postRingData } from "./api/fetchDb";
 
 
 // オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
@@ -47,7 +48,7 @@ function getLatestLap(data: RingsData): RingsData{
 function App() {
   const {
     ringsData,
-    // latestRing,
+    latestRing,
     // toriData,
     // usedOrbitIndexes,
     // initializeRingData,
@@ -55,12 +56,7 @@ function App() {
   } = useContext(DbContext);
 
   const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
-
-
-  let shufflePosition: RingPosition[];//シャッフル後の全てのリングpositionを格納
-  let randomPosition: RingPosition | undefined; //配列から取り出したリング
-
-  const [ringCount, setRingCount] = useState<number>(0);
+  const [ringCount, setRingCount] = useState<number>(0); // DEI軌道内のリング数(0～71)
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -72,40 +68,36 @@ function App() {
   // 現在のリングのデータ(ringsData)で、3Dオブジェクトを初期化する関数
   function initializeRingDraw(): void{
     dispatch(resetHandle()); // 全3Dを消去する
+    setRingCount(0);
+    setUsedOrbitIndexes([]);
+
     const extractedRingData: RingsData = getLatestLap(ringsData); // リングデータを71個までに限定して切り出す(一応)
 
     // 3Dオブジェクトの初期表示を行う
-    Object.entries(extractedRingData).forEach(([_key, value], index) => {
+    Object.entries(extractedRingData).forEach(([_key, value]) => {
       // リングデータを使用して、3Dオブジェクトを1つ作成する
       const newTorus: TorusInfo = convertToTorus(value);
       dispatch(pushTorusInfo(newTorus)); //リング情報をオブジェクトに詰め込みstoreへ送る
 
       setRingCount((prev) => prev + 1); // リング数を1増やす
-      setUsedOrbitIndexes((prev) => [...prev, index]); // 使用済みの軌道番号として保管する
+      setUsedOrbitIndexes((prev) => [...prev, value.orbitIndex]); // 使用済みの軌道番号として保管する
     });
   }
-
-  //配列の中をシャッフルする
-  function shuffleArray(sourceArray: RingPosition[]) {
-    const array = sourceArray.concat();
-    const arrayLength = array.length;
-
-    for (let i = arrayLength - 1; i >= 0; i--) {
-        const randomIndex = Math.floor(Math.random() * (i + 1));
-        [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
-    }
-    return array;
-  }
-  shufflePosition = shuffleArray(positionArray);
 
   // リングの3Dオブジェクトを追加する関数
   const addTorus = () => { 
     let rX: number;//回転x軸
     let rY: number;//回転y軸
     let torusScale: number = 0.08;//torusの大きさ
-    let num = ringCount;
+    let num: number = ringCount;
+    let newOrbitIndex: number = -1;
     const color = 0xffffff * Math.random();
-    
+    let positionWithIndex: RingPositionWithIndex | null = null;
+    let randomPosition: RingPosition | null = null; // ランダムなリング位置
+    const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
+    let newOrbitIndexes: number[] = usedOrbitIndexes.slice(); // 使用済みのリング軌道内位置
+
+    // リングの角度を求める
     if (num % 2 == 0) {                   //偶数の時の角度
       rX = Math.floor(Math.random());
       rY = Math.floor(Math.random());
@@ -114,27 +106,61 @@ function App() {
       rY = Math.floor(Math.random() * 5);
     }
 
-    //配列内シャッフルして最後から取り出していく
-    if (num == 71) {
+    // 既に全てのリングが埋まっている場合
+    if (num >= orbitLength) {
+      // 描画とリング軌道内位置の空き情報を初期化する
       dispatch(resetHandle());
-      shufflePosition = shuffleArray(positionArray);
-      randomPosition = shufflePosition.pop();
+      newOrbitIndexes = [];
       num = 0;
     }
 
+    // DEI軌道の中から、空いているリングの位置をランダムに取得する
+    console.log(newOrbitIndexes);
+    positionWithIndex = getRandomPositionExceptIndexes(positionArray, newOrbitIndexes); 
+    if(positionWithIndex){
+      randomPosition = positionWithIndex.ringPosition;
+      newOrbitIndex = positionWithIndex.index;
+    }else{
+      throw new Error("DEI軌道のリングが全て埋まっているのに、リングを追加しようとしました");
+    }
+
     //リング情報をオブジェクトに詰め込みstoreへ送る
-    dispatch(pushTorusInfo(
-      {
-        id: uuidv4(),
-        color: color,
-        rotateX: rX,
-        rotateY: rY,
-        positionX: randomPosition?.positionX,
-        positionY: randomPosition?.positionY,
-        scale: torusScale, 
-      }
-    ));
+    const newTorus: TorusInfo = {
+      id: uuidv4(),
+      color: color,
+      rotateX: rX,
+      rotateY: rY,
+      positionX: randomPosition.positionX,
+      positionY: randomPosition.positionY,
+      scale: torusScale,
+    };
+    dispatch(pushTorusInfo(newTorus));
+
     num++;
+    newOrbitIndexes.push(newOrbitIndex);
+
+    // サーバーにリングのデータを追加する
+    const newRingData: RingData = {
+      location: "anywhere", // 撮影場所
+      locationJp: "どこか", // 撮影場所日本語
+      latitude: 0, // 撮影地点の緯度
+      longitude: 0, // 撮影地点の経度
+      userIp: ip, // IPアドレス
+      ringCount: (latestRing?.ringCount ?? 0) + 1, // リング数
+      orbitIndex: newOrbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
+      rotateX: rX, // リング角度(右手親指)
+      rotateY: rY, // リング角度(右手人差し指)
+      positionX: randomPosition.positionX, // リング位置(横方向)
+      positionY: randomPosition.positionY, // リング位置(縦方向)
+      ringColor: color, // リング色
+      scale: torusScale, //リングの大きさ
+      creationDate:  new Date().getTime() // 撮影日時
+    };
+    postRingData(newRingData);
+
+    // stateを更新する
+    setRingCount(num);
+    setUsedOrbitIndexes(newOrbitIndexes);
   };
 
   const [ip, setIp] = useState<string>("");
@@ -175,6 +201,7 @@ function App() {
       >
         サーバーデータ削除
       </button>
+      <button style={{marginTop: "4rem"}}>リング数: {ringCount}</button>
     </div>
 
   );
