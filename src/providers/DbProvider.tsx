@@ -3,10 +3,10 @@ import { TorusInfo } from "./../redux/features/torusInfo-slice";
 import {
     RingData,
     RingsData,
-    getRingData,
     convertToTori,
     getLatestRing
-} from "./../api/fetchDb";
+} from "./../redux/features/handleRingData";
+import { getRingData } from "./../api/fetchDb";
 
 
 /* 型定義 */
