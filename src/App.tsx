@@ -51,17 +51,20 @@ function getLatestLap(data: RingsData): RingsData{
 
 
 function App() {
+  // サーバーから取得したリングデータを管理するcontext
   const {
     ringsData,
-    latestRing,
-    // toriData,
-    // usedOrbitIndexes,
-    // initializeRingData,
-    // addTorusData
+    latestRing
   } = useContext(DbContext);
 
   const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
   const [ringCount, setRingCount] = useState<number>(0); // DEI軌道内のリング数(0～71)
+
+  // リングデータをサーバーに送信する際に必要な情報を管理するstate
+  const [location, setLocation] = useState<string | null>(null); // 現在値
+  const [locationJp, setLocationJp] = useState<string | null>(null); // 現在地(和名)
+  const [currentLatitude, setCurrentLatitude] = useState<number | null>(null); // 現在地の緯度
+  const [currentLongitude, setCurrentLongitude] = useState<number | null>(null); // 現在地の経度
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -120,7 +123,7 @@ function App() {
     }
 
     // DEI軌道の中から、空いているリングの位置をランダムに取得する
-    console.log(newOrbitIndexes);
+    // console.log("現在埋まっているリング位置:\n", newOrbitIndexes);
     positionWithIndex = getRandomPositionExceptIndexes(positionArray, newOrbitIndexes); 
     if(positionWithIndex){
       randomPosition = positionWithIndex.ringPosition;
@@ -146,10 +149,10 @@ function App() {
 
     // サーバーにリングのデータを追加する
     const newRingData: RingData = {
-      location: "anywhere", // 撮影場所
-      locationJp: "どこか", // 撮影場所日本語
-      latitude: 0, // 撮影地点の緯度
-      longitude: 0, // 撮影地点の経度
+      location: location ?? "", // 撮影場所
+      locationJp: locationJp ?? "", // 撮影場所日本語
+      latitude: currentLatitude ?? 0, // 撮影地点の緯度
+      longitude: currentLongitude ?? 0, // 撮影地点の経度
       userIp: ip, // IPアドレス
       ringCount: (latestRing?.ringCount ?? 0) + 1, // リング数
       orbitIndex: newOrbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
@@ -162,6 +165,7 @@ function App() {
       creationDate:  new Date().getTime() // 撮影日時
     };
     postRingData(newRingData);
+    console.log("サーバーにデータを送信しました:\n", newRingData);
 
     // stateを更新する
     setRingCount(num);
@@ -211,22 +215,30 @@ async function fetchGeoJSONPointData() : Promise<number> {
     // 現在地の緯度と経度を取得
     const [currentLat, currentLon] = await getCurrentLocation();
 
-    console.log(`Your latitude is: ${currentLat}`);
-    console.log(`Your longitude is: ${currentLon}`);
+    // console.log(`Your latitude is: ${currentLat}`);
+    // console.log(`Your longitude is: ${currentLon}`);
+
+    setCurrentLatitude(currentLat);
+    setCurrentLongitude(currentLon);
 
     // ピンの位置情報を取得
     const geoJSONData: FeatureCollection<Point> = await getLocationConfig();
 
     // 各ピンの位置と現在地との距離をチェック
-    geoJSONData.features.forEach((feature, index) => {
+    geoJSONData.features.forEach((feature, _index) => {
       const [longitude, latitude] = feature.geometry.coordinates;
       const distance = haversineDistance(currentLat, currentLon, latitude, longitude);
-      console.log(`Location is: ${feature.properties?.location}`);
+      const currentLocation: string = feature.properties?.location ?? "";
+      const currentLocationJp: string = feature.properties?.locationJp ?? "";
+      // console.log(`Location is: ${currentLocation}`);
+      // console.log(`LocationJP is: ${currentLocationJp}`);
+      setLocation(currentLocation);
+      setLocationJp(currentLocationJp);
       if (distance <= RADIUS) {
         result = 1; // 条件に合致した場合、resultを1に設定
-        console.log(`Feature ${index + 1} is within ${RADIUS} meters of your current location.`);
+        // console.log(`Feature ${index + 1} is within ${RADIUS} meters of your current location.`);
       } else {
-        console.log(`Feature ${index + 1} is ${distance} meters away from your current location.`);
+        // console.log(`Feature ${index + 1} is ${distance} meters away from your current location.`);
       }
     });
   } catch (error) {
@@ -236,8 +248,9 @@ async function fetchGeoJSONPointData() : Promise<number> {
 }
 
 // GeoJSON Pointデータと現在地の比較を実行
-const result = fetchGeoJSONPointData();
-console.log(result);
+fetchGeoJSONPointData();
+// const result = fetchGeoJSONPointData();
+// console.log(result);
 
 
 
