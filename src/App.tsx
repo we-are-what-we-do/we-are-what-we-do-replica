@@ -8,12 +8,11 @@ import { TorusInfo, pushTorusInfo, resetHandle } from "./redux/features/torusInf
 import { v4 as uuidv4 } from 'uuid';
 import { RingPosition, positionArray } from "./torusPosition";
 import TorusList from './components/TorusList';
-import { useEffect, useState } from 'react';
 // import  Geolocation_test  from './components/GeoLocation_test';
 import { getLocationConfig } from './api/fetchDb';
 import { FeatureCollection, Point } from 'geojson';
 import { haversineDistance } from './api/distanceCalculations';
-import { LocationDataProvider } from './providers/LocationDataProvider';
+// import { LocationDataProvider } from './providers/LocationDataProvider';
 import { DbContext } from "./providers/DbProvider";
 import { RingData, RingPositionWithIndex, RingsData, convertToTorus, getRandomPositionExceptIndexes } from "./redux/features/handleRingData";
 import { postRingData } from "./api/fetchDb";
@@ -222,7 +221,7 @@ async function fetchGeoJSONPointData() : Promise<number> {
     geoJSONData.features.forEach((feature, index) => {
       const [longitude, latitude] = feature.geometry.coordinates;
       const distance = haversineDistance(currentLat, currentLon, latitude, longitude);
-      console.log(`Location is: ${feature.properties.location}`);
+      console.log(`Location is: ${feature.properties?.location}`);
       if (distance <= RADIUS) {
         result = 1; // 条件に合致した場合、resultを1に設定
         console.log(`Feature ${index + 1} is within ${RADIUS} meters of your current location.`);
@@ -267,22 +266,8 @@ console.log(result);
         サーバーデータ削除
       </button>
       <button style={{marginTop: "4rem"}}>リング数: {ringCount}</button>
+      {/* <Geolocation_test setPosition={setPosition} /> */}
     </div>
-
-    <LocationDataProvider> 
-      <div id='canvas'>
-        <Canvas camera={{ position: [0,0,10] }}>
-            <TorusList />
-            <axesHelper scale={10}/>
-            <OrbitControls/>
-            <Text position={[0, 5, 0]} >
-              React Three Fiber
-            </Text>
-        </Canvas>
-        <button onClick={addTorus}>追加</button>
-        {/* <Geolocation_test setPosition={setPosition} /> */}
-      </div>
-    </LocationDataProvider>
   );
 }
 export default App;
