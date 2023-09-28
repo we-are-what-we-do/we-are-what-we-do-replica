@@ -1,11 +1,10 @@
-import { createContext, useState, ReactNode } from 'react';
+import { createContext, useState, ReactNode, useEffect } from 'react';
 import { TorusInfo } from "./../redux/features/torusInfo-slice";
 import {
     RingData,
     RingsData,
     convertToTori,
-    getLatestRing,
-    getOrbitIndexes
+    getLatestRing
 } from "./../redux/features/handleRingData";
 import { getRingData } from "./../api/fetchDb";
 
@@ -16,7 +15,6 @@ type DbContent = {
     ringsData: RingsData;
     latestRing: RingData | null;
     toriData: TorusInfo[];
-    usedOrbitIndexes: number[];
     initializeRingData: (location?: string) => Promise<void>;
     addTorusData: (newTorus: TorusInfo) => void;
 };
@@ -27,7 +25,6 @@ const initialData: DbContent = {
     ringsData: {},
     latestRing: null,
     toriData: [],
-    usedOrbitIndexes: [],
     initializeRingData: () => Promise.resolve(),
     addTorusData: () => {}
 };
@@ -39,18 +36,20 @@ export function DbProvider({children}: {children: ReactNode}){
     const [ringsData, setRingsData] = useState<RingsData>({}); // サーバーから取得したリングデータ
     const [latestRing, setLatestRing] = useState<RingData | null>(null); // 直前に追加されたリングデータ
     const [toriData, setTori] = useState<TorusInfo[]>([]); // Three.jsで使用するリングデータ
-    const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
+
+    // 初回レンダリング時、サーバーからデータを取得する
+    useEffect(() => {
+        initializeRingData();
+    }, [])
 
     // リングのデータを、サーバーから取得したデータで初期化する関数
     async function initializeRingData(): Promise<void>{
         const newRingsData: RingsData = await getRingData() ?? {};
         const newLatestRing: RingData | null = getLatestRing(newRingsData);
         let newTori: TorusInfo[] = convertToTori(newRingsData);
-        const newUsedOrbitIndexes: number[] = getOrbitIndexes(newRingsData);
         setRingsData(newRingsData);
         setLatestRing(newLatestRing);
         setTori(newTori);
-        setUsedOrbitIndexes(newUsedOrbitIndexes);
     }
 
     // torusArrayに新しいtorusデータを一つ追加する関数
@@ -68,7 +67,6 @@ export function DbProvider({children}: {children: ReactNode}){
                 ringsData,
                 latestRing,
                 toriData,
-                usedOrbitIndexes,
                 initializeRingData,
                 addTorusData
             }}

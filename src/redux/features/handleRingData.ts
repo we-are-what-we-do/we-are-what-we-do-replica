@@ -1,5 +1,7 @@
 import { RingPosition } from "../../torusPosition";
 import { TorusInfo } from "./torusInfo-slice";
+import { v4 as uuidv4 } from 'uuid';
+
 
 /* 型定義 */
 // リングの型
@@ -22,6 +24,11 @@ export type RingData = {
 export type RingsData = {
     [id: string]: RingData;
 };
+// リングの位置の型
+export type RingPositionWithIndex = {
+    index: number;
+    ringPosition: RingPosition;
+}
 
 
 /* 関数定義 */
@@ -29,16 +36,16 @@ export type RingsData = {
 export function convertToTori(data: RingsData): TorusInfo[]{
     const result: TorusInfo[] = new Array;
     Object.entries(data).forEach(([_key, value], _index) => { // TODO 全データを舐めるのは止めた方がいいかも
-        const newLocalTorus: TorusInfo = convertToTorus(value, value.ringCount);
+        const newLocalTorus: TorusInfo = convertToTorus(value);
         result.push(newLocalTorus);
     });
     return result;
 }
 
 // RingData型をTorusInfo型に変換する関数
-export function convertToTorus(data: RingData, index: number): TorusInfo{
+export function convertToTorus(data: RingData): TorusInfo{
     const newTorusInfo: TorusInfo = {
-        id: index,
+        id: uuidv4(),
         color: data.ringColor,
         rotateX: data.rotateX,
         rotateY: data.rotateY,
@@ -60,17 +67,8 @@ export function getLatestRing(data: RingsData): RingData | null{
     return latestRing;
 }
 
-// 全データの中から、リングの軌道内位置情報のみを取得する関数
-export function getOrbitIndexes(data: RingsData): number[]{
-    let result: number[] = new Array;
-    Object.entries(data).forEach(([_key, value]) => {
-        result.push(value.orbitIndex);
-    });
-    return result;
-}
-
-// 指定したインデックス以外の要素からランダムな要素を取得する関数
-export function getRandomPositionExceptIndexes(positionArray: RingPosition[], excludedIndexes: number[]) {
+// 指定したインデックス以外の要素からランダムなRingPositionを取得する関数
+export function getRandomPositionExceptIndexes(positionArray: RingPosition[], excludedIndexes: number[]): RingPositionWithIndex | null{
     // ランダムに選択される要素のインデックスを決定する
     const eligibleIndexes = positionArray
         .map((_, index) => index)
@@ -84,5 +82,5 @@ export function getRandomPositionExceptIndexes(positionArray: RingPosition[], ex
     const randomIndex = eligibleIndexes[Math.floor(Math.random() * eligibleIndexes.length)];
     const randomValue = positionArray[randomIndex];
 
-    return { index: randomIndex, value: randomValue };
+    return { index: randomIndex, ringPosition: randomValue };
 }
