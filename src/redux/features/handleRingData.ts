@@ -86,10 +86,3 @@ export function getRandomPositionExceptIndexes(positionArray: RingPosition[], ex
 
     return { index: randomIndex, value: randomValue };
 }
-  
-  const inputArray = ["a", "b", "c", "d", "e"];
-  const excludedIndexes = [0, 2];
-  const randomElement = getRandomPositionExceptIndexes(inputArray, excludedIndexes);
-  
-  console.log(randomElement);
-  
