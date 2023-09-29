@@ -1,12 +1,12 @@
 import "./App.css";
-import { OrbitControls, Text } from "@react-three/drei";
+import TorusList from './components/TorusList';
+import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
-import { useDispatch } from "react-redux";
+import { Ring, positionArray } from "./torusPosition";
 import { AppDispatch } from "./redux/store";
+import { useDispatch } from "react-redux";
 import { pushTorusInfo, resetHandle } from "./redux/features/torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
-import { RingPosition, positionArray } from "./torusPosition";
-import TorusList from './components/TorusList';
 import { useEffect, useState } from 'react';
 // import  Geolocation_test  from './components/GeoLocation_test';
 import { getLocationConfig } from './api/fetchDb';
@@ -15,20 +15,16 @@ import { haversineDistance } from './api/distanceCalculations';
 import { LocationDataProvider } from './providers/LocationDataProvider';
 
 function App() {
-  let rX: number;//回転x軸
-  let rY: number;//回転y軸
-  let torusScale: number;//torusの大きさ
-
-  let shufflePosition: RingPosition[];//シャッフル後の全てのリングpositionを格納
-  let randomPosition: RingPosition | undefined; //配列から取り出したリング
-
+  let torusScale     : number;
+  let shufflePosition: Ring[];
+  let randomPosition : Ring | undefined;
   let num = 0;
 
   const dispatch = useDispatch<AppDispatch>();
 
-  //配列の中をシャッフルする
-  function shuffleArray(sourceArray: RingPosition[]) {
-    const array = sourceArray.concat();
+  //配列内をシャッフルする
+  function shuffleArray(sourcceArray: Ring[]) {
+    const array = sourcceArray.concat();
     const arrayLength = array.length;
 
     for (let i = arrayLength - 1; i >= 0; i--) {
@@ -40,41 +36,37 @@ function App() {
   shufflePosition = shuffleArray(positionArray);
 
 
-  const addTorus = () => { 
-    const color = 0xffffff * Math.random();
-    torusScale = 0.08;
-    randomPosition = shufflePosition.pop();
+  //写真をとったら（仮clickアクション）
+  function addTorus() { 
+    console.log(num + 1);
     
-    if (num % 2 == 0) {                   //偶数の時の角度
-      rX = Math.floor(Math.random());
-      rY = Math.floor(Math.random());
-    } else {                              //奇数の時の角度
-      rX = Math.floor(Math.random() * 2); 
-      rY = Math.floor(Math.random() * 5);
-    }
+    torusScale = 0.08;
+    const color = `hsl(${Math.floor(Math.random() * 361)}, 100%, 50%)`;
 
-    //配列内シャッフルして最後から取り出していく
-    if (num == 71) {
+    randomPosition = shufflePosition[num];
+
+    if (num == 70) {
+      console.log("reset");
       dispatch(resetHandle());
       shufflePosition = shuffleArray(positionArray);
-      randomPosition = shufflePosition.pop();
       num = 0;
-    }
+      randomPosition = shufflePosition[num];
+    } 
 
-    //リング情報をオブジェクトに詰め込みstoreへ送る
+    //リング情報をstoreへ送る
     dispatch(pushTorusInfo(
       {
-        id: uuidv4(),
-        color: color,
-        rotateX: rX,
-        rotateY: rY,
-        positionX: randomPosition?.positionX,
-        positionY: randomPosition?.positionY,
-        scale: torusScale, 
+        id:        uuidv4(),
+        color:     color,
+        rotateX:   randomPosition.rotateX,
+        rotateY:   randomPosition.rotateY,
+        positionX: randomPosition.positionX, 
+        positionY: randomPosition.positionY,
+        scale:     torusScale,
       }
     ));
     num++;
-  };
+  }
 
 // // // // // // // // // // // // // // // // // // // // // // 
 // compareCurrentIPWithLastIP
@@ -203,12 +195,9 @@ console.log(`gpsFlag : ${gpsFlag}`);
       )}
       <div id='canvas'>
         <Canvas camera={{ position: [0,0,10] }}>
+        <color attach="background" args={[0xff000000]} /> {/*背景色*/}
             <TorusList />
-            <axesHelper scale={10}/>
             <OrbitControls/>
-            <Text position={[0, 5, 0]} >
-              React Three Fiber
-            </Text>
         </Canvas>
         <button onClick={addTorus}>追加</button>
         {/* <Geolocation_test setPosition={setPosition} /> */}
