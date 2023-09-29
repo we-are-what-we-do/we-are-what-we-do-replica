@@ -58,7 +58,6 @@ function App() {
   } = useContext(DbContext);
 
   const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
-  const [ringCount, setRingCount] = useState<number>(0); // DEI軌道内のリング数(0～71)
 
   // リングデータをサーバーに送信する際に必要な情報を管理するstate
   const [location, setLocation] = useState<string | null>(null); // 現在値
@@ -76,7 +75,6 @@ function App() {
   // 現在のリングのデータ(ringsData)で、3Dオブジェクトを初期化する関数
   function initializeRingDraw(): void{
     dispatch(resetHandle()); // 全3Dを消去する
-    setRingCount(0);
     setUsedOrbitIndexes([]);
 
     const extractedRingData: RingsData = getLatestLap(ringsData); // リングデータを71個までに限定して切り出す(一応)
@@ -87,7 +85,6 @@ function App() {
       const newTorus: TorusInfo = convertToTorus(value);
       dispatch(pushTorusInfo(newTorus)); //リング情報をオブジェクトに詰め込みstoreへ送る
 
-      setRingCount((prev) => prev + 1); // リング数を1増やす
       setUsedOrbitIndexes((prev) => [...prev, value.orbitIndex]); // 使用済みの軌道番号として保管する
     });
   }
@@ -97,30 +94,12 @@ function App() {
     let rX: number;//回転x軸
     let rY: number;//回転y軸
     let torusScale: number = 0.08;//torusの大きさ
-    let num: number = ringCount;
     let newOrbitIndex: number = -1;
     const color = 0xffffff * Math.random();
     let positionWithIndex: RingPositionWithIndex | null = null;
     let randomPosition: RingPosition | null = null; // ランダムなリング位置
     const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
     let newOrbitIndexes: number[] = usedOrbitIndexes.slice(); // 使用済みのリング軌道内位置
-
-    // リングの角度を求める
-    if (num % 2 == 0) {                   //偶数の時の角度
-      rX = Math.floor(Math.random());
-      rY = Math.floor(Math.random());
-    } else {                              //奇数の時の角度
-      rX = Math.floor(Math.random() * 2); 
-      rY = Math.floor(Math.random() * 5);
-    }
-
-    // 既に全てのリングが埋まっている場合
-    if (num >= orbitLength) {
-      // 描画とリング軌道内位置の空き情報を初期化する
-      dispatch(resetHandle());
-      newOrbitIndexes = [];
-      num = 0;
-    }
 
     // DEI軌道の中から、空いているリングの位置をランダムに取得する
     // console.log("現在埋まっているリング位置:\n", newOrbitIndexes);
@@ -130,6 +109,22 @@ function App() {
       newOrbitIndex = positionWithIndex.index;
     }else{
       throw new Error("DEI軌道のリングが全て埋まっているのに、リングを追加しようとしました");
+    }
+
+    // リングの角度を求める
+    if (newOrbitIndex % 2 == 0) {                   //偶数の時の角度
+      rX = Math.floor(Math.random());
+      rY = Math.floor(Math.random());
+    } else {                              //奇数の時の角度
+      rX = Math.floor(Math.random() * 2); 
+      rY = Math.floor(Math.random() * 5);
+    }
+
+    // 既に全てのリングが埋まっている場合
+    if (newOrbitIndexes.length >= orbitLength) {
+      // 描画とリング軌道内位置の空き情報を初期化する
+      dispatch(resetHandle());
+      newOrbitIndexes = [];
     }
 
     //リング情報をオブジェクトに詰め込みstoreへ送る
@@ -144,7 +139,6 @@ function App() {
     };
     dispatch(pushTorusInfo(newTorus));
 
-    num++;
     newOrbitIndexes.push(newOrbitIndex);
 
     // サーバーにリングのデータを追加する
@@ -168,7 +162,6 @@ function App() {
     console.log("サーバーにデータを送信しました:\n", newRingData);
 
     // stateを更新する
-    setRingCount(num);
     setUsedOrbitIndexes(newOrbitIndexes);
   };
 
@@ -264,7 +257,7 @@ fetchGeoJSONPointData();
             React Three Fiber
           </Text>
       </Canvas>
-      <button onClick={addTorus}>追加</button>
+      <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
       <button
         /* TODO いらなくなったらこのbuttonごと消す */
         style={{
@@ -278,7 +271,6 @@ fetchGeoJSONPointData();
       >
         サーバーデータ削除
       </button>
-      <button style={{marginTop: "4rem"}}>リング数: {ringCount}</button>
       {/* <Geolocation_test setPosition={setPosition} /> */}
     </div>
   );
