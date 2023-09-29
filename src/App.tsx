@@ -44,7 +44,12 @@ function getLatestLap(data: RingsData): RingsData{
   }else{
     // リングが71個より多い場合
     const latestLapLength: number = ringAmount % orbitLength; // 最新のDEI周が何個のリングでできているか
-    result = getLastRings(data, latestLapLength);
+    if(latestLapLength === 0){
+      // リング個数が71の倍数のとき
+      result = getLastRings(data, 71);
+    }else{
+      result = getLastRings(data, latestLapLength);
+    }
   }
   return result;
 }
@@ -101,6 +106,13 @@ function App() {
     const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
     let newOrbitIndexes: number[] = usedOrbitIndexes.slice(); // 使用済みのリング軌道内位置
 
+    // 既に全てのリングが埋まっている場合
+    if (newOrbitIndexes.length >= orbitLength) {
+      // 描画とリング軌道内位置の空き情報を初期化する
+      dispatch(resetHandle());
+      newOrbitIndexes = [];
+    }
+
     // DEI軌道の中から、空いているリングの位置をランダムに取得する
     // console.log("現在埋まっているリング位置:\n", newOrbitIndexes);
     positionWithIndex = getRandomPositionExceptIndexes(positionArray, newOrbitIndexes); 
@@ -112,19 +124,13 @@ function App() {
     }
 
     // リングの角度を求める
+    // 軌道設定配列のindexが偶数と奇数で分ける
     if (newOrbitIndex % 2 == 0) {                   //偶数の時の角度
       rX = Math.floor(Math.random());
       rY = Math.floor(Math.random());
     } else {                              //奇数の時の角度
       rX = Math.floor(Math.random() * 2); 
       rY = Math.floor(Math.random() * 5);
-    }
-
-    // 既に全てのリングが埋まっている場合
-    if (newOrbitIndexes.length >= orbitLength) {
-      // 描画とリング軌道内位置の空き情報を初期化する
-      dispatch(resetHandle());
-      newOrbitIndexes = [];
     }
 
     //リング情報をオブジェクトに詰め込みstoreへ送る

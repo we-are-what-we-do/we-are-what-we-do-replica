@@ -51,7 +51,11 @@ export function DbProvider({children}: {children: ReactNode}){
         setLatestRing(newLatestRing);
         setTori(newTori);
 
-        console.log("サーバーからデータを取得しました:\n", newRingsData); // TODO 後で消す
+        // TODO 後で消す
+        console.log(
+            "サーバーからデータを取得しました:\n", newRingsData,
+            "\nリング数:", Object.keys(newRingsData).length
+        );
     }
 
     // torusArrayに新しいtorusデータを一つ追加する関数
