@@ -1,6 +1,6 @@
 import "./App.css";
 import { useContext, useEffect, useState } from "react";
-import { OrbitControls, Text } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "./redux/store";
@@ -16,8 +16,8 @@ import { haversineDistance } from './api/distanceCalculations';
 import { DbContext } from "./providers/DbProvider";
 import { RingData, RingPositionWithIndex, RingsData, convertToTorus, getRandomPositionExceptIndexes } from "./redux/features/handleRingData";
 import { postRingData } from "./api/fetchDb";
-
-
+import  Geolocation  from './components/GeoLocation';
+import Camera from "./components/Camera";
 // オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
 // TODO 仮定義なので、APIの方でリングデータが0～71個に限定されていることを確認次第、削除する
 function getLastRings(obj: RingsData, lastAmount: number): RingsData{
@@ -246,6 +246,7 @@ async function fetchGeoJSONPointData() : Promise<number> {
   return result; 
 }
 
+
 // GeoJSON Pointデータと現在地の比較を実行
 fetchGeoJSONPointData();
 // const result = fetchGeoJSONPointData();
@@ -254,31 +255,33 @@ fetchGeoJSONPointData();
 
 
   return(
-    <div id='canvas'>
-      <Canvas camera={{ position: [0,0,10] }}>
-          <TorusList />
-          <axesHelper scale={10}/>
-          <OrbitControls/>
-          <Text position={[0, 5, 0]} >
-            React Three Fiber
-          </Text>
-      </Canvas>
-      <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
-      <button
-        /* TODO いらなくなったらこのbuttonごと消す */
-        style={{
-          marginTop: "2rem"
-        }}
-        onClick={() => {
-          fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/api/ring-data.json", {
-            method: 'DELETE'
-          });
-        }}
-      >
-        サーバーデータ削除
-      </button>
-      {/* <Geolocation_test setPosition={setPosition} /> */}
+    <div className="Test">
+        <h1>カメラアクセス</h1>
+        <Camera />
+
+        <div id='canvas'>
+          <Canvas
+          onCreated={({ gl }) => {
+            gl.setClearColor(0xFF0000, 0);
+            gl.autoClear = false;
+            gl.clearDepth()
+          }}
+          gl={{ antialias: true, alpha: true }}
+          camera={{ position: [0,0,10] }}>
+              <TorusList />
+              <OrbitControls/>
+          </Canvas>
+          <button onClick={addTorus}>追加</button>
+          {/* <Geolocation_test setPosition={setPosition} /> */}
+        </div>
+
+        <h1>GPSアクセス</h1>
+        <Geolocation />
+        <h1>IPアドレス</h1>
+
     </div>
+ 
+
   );
 }
 export default App;

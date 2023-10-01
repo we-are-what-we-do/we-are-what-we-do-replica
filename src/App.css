@@ -4,6 +4,7 @@
   height: 100vh;
   overflow: hidden;
   user-select: none;
+  position: absolute;
 }
 
 button {
@@ -11,4 +12,8 @@ button {
   top: 75%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+video {
+  position: absolute;
 }
