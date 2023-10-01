@@ -1,12 +1,13 @@
 import React, { useState, useEffect, ReactNode  } from 'react';
-import { Points, getLocationConfig } from './../api/fetchDb';
+import { getLocationConfig } from './../api/fetchDb';
+import { FeatureCollection, Point } from 'geojson';
 
 type LocationDataProviderProps = {
     children: ReactNode;
   };
 
 export const LocationDataProvider: React.FC<LocationDataProviderProps> = ({ children }) => {
-  const [geoJSONData, setGeoJSONData] = useState<Points | null>(null);
+  const [geoJSONData, setGeoJSONData] = useState<FeatureCollection<Point> | null>(null);
 
   useEffect(() => {
     // データの取得とstateの更新

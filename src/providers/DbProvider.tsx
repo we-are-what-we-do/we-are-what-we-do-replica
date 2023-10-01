@@ -1,53 +1,68 @@
-import { createContext, useState, ReactNode } from 'react';
+import { createContext, useState, ReactNode, useEffect } from 'react';
 import { TorusInfo } from "./../redux/features/torusInfo-slice";
 import {
+    RingData,
     RingsData,
-    getRingData,
     convertToTori,
-    ToriByLocation
-} from "./../api/fetchDb";
+    getLatestRing
+} from "./../redux/features/handleRingData";
+import { getRingData } from "./../api/fetchDb";
 
 
 /* 型定義 */
 // contextに渡すデータの型
 type DbContent = {
     ringsData: RingsData;
-    toriByLocation: ToriByLocation;
+    latestRing: RingData | null;
+    toriData: TorusInfo[];
     initializeRingData: (location?: string) => Promise<void>;
-    addTorus: (location: string, newTorus: TorusInfo) => void;
+    addTorusData: (newTorus: TorusInfo) => void;
 };
 
 
 /* Provider */
 const initialData: DbContent = {
     ringsData: {},
-    toriByLocation: {},
+    latestRing: null,
+    toriData: [],
     initializeRingData: () => Promise.resolve(),
-    addTorus: () => {}
+    addTorusData: () => {}
 };
 
 export const DbContext = createContext<DbContent>(initialData);
 
 export function DbProvider({children}: {children: ReactNode}){
     // リングのデータを管理する
-    const [ringsData, setRingsData] = useState<RingsData>({});
-    const [toriByLocation, setTori] = useState<ToriByLocation>({});
+    const [ringsData, setRingsData] = useState<RingsData>({}); // サーバーから取得したリングデータ
+    const [latestRing, setLatestRing] = useState<RingData | null>(null); // 直前に追加されたリングデータ
+    const [toriData, setTori] = useState<TorusInfo[]>([]); // Three.jsで使用するリングデータ
+
+    // 初回レンダリング時、サーバーからデータを取得する
+    useEffect(() => {
+        initializeRingData();
+    }, [])
 
     // リングのデータを、サーバーから取得したデータで初期化する関数
-    async function initializeRingData(location?: string): Promise<void>{
-        const newRingsData: RingsData = await getRingData(location) ?? {};
-        let newTori: ToriByLocation = convertToTori(ringsData);
+    async function initializeRingData(): Promise<void>{
+        const newRingsData: RingsData = await getRingData() ?? {};
+        const newLatestRing: RingData | null = getLatestRing(newRingsData);
+        let newTori: TorusInfo[] = convertToTori(newRingsData);
         setRingsData(newRingsData);
+        setLatestRing(newLatestRing);
         setTori(newTori);
+
+        // TODO 後で消す
+        console.log(
+            "サーバーからデータを取得しました:\n", newRingsData,
+            "\nリング数:", Object.keys(newRingsData).length
+        );
     }
 
     // torusArrayに新しいtorusデータを一つ追加する関数
-    function addTorus(location: string, newTorus: TorusInfo): void{
+    function addTorusData(newTorus: TorusInfo): void{
         setTori((prevTori) => {
-            const newTori: ToriByLocation = Object.assign({}, prevTori);
-            const newArray: TorusInfo[] = prevTori[location]?.slice() ?? [];
-            newArray.push(newTorus);
-            newTori[location] = newArray;
+            const newTori: TorusInfo[] = prevTori.slice();
+            newTori.push(newTorus);
             return newTori;
         });
     };
@@ -56,9 +71,11 @@ export function DbProvider({children}: {children: ReactNode}){
         <DbContext.Provider
             value={{
                 ringsData,
-                toriByLocation,
+                latestRing,
+                toriData,
+
                 initializeRingData,
-                addTorus
+                addTorusData
             }}
         >
             {children}
