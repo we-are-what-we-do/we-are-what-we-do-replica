@@ -308,7 +308,7 @@ console.log(`gpsFlag : ${gpsFlag}`);
       <button
         /* TODO いらなくなったらこのbuttonごと消す */
         style={{
-          marginTop: "2rem"
+          marginLeft: "8rem"
         }}
         onClick={() => {
           fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/api/ring-data.json", {
