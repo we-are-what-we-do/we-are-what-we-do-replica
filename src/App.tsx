@@ -1,5 +1,6 @@
 import "./App.css";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
+import { useDispatch } from 'react-redux';
 
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
@@ -7,7 +8,7 @@ import { Ring, positionArray } from "./torusPosition";
 import { AppDispatch } from "./redux/store";
 import { TorusInfo, pushTorusInfo, resetHandle } from "./redux/features/torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
-import { RingPosition, positionArray } from "./torusPosition";
+import { RingPosition } from "./torusPosition";
 import TorusList from './components/TorusList';
 
 // import  Geolocation_test  from './components/GeoLocation_test';
@@ -20,6 +21,9 @@ import { RingData, RingPositionWithIndex, RingsData, convertToTorus, getRandomPo
 import { postRingData } from "./api/fetchDb";
 import  Geolocation  from './components/GeoLocation';
 import Camera from "./components/Camera";
+import { saveAs } from 'file-saver';
+import * as THREE from 'three';
+
 // オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
 // TODO 仮定義なので、APIの方でリングデータが0～71個に限定されていることを確認次第、削除する
 function getLastRings(obj: RingsData, lastAmount: number): RingsData{
@@ -57,7 +61,7 @@ function getLatestLap(data: RingsData): RingsData{
 }
 
 function App() {
-  // サーバーから取得したリングデータを管理するcontext
+ // サーバーから取得したリングデータを管理するcontext
   const {
     ringsData,
     latestRing
@@ -286,7 +290,7 @@ async function compareCurrentLocationWithPin() : Promise<number> {
         // console.log(`Feature ${index + 1} is ${distance} meters away from your current location.`);
 
       }
-    };
+    })
   } catch (error) {
     console.error("Error fetching GeoJSON Point data or getting current location:", error);
   }
@@ -294,10 +298,44 @@ async function compareCurrentLocationWithPin() : Promise<number> {
 }
 
 
-// GeoJSON Pointデータと現在地の比較を実行
-fetchGeoJSONPointData();
-// const result = fetchGeoJSONPointData();
-// console.log(result);
+
+
+// const videoRef = useRef<HTMLVideoElement>(null);
+const canvasRef = useRef<HTMLCanvasElement>(null);
+const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+
+useEffect(() => {
+  if (canvasRef.current) {
+    rendererRef.current = new THREE.WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
+  }
+}, []);
+
+const captureImage = () => {
+  if (rendererRef.current) {
+    const dataURL = rendererRef.current.domElement.toDataURL('image/png');
+    console.log(dataURL);
+    saveImage(dataURL);
+  }
+};
+
+const saveImage = (dataURL: string) => {
+  // DataURLからBlobを作成
+  const blob = dataURLToBlob(dataURL);
+
+  // 'file-saver'ライブラリを使ってダウンロード
+  saveAs(blob, "screenshot.png");
+};
+
+const dataURLToBlob = (dataURL: string) => {
+  const byteString = window.atob(dataURL.split(",")[1]);
+  const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
+  const arrayBuffer = new ArrayBuffer(byteString.length);
+  const uint8Array = new Uint8Array(arrayBuffer);
+  for (let i = 0; i < byteString.length; i++) {
+    uint8Array[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([uint8Array], { type: mimeString });
+};
 
 
 
@@ -305,7 +343,6 @@ fetchGeoJSONPointData();
     <div className="Test">
         <h1>カメラアクセス</h1>
         <Camera />
-
         <div id='canvas'>
           <Canvas
           onCreated={({ gl }) => {
@@ -314,11 +351,15 @@ fetchGeoJSONPointData();
             gl.clearDepth()
           }}
           gl={{ antialias: true, alpha: true }}
-          camera={{ position: [0,0,10] }}>
+          camera={{ position: [0,0,10] }}
+          ref={canvasRef}>
               <TorusList />
               <OrbitControls/>
           </Canvas>
-          <button onClick={addTorus}>追加</button>
+
+          <button onClick={captureImage}>Capture</button>
+
+          {/* <button onClick={addTorus}>追加</button> */}
           {/* <Geolocation_test setPosition={setPosition} /> */}
         </div>
 
