@@ -304,7 +304,20 @@ console.log(`gpsFlag : ${gpsFlag}`);
             <TorusList />
             <OrbitControls/>
         </Canvas>
-        <button onClick={addTorus}>追加</button>
+        <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
+      <button
+        /* TODO いらなくなったらこのbuttonごと消す */
+        style={{
+          marginTop: "2rem"
+        }}
+        onClick={() => {
+          fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/api/ring-data.json", {
+            method: 'DELETE'
+          });
+        }}
+      >
+        サーバーデータ削除
+      </button>
         {/* <Geolocation_test setPosition={setPosition} /> */}
       </div>
     </LocationDataProvider>
