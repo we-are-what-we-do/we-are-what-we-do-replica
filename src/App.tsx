@@ -1,6 +1,7 @@
 import "./App.css";
 import { useContext, useEffect, useState } from "react";
-import { OrbitControls, Text } from "@react-three/drei";
+
+import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
 import { Ring, positionArray } from "./torusPosition";
 import { AppDispatch } from "./redux/store";
@@ -76,6 +77,7 @@ function App() {
   useEffect(() => {
     initializeRingDraw();
   }, [ringsData])
+
 
   // 現在のリングのデータ(ringsData)で、3Dオブジェクトを初期化する関数
   function initializeRingDraw(): void{
@@ -321,6 +323,7 @@ console.log(`gpsFlag : ${gpsFlag}`);
         {/* <Geolocation_test setPosition={setPosition} /> */}
       </div>
     </LocationDataProvider>
+
   );
 }
 export default App;

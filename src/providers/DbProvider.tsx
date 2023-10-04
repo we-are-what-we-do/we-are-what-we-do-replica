@@ -73,6 +73,7 @@ export function DbProvider({children}: {children: ReactNode}){
                 ringsData,
                 latestRing,
                 toriData,
+
                 initializeRingData,
                 addTorusData
             }}
