@@ -7,9 +7,8 @@ import { Ring, positionArray } from "./torusPosition";
 import { AppDispatch } from "./redux/store";
 import { TorusInfo, pushTorusInfo, resetHandle } from "./redux/features/torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
-import { RingPosition, positionArray } from "./torusPosition";
 import TorusList from './components/TorusList';
-
+import { useDispatch } from "react-redux";
 // import  Geolocation_test  from './components/GeoLocation_test';
 import { getLocationConfig } from './api/fetchDb';
 import { FeatureCollection, Point } from 'geojson';
@@ -18,8 +17,9 @@ import { haversineDistance } from './api/distanceCalculations';
 import { DbContext } from "./providers/DbProvider";
 import { RingData, RingPositionWithIndex, RingsData, convertToTorus, getRandomPositionExceptIndexes } from "./redux/features/handleRingData";
 import { postRingData } from "./api/fetchDb";
-import  Geolocation  from './components/GeoLocation';
-import Camera from "./components/Camera";
+import LocationDataProvider from "./providers/LocationDataProvider";
+
+
 // オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
 // TODO 仮定義なので、APIの方でリングデータが0～71個に限定されていることを確認次第、削除する
 function getLastRings(obj: RingsData, lastAmount: number): RingsData{
@@ -48,7 +48,7 @@ function getLatestLap(data: RingsData): RingsData{
     const latestLapLength: number = ringAmount % orbitLength; // 最新のDEI周が何個のリングでできているか
     if(latestLapLength === 0){
       // リング個数が71の倍数のとき
-      result = getLastRings(data, 71);
+      result = getLastRings(data, orbitLength);
     }else{
       result = getLastRings(data, latestLapLength);
     }
@@ -98,13 +98,11 @@ function App() {
 
   // リングの3Dオブジェクトを追加する関数
   const addTorus = () => { 
-    let rX: number;//回転x軸
-    let rY: number;//回転y軸
-    let torusScale: number = 0.08;//torusの大きさ
+    const torusScale: number = 0.08;//torusの大きさ
     let newOrbitIndex: number = -1;
     const color = 0xffffff * Math.random();
     let positionWithIndex: RingPositionWithIndex | null = null;
-    let randomPosition: RingPosition | null = null; // ランダムなリング位置
+    let randomPosition: Ring | null = null; // ランダムなリング位置
     const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
     let newOrbitIndexes: number[] = usedOrbitIndexes.slice(); // 使用済みのリング軌道内位置
 
@@ -125,22 +123,16 @@ function App() {
       throw new Error("DEI軌道のリングが全て埋まっているのに、リングを追加しようとしました");
     }
 
-    // リングの角度を求める
-    // 軌道設定配列のindexが偶数と奇数で分ける
-    if (newOrbitIndex % 2 == 0) {                   //偶数の時の角度
-      rX = Math.floor(Math.random());
-      rY = Math.floor(Math.random());
-    } else {                              //奇数の時の角度
-      rX = Math.floor(Math.random() * 2); 
-      rY = Math.floor(Math.random() * 5);
+    if(!randomPosition){
+      throw new Error("リングのrandomPositionが取得できていません");
     }
 
     //リング情報をオブジェクトに詰め込みstoreへ送る
     const newTorus: TorusInfo = {
       id: uuidv4(),
       color: color,
-      rotateX: rX,
-      rotateY: rY,
+      rotateX: randomPosition.rotateX,
+      rotateY: randomPosition.rotateY,
       positionX: randomPosition.positionX,
       positionY: randomPosition.positionY,
       scale: torusScale,
@@ -155,11 +147,11 @@ function App() {
       locationJp: locationJp ?? "", // 撮影場所日本語
       latitude: currentLatitude ?? 0, // 撮影地点の緯度
       longitude: currentLongitude ?? 0, // 撮影地点の経度
-      userIp: ip, // IPアドレス
+      userIp: currentIp, // IPアドレス
       ringCount: (latestRing?.ringCount ?? 0) + 1, // リング数
       orbitIndex: newOrbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
-      rotateX: rX, // リング角度(右手親指)
-      rotateY: rY, // リング角度(右手人差し指)
+      rotateX: randomPosition.rotateX, // リング角度(右手親指)
+      rotateY: randomPosition.rotateY, // リング角度(右手人差し指)
       positionX: randomPosition.positionX, // リング位置(横方向)
       positionY: randomPosition.positionY, // リング位置(縦方向)
       ringColor: color, // リング色
@@ -173,13 +165,13 @@ function App() {
     setUsedOrbitIndexes(newOrbitIndexes);
   };
 
-
 // // // // // // // // // // // // // // // // // // // // // // 
 // compareCurrentIPWithLastIP
 // アクティブなIPアドレスと前回登録したIPアドレスを比較
 // // // // // // // // // // // // // // // // // // // // // // 
 
 // ipFlag
+const [ currentIp, setCurrentIp ] = useState<string>("");
 const [ipFlag, setIpFlag] = useState<number>(0);
 
 async function compareCurrentIPWithLastIP() : Promise<number> {
@@ -191,6 +183,7 @@ async function compareCurrentIPWithLastIP() : Promise<number> {
     const response = await fetch('https://api.ipify.org?format=json');
     const data = await response.json();
     const currentIP = data.ip;
+    setCurrentIp(currentIP); // useStateで現在のipを保管する
     console.log(`Your current IP is: ${currentIP}`);
 
     // 前回登録時のIPアドレスを取得（latestRing.userIpと仮定）
@@ -269,8 +262,7 @@ async function compareCurrentLocationWithPin() : Promise<number> {
     const geoJSONData: FeatureCollection<Point> = await getLocationConfig();
 
     // 各ピンの位置と現在地との距離をチェック
-    geoJSONData.features.forEach((feature, _index) => {
-
+    for (const feature of geoJSONData.features) {
       const [longitude, latitude] = feature.geometry.coordinates;
       const distance = haversineDistance(currentLat, currentLon, latitude, longitude);
       const currentLocation: string = feature.properties?.location ?? "";
@@ -281,10 +273,10 @@ async function compareCurrentLocationWithPin() : Promise<number> {
       setLocationJp(currentLocationJp);
       if (distance <= RADIUS) {
         result = 1; // 条件に合致した場合、resultを1に設定
-        // console.log(`Feature ${index + 1} is within ${RADIUS} meters of your current location.`);
+        console.log(`Feature is within ${RADIUS} meters of your current location.`);
+        break; // 1つでも条件に合致するピンが見つかった場合、ループを抜ける
       } else {
-        // console.log(`Feature ${index + 1} is ${distance} meters away from your current location.`);
-
+        console.log(`Feature is ${distance} meters away from your current location.`);
       }
     };
   } catch (error) {
@@ -293,42 +285,44 @@ async function compareCurrentLocationWithPin() : Promise<number> {
   return result; 
 }
 
-
-// GeoJSON Pointデータと現在地の比較を実行
-fetchGeoJSONPointData();
-// const result = fetchGeoJSONPointData();
-// console.log(result);
-
-
+// GeoJSON Pointデータと現在地の比較を実行した結果をgpsFlagにセット
+useEffect(() => {
+  compareCurrentLocationWithPin().then(result => {
+    setGpsFlag(result);
+  });
+}, []);
+console.log(`gpsFlag : ${gpsFlag}`);
 
   return(
-    <div className="Test">
-        <h1>カメラアクセス</h1>
-        <Camera />
-
-        <div id='canvas'>
-          <Canvas
-          onCreated={({ gl }) => {
-            gl.setClearColor(0xFF0000, 0);
-            gl.autoClear = false;
-            gl.clearDepth()
-          }}
-          gl={{ antialias: true, alpha: true }}
-          camera={{ position: [0,0,10] }}>
-              <TorusList />
-              <OrbitControls/>
-          </Canvas>
-          <button onClick={addTorus}>追加</button>
-          {/* <Geolocation_test setPosition={setPosition} /> */}
+    <LocationDataProvider> 
+      {errorMessage && (
+        <div className="error-message-box">
+          {errorMessage}
         </div>
-
-        <h1>GPSアクセス</h1>
-        <Geolocation />
-        <h1>IPアドレス</h1>
-
-    </div>
- 
-
+      )}
+      <div id='canvas'>
+        <Canvas camera={{ position: [0,0,10] }}>
+        <color attach="background" args={[0xff000000]} /> {/*背景色*/}
+            <TorusList />
+            <OrbitControls/>
+        </Canvas>
+        <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
+      <button
+        /* TODO いらなくなったらこのbuttonごと消す */
+        style={{
+          marginLeft: "8rem"
+        }}
+        onClick={() => {
+          fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/api/ring-data.json", {
+            method: 'DELETE'
+          });
+        }}
+      >
+        サーバーデータ削除
+      </button>
+        {/* <Geolocation_test setPosition={setPosition} /> */}
+      </div>
+    </LocationDataProvider>
 
   );
 }
