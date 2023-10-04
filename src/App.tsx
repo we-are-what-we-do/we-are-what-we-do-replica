@@ -47,7 +47,7 @@ function getLatestLap(data: RingsData): RingsData{
     const latestLapLength: number = ringAmount % orbitLength; // 最新のDEI周が何個のリングでできているか
     if(latestLapLength === 0){
       // リング個数が71の倍数のとき
-      result = getLastRings(data, 71);
+      result = getLastRings(data, orbitLength);
     }else{
       result = getLastRings(data, latestLapLength);
     }
