@@ -1,18 +1,22 @@
 import "./App.css";
-import TorusList from './components/TorusList';
-import { OrbitControls } from "@react-three/drei";
+import * as THREE from "three";
+import { saveAs } from "file-saver";
 import { Canvas } from '@react-three/fiber';
-import { Ring, positionArray } from "./torusPosition";
+import { OrbitControls } from "@react-three/drei";
 import { AppDispatch } from "./redux/store";
 import { useDispatch } from "react-redux";
+import { useEffect, useRef, useState } from 'react';
+import { Ring, positionArray } from "./torusPosition";
 import { pushTorusInfo, resetHandle } from "./redux/features/torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
-import { useEffect, useState } from 'react';
+import TorusList from './components/TorusList';
 // import  Geolocation_test  from './components/GeoLocation_test';
 import { getLocationConfig } from './api/fetchDb';
 import { FeatureCollection, Point } from 'geojson';
 import { haversineDistance } from './api/distanceCalculations';
 import { LocationDataProvider } from './providers/LocationDataProvider';
+import Camera from "./components/Camera";
+
 
 
 // オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
@@ -21,7 +25,7 @@ function getLastRings(obj: RingsData, lastAmount: number): RingsData{
   const keys: string[] = Object.keys(obj);
   const lastKeys: string[] = keys.slice(-lastAmount); // オブジェクトの最後のn個のキーを取得
 
-  //配列内をシャッフルする
+  //配列内をシャッフルする関数
   function shuffleArray(sourcceArray: Ring[]) {
     const array = sourcceArray.concat();
     const arrayLength = array.length;
@@ -47,10 +51,48 @@ function getLatestLap(data: RingsData): RingsData{
   return result;
 }
 
+  //three.jsのbase64変換？？
+  const canvasRef   = useRef<HTMLCanvasElement>  (null!);
+  const rendererRef = useRef<THREE.WebGLRenderer>(null!);
 
-  //写真をとったら（仮clickアクション）
+  useEffect(() => {
+    if (canvasRef.current) {
+      rendererRef.current = new THREE.WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
+    }
+  }, []);
+
+  const captureImage = () => {
+    if (rendererRef.current) {
+      const dataURL = rendererRef.current.domElement.toDataURL('image/png');
+      console.log(dataURL);
+      saveImage(dataURL);
+    }
+  };
+
+  const saveImage = (dataURL: string) => {
+    // DataURLからBlobを作成
+    const blob = dataURLToBlob(dataURL);
+
+    // 'file-saver'ライブラリを使ってダウンロード
+    saveAs(blob, "screenshot.png");
+  };
+
+  const dataURLToBlob = (dataURL: string) => {
+    const byteString  = window.atob(dataURL.split(",")[1]);
+    const mimeString  = dataURL.split(",")[0].split(":")[1].split(";")[0];
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uint8Array  = new Uint8Array(arrayBuffer);
+
+    for (let i = 0; i < byteString.length; i++) {
+      uint8Array[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([uint8Array], { type: mimeString });
+  };
+
+
+  //写真をとったら（仮clickアクション）-----------------------------
   function addTorus() { 
-    console.log(num + 1);
+    // console.log(num + 1);
     
     torusScale = 0.08;
     const color = `hsl(${Math.floor(Math.random() * 361)}, 100%, 50%)`;
@@ -82,7 +124,10 @@ function getLatestLap(data: RingsData): RingsData{
       }
     ));
     num++;
+    captureImage();
   }
+  //---------------------------------------------------------------
+
 
   // リングの3Dオブジェクトを追加する関数
   const addTorus = () => { 
@@ -288,15 +333,20 @@ console.log(`gpsFlag : ${gpsFlag}`);
           {errorMessage}
         </div>
       )}
-      <div id='canvas'>
-        <Canvas camera={{ position: [0,0,10] }}>
-        <color attach="background" args={[0xff000000]} /> {/*背景色*/}
+
+      <div className="camera">
+        <Camera/>
+      </div>
+
+      <div className='canvas'>
+        <Canvas camera={{ position: [0,0,10] } }>
             <TorusList />
             <OrbitControls/>
         </Canvas>
         <button onClick={addTorus}>追加</button>
-        {/* <Geolocation_test setPosition={setPosition} /> */}
       </div>
+      
+      {/* <Geolocation_test setPosition={setPosition} /> */}
     </LocationDataProvider>
 
   );
