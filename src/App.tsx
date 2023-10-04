@@ -1,6 +1,6 @@
 import "./App.css";
 import { useContext, useEffect, useState } from "react";
-import { OrbitControls, Text } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
 import { Ring, positionArray } from "./torusPosition";
 import { AppDispatch } from "./redux/store";

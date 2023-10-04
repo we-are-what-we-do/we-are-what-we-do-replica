@@ -1,4 +1,4 @@
-import { RingPosition } from "../../torusPosition";
+import { Ring } from "../../torusPosition";
 import { TorusInfo } from "./torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,7 +27,7 @@ export type RingsData = {
 // リングの位置の型
 export type RingPositionWithIndex = {
     index: number;
-    ringPosition: RingPosition;
+    ringPosition: Ring;
 }
 
 
@@ -68,7 +68,7 @@ export function getLatestRing(data: RingsData): RingData | null{
 }
 
 // 指定したインデックス以外の要素からランダムなRingPositionを取得する関数
-export function getRandomPositionExceptIndexes(positionArray: RingPosition[], excludedIndexes: number[]): RingPositionWithIndex | null{
+export function getRandomPositionExceptIndexes(positionArray: Ring[], excludedIndexes: number[]): RingPositionWithIndex | null{
     // ランダムに選択される要素のインデックスを決定する
     const eligibleIndexes = positionArray
         .map((_, index) => index)
