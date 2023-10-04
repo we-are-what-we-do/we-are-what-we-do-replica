@@ -27,14 +27,13 @@ const Camera: React.FC = () => {
   }, []);
 
   return (
-    <>
-      <video ref={videoRef} autoPlay playsInline></video>
+    <div>
+      <video ref={videoRef} autoPlay playsInline width="100%"></video>
 
-      <div className='camera-success-message'>
       {isCameraAccessible === true && <p>カメラの許可が成功しました</p>}
       {isCameraAccessible === false && <p>アプリを使用するにはカメラの許可が必要です</p>}
-      </div>
-    </>
+
+    </div>
   );
 };
 

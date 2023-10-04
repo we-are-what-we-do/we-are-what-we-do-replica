@@ -5,20 +5,13 @@
   user-select: none;
 }
 
-.canvas {
+#canvas {
   margin: 0;
   padding: 0;
-  position: absolute;
-  width: 100%;
   height: 100vh;
+  overflow: hidden;
   user-select: none;
   position: absolute;
-}
-
-.camera {
-  position: absolute;
-  width: 100%;
-  height: 100vh;
 }
 
 button {
@@ -26,6 +19,57 @@ button {
   bottom: 0%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.geo-info {
+  position: absolute;
+  bottom: 5%;
+  left: 5%;
+  color: white;
+}
+
+.geo-info h2 {
+  text-align: center;
+  padding-bottom: 5px;
+  border-bottom: 1px solid white;
+}
+
+.geo-info h3:nth-of-type(1) {
+  margin-top: 10px;
+}
+
+.battery {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+}
+
+.AF {
+  position: absolute;
+  top: 5%;
+  left: 12%;
+}
+
+#timer {
+  position: absolute;
+  right: 5%;
+  bottom: 10%;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.live {
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  color: white;
+  letter-spacing: 2px;
+  font-family: 'Roboto', sans-serif;
+  animation: 1.75s linear 0s infinite alternate recAnime;
+}
+
+.live img {
+  margin-left: 10px;
 }
 
 #bt {
@@ -37,20 +81,51 @@ button {
   padding: 10px 20px;
 }
 
+@keyframes recAnime {
+  0% {
+    opacity: 1;
+  }
 
-video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  min-width: 100%;
-  min-height: 100%;
-  -webkit-transform: translate(-50%, -50%);
-  -moz-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
-.camera-success-message {
+#commentBox {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 20%;
+  left: 0%;
+  width: 100%;
+  height: 450px;
+}
+
+.comment {
+  position: absolute;
+  color: white;
+  width: 100vw;
+  font-size: 2rem;
+  font-family: sans-serif;
+  animation: 5s linear 0s forwards commented;
+}
+
+@keyframes commented {
+  0% {
+    transform: translateX(-10%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+#last-update {
+  position: absolute;
+  right: 5%;
+  bottom: 5%;
+  color: white;
+  font-size: 1.5rem;
 }
