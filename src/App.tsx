@@ -1,23 +1,22 @@
 import "./App.css";
-import { useContext, useEffect, useState } from "react";
-
-import { OrbitControls } from "@react-three/drei";
+import * as THREE from "three";
+import { saveAs } from "file-saver";
 import { Canvas } from '@react-three/fiber';
-import { Ring, positionArray } from "./torusPosition";
+import { OrbitControls } from "@react-three/drei";
 import { AppDispatch } from "./redux/store";
-import { TorusInfo, pushTorusInfo, resetHandle } from "./redux/features/torusInfo-slice";
+import { useDispatch } from "react-redux";
+import { useEffect, useRef, useState } from 'react';
+import { Ring, positionArray } from "./torusPosition";
+import { pushTorusInfo, resetHandle } from "./redux/features/torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
 import TorusList from './components/TorusList';
-import { useDispatch } from "react-redux";
 // import  Geolocation_test  from './components/GeoLocation_test';
 import { getLocationConfig } from './api/fetchDb';
 import { FeatureCollection, Point } from 'geojson';
 import { haversineDistance } from './api/distanceCalculations';
-// import { LocationDataProvider } from './providers/LocationDataProvider';
-import { DbContext } from "./providers/DbProvider";
-import { RingData, RingPositionWithIndex, RingsData, convertToTorus, getRandomPositionExceptIndexes } from "./redux/features/handleRingData";
-import { postRingData } from "./api/fetchDb";
-import LocationDataProvider from "./providers/LocationDataProvider";
+import { LocationDataProvider } from './providers/LocationDataProvider';
+import Camera from "./components/Camera";
+
 
 
 // オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
@@ -26,14 +25,10 @@ function getLastRings(obj: RingsData, lastAmount: number): RingsData{
   const keys: string[] = Object.keys(obj);
   const lastKeys: string[] = keys.slice(-lastAmount); // オブジェクトの最後のn個のキーを取得
 
-  const result: RingsData = {};
-  for (const key of lastKeys) {
-    result[key] = obj[key]; // キーを使用してプロパティを抽出
-  }
-
-  return result;
-}
-
+  //配列内をシャッフルする関数
+  function shuffleArray(sourcceArray: Ring[]) {
+    const array = sourcceArray.concat();
+    const arrayLength = array.length;
 // 過去周のDEI周を切り捨てる関数
 // TODO 仮定義なので、APIの方でリングデータが0～71個に限定されていることを確認次第、削除する
 function getLatestLap(data: RingsData): RingsData{
@@ -56,14 +51,51 @@ function getLatestLap(data: RingsData): RingsData{
   return result;
 }
 
-function App() {
-  // サーバーから取得したリングデータを管理するcontext
-  const {
-    ringsData,
-    latestRing
-  } = useContext(DbContext);
+  //three.jsのbase64変換？？
+  const canvasRef   = useRef<HTMLCanvasElement>  (null!);
+  const rendererRef = useRef<THREE.WebGLRenderer>(null!);
 
-  const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
+  useEffect(() => {
+    if (canvasRef.current) {
+      rendererRef.current = new THREE.WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
+    }
+  }, []);
+
+  const captureImage = () => {
+    if (rendererRef.current) {
+      const dataURL = rendererRef.current.domElement.toDataURL('image/png');
+      console.log(dataURL);
+      saveImage(dataURL);
+    }
+  };
+
+  const saveImage = (dataURL: string) => {
+    // DataURLからBlobを作成
+    const blob = dataURLToBlob(dataURL);
+
+    // 'file-saver'ライブラリを使ってダウンロード
+    saveAs(blob, "screenshot.png");
+  };
+
+  const dataURLToBlob = (dataURL: string) => {
+    const byteString  = window.atob(dataURL.split(",")[1]);
+    const mimeString  = dataURL.split(",")[0].split(":")[1].split(";")[0];
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uint8Array  = new Uint8Array(arrayBuffer);
+
+    for (let i = 0; i < byteString.length; i++) {
+      uint8Array[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([uint8Array], { type: mimeString });
+  };
+
+
+  //写真をとったら（仮clickアクション）-----------------------------
+  function addTorus() { 
+    // console.log(num + 1);
+    
+    torusScale = 0.08;
+    const color = `hsl(${Math.floor(Math.random() * 361)}, 100%, 50%)`;
 
   // リングデータをサーバーに送信する際に必要な情報を管理するstate
   const [location, setLocation] = useState<string | null>(null); // 現在値
@@ -71,30 +103,31 @@ function App() {
   const [currentLatitude, setCurrentLatitude] = useState<number | null>(null); // 現在地の緯度
   const [currentLongitude, setCurrentLongitude] = useState<number | null>(null); // 現在地の経度
 
-  const dispatch = useDispatch<AppDispatch>();
+    if (num == 70) {
+      console.log("reset");
+      dispatch(resetHandle());
+      shufflePosition = shuffleArray(positionArray);
+      num = 0;
+      randomPosition = shufflePosition[num];
+    } 
 
-  // リングの初期表示を行う
-  useEffect(() => {
-    initializeRingDraw();
-  }, [ringsData])
-
-
-  // 現在のリングのデータ(ringsData)で、3Dオブジェクトを初期化する関数
-  function initializeRingDraw(): void{
-    dispatch(resetHandle()); // 全3Dを消去する
-    setUsedOrbitIndexes([]);
-
-    const extractedRingData: RingsData = getLatestLap(ringsData); // リングデータを71個までに限定して切り出す(一応)
-
-    // 3Dオブジェクトの初期表示を行う
-    Object.entries(extractedRingData).forEach(([_key, value]) => {
-      // リングデータを使用して、3Dオブジェクトを1つ作成する
-      const newTorus: TorusInfo = convertToTorus(value);
-      dispatch(pushTorusInfo(newTorus)); //リング情報をオブジェクトに詰め込みstoreへ送る
-
-      setUsedOrbitIndexes((prev) => [...prev, value.orbitIndex]); // 使用済みの軌道番号として保管する
-    });
+    //リング情報をstoreへ送る
+    dispatch(pushTorusInfo(
+      {
+        id:        uuidv4(),
+        color:     color,
+        rotateX:   randomPosition.rotateX,
+        rotateY:   randomPosition.rotateY,
+        positionX: randomPosition.positionX, 
+        positionY: randomPosition.positionY,
+        scale:     torusScale,
+      }
+    ));
+    num++;
+    captureImage();
   }
+  //---------------------------------------------------------------
+
 
   // リングの3Dオブジェクトを追加する関数
   const addTorus = () => { 
@@ -300,28 +333,20 @@ console.log(`gpsFlag : ${gpsFlag}`);
           {errorMessage}
         </div>
       )}
-      <div id='canvas'>
-        <Canvas camera={{ position: [0,0,10] }}>
-        <color attach="background" args={[0xff000000]} /> {/*背景色*/}
+
+      <div className="camera">
+        <Camera/>
+      </div>
+
+      <div className='canvas'>
+        <Canvas camera={{ position: [0,0,10] } }>
             <TorusList />
             <OrbitControls/>
         </Canvas>
-        <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
-      <button
-        /* TODO いらなくなったらこのbuttonごと消す */
-        style={{
-          marginLeft: "8rem"
-        }}
-        onClick={() => {
-          fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/api/ring-data.json", {
-            method: 'DELETE'
-          });
-        }}
-      >
-        サーバーデータ削除
-      </button>
-        {/* <Geolocation_test setPosition={setPosition} /> */}
+        <button onClick={addTorus}>追加</button>
       </div>
+      
+      {/* <Geolocation_test setPosition={setPosition} /> */}
     </LocationDataProvider>
 
   );
