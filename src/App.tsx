@@ -47,7 +47,7 @@ function getLatestLap(data: RingsData): RingsData{
     const latestLapLength: number = ringAmount % orbitLength; // 最新のDEI周が何個のリングでできているか
     if(latestLapLength === 0){
       // リング個数が71の倍数のとき
-      result = getLastRings(data, 71);
+      result = getLastRings(data, orbitLength);
     }else{
       result = getLastRings(data, latestLapLength);
     }
@@ -59,7 +59,8 @@ function App() {
   // サーバーから取得したリングデータを管理するcontext
   const {
     ringsData,
-    latestRing
+    latestRing,
+    setLatestRing
   } = useContext(DbContext);
 
   const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
@@ -157,6 +158,7 @@ function App() {
       creationDate:  new Date().getTime() // 撮影日時
     };
     postRingData(newRingData);
+    setLatestRing(newRingData);
     console.log("サーバーにデータを送信しました:\n", newRingData);
 
     // stateを更新する
