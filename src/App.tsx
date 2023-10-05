@@ -216,7 +216,7 @@ function App() {
           marginLeft: "8rem"
         }}
         onClick={() => {
-          fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/api/ring-data.json", {
+          fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json", {
             method: 'DELETE'
           });
         }}
