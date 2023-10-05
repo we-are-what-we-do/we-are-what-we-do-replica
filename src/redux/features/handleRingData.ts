@@ -68,7 +68,7 @@ export function getLatestRing(data: RingsData): RingData | null{
 }
 
 // 指定したインデックス以外の要素からランダムなRingPositionを取得する関数
-export function getRandomPositionExceptIndexes(positionArray: RingPosition[], excludedIndexes: number[]): RingPositionWithIndex | null{
+export function getRandomPositionExceptIndexes(positionArray: Ring[], excludedIndexes: number[]): RingPositionWithIndex | null{
     // ランダムに選択される要素のインデックスを決定する
     const eligibleIndexes = positionArray
         .map((_, index) => index)
