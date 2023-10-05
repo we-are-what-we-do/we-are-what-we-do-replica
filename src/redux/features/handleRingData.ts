@@ -1,4 +1,4 @@
-import { Ring as RingPosition } from "../../torusPosition";
+import { Ring } from "../../torusPosition";
 import { TorusInfo } from "./torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,7 +27,7 @@ export type RingsData = {
 // リングの位置の型
 export type RingPositionWithIndex = {
     index: number;
-    ringPosition: RingPosition;
+    ringPosition: Ring;
 }
 
 
