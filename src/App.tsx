@@ -76,17 +76,52 @@ export default function App() {
   /* 写真撮影 */
   // const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+
+  function getCurrentCanvas(){
+    console.log("canvasRef.current", canvasRef.current)
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas });
+
+    // Add your 3D objects to the scene here
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+
+    camera.position.z = 5;
+
+    sceneRef.current = scene;
+    cameraRef.current = camera;
+    rendererRef.current = renderer;
+
+    const animate = () => {
+      requestAnimationFrame(animate);
+
+      // Update your 3D scene here
+      if (sceneRef.current && cameraRef.current && rendererRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      }
+    };
+
+    animate();
+  }
 
   const captureImage = () => {
-    console.log("canvasRef.current:", canvasRef.current);
-    if (!canvasRef.current) return;
-    const gl: WebGLRenderingContext | null = canvasRef.current.getContext("webgl");
-    console.log("gl:", gl);
-    if(!gl) return;
-    const canvasElm: HTMLCanvasElement = gl.canvas as HTMLCanvasElement;
-    const dataURL: string = canvasElm.toDataURL("image/png"); // base64形式の画像
-    console.log(dataURL);
-    saveImage(dataURL);
+    getCurrentCanvas();
+
+    console.log("rendererRef.current", rendererRef.current)
+    if (rendererRef.current) {
+      const dataURL = rendererRef.current.domElement.toDataURL("image/png");
+      console.log(dataURL);
+      saveImage(dataURL);
+    }
   };
 
   const saveImage = (dataURL: string) => {
