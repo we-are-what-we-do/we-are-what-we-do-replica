@@ -4,11 +4,9 @@ import { useDispatch } from 'react-redux';
 
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
-import { Ring, positionArray } from "./torusPosition";
+import { positionArray } from "./torusPosition";
 import { AppDispatch } from "./redux/store";
 import { TorusInfo, pushTorusInfo, resetHandle } from "./redux/features/torusInfo-slice";
-import { v4 as uuidv4 } from 'uuid';
-import { RingPosition } from "./torusPosition";
 import TorusList from './components/TorusList';
 
 // import  Geolocation_test  from './components/GeoLocation_test';
@@ -17,8 +15,7 @@ import { FeatureCollection, Point } from 'geojson';
 import { haversineDistance } from './api/distanceCalculations';
 // import { LocationDataProvider } from './providers/LocationDataProvider';
 import { DbContext } from "./providers/DbProvider";
-import { RingData, RingPositionWithIndex, RingsData, convertToTorus, getRandomPositionExceptIndexes } from "./redux/features/handleRingData";
-import { postRingData } from "./api/fetchDb";
+import { RingsData, convertToTorus } from "./redux/features/handleRingData";
 import  Geolocation  from './components/GeoLocation';
 import Camera from "./components/Camera";
 import { saveAs } from 'file-saver';
@@ -63,17 +60,16 @@ function getLatestLap(data: RingsData): RingsData{
 function App() {
  // サーバーから取得したリングデータを管理するcontext
   const {
-    ringsData,
-    latestRing
+    ringsData
   } = useContext(DbContext);
 
-  const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
+  const [_usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
 
   // リングデータをサーバーに送信する際に必要な情報を管理するstate
-  const [location, setLocation] = useState<string | null>(null); // 現在値
-  const [locationJp, setLocationJp] = useState<string | null>(null); // 現在地(和名)
-  const [currentLatitude, setCurrentLatitude] = useState<number | null>(null); // 現在地の緯度
-  const [currentLongitude, setCurrentLongitude] = useState<number | null>(null); // 現在地の経度
+  const [_location, setLocation] = useState<string | null>(null); // 現在値
+  const [_locationJp, setLocationJp] = useState<string | null>(null); // 現在地(和名)
+  const [_currentLatitude, setCurrentLatitude] = useState<number | null>(null); // 現在地の緯度
+  const [_currentLongitude, setCurrentLongitude] = useState<number | null>(null); // 現在地の経度
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -99,85 +95,6 @@ function App() {
       setUsedOrbitIndexes((prev) => [...prev, value.orbitIndex]); // 使用済みの軌道番号として保管する
     });
   }
-
-  // リングの3Dオブジェクトを追加する関数
-  const addTorus = () => { 
-    let rX: number;//回転x軸
-    let rY: number;//回転y軸
-    let torusScale: number = 0.08;//torusの大きさ
-    let newOrbitIndex: number = -1;
-    const color = 0xffffff * Math.random();
-    let positionWithIndex: RingPositionWithIndex | null = null;
-    let randomPosition: RingPosition | null = null; // ランダムなリング位置
-    const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
-    let newOrbitIndexes: number[] = usedOrbitIndexes.slice(); // 使用済みのリング軌道内位置
-
-    // 既に全てのリングが埋まっている場合
-    if (newOrbitIndexes.length >= orbitLength) {
-      // 描画とリング軌道内位置の空き情報を初期化する
-      dispatch(resetHandle());
-      newOrbitIndexes = [];
-    }
-
-    // DEI軌道の中から、空いているリングの位置をランダムに取得する
-    // console.log("現在埋まっているリング位置:\n", newOrbitIndexes);
-    positionWithIndex = getRandomPositionExceptIndexes(positionArray, newOrbitIndexes); 
-    if(positionWithIndex){
-      randomPosition = positionWithIndex.ringPosition;
-      newOrbitIndex = positionWithIndex.index;
-    }else{
-      throw new Error("DEI軌道のリングが全て埋まっているのに、リングを追加しようとしました");
-    }
-
-    // リングの角度を求める
-    // 軌道設定配列のindexが偶数と奇数で分ける
-    if (newOrbitIndex % 2 == 0) {                   //偶数の時の角度
-      rX = Math.floor(Math.random());
-      rY = Math.floor(Math.random());
-    } else {                              //奇数の時の角度
-      rX = Math.floor(Math.random() * 2); 
-      rY = Math.floor(Math.random() * 5);
-    }
-
-    //リング情報をオブジェクトに詰め込みstoreへ送る
-    const newTorus: TorusInfo = {
-      id: uuidv4(),
-      color: color,
-      rotateX: rX,
-      rotateY: rY,
-      positionX: randomPosition.positionX,
-      positionY: randomPosition.positionY,
-      scale: torusScale,
-    };
-    dispatch(pushTorusInfo(newTorus));
-
-    newOrbitIndexes.push(newOrbitIndex);
-
-    // サーバーにリングのデータを追加する
-    const newRingData: RingData = {
-      location: location ?? "", // 撮影場所
-      locationJp: locationJp ?? "", // 撮影場所日本語
-      latitude: currentLatitude ?? 0, // 撮影地点の緯度
-      longitude: currentLongitude ?? 0, // 撮影地点の経度
-      userIp: ip, // IPアドレス
-      ringCount: (latestRing?.ringCount ?? 0) + 1, // リング数
-      orbitIndex: newOrbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
-      rotateX: rX, // リング角度(右手親指)
-      rotateY: rY, // リング角度(右手人差し指)
-      positionX: randomPosition.positionX, // リング位置(横方向)
-      positionY: randomPosition.positionY, // リング位置(縦方向)
-      ringColor: color, // リング色
-      scale: torusScale, //リングの大きさ
-      creationDate:  new Date().getTime() // 撮影日時
-    };
-    postRingData(newRingData);
-    console.log("サーバーにデータを送信しました:\n", newRingData);
-
-    // stateを更新する
-    setUsedOrbitIndexes(newOrbitIndexes);
-  };
-
-
 // // // // // // // // // // // // // // // // // // // // // // 
 // compareCurrentIPWithLastIP
 // アクティブなIPアドレスと前回登録したIPアドレスを比較
