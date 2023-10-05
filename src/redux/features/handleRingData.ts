@@ -1,4 +1,4 @@
-import { RingPosition } from "../../torusPosition";
+import { Ring, positionArray, torusScale } from "../../torusPosition";
 import { TorusInfo } from "./torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,22 +13,12 @@ export type RingData = {
     "userIp": string; // IPアドレス
     "ringCount": number; // リング数
     "orbitIndex": number; // リング軌道内の順番(DEI中の何個目か、0~70)
-    "rotateX": number; // リング角度(右手親指)
-    "rotateY": number; // リング角度(右手人差し指)
-    "positionX": number; // リング位置(横方向)
-    "positionY": number; // リング位置(縦方向)
-    "ringColor": number; // リング色
-    "scale": number; //リングの大きさ
+    "ringHue": number; // リングの色調(0～360)
     "creationDate":  number // 撮影日時
 };
 export type RingsData = {
     [id: string]: RingData;
 };
-// リングの位置の型
-export type RingPositionWithIndex = {
-    index: number;
-    ringPosition: RingPosition;
-}
 
 
 /* 関数定義 */
@@ -44,14 +34,15 @@ export function convertToTori(data: RingsData): TorusInfo[]{
 
 // RingData型をTorusInfo型に変換する関数
 export function convertToTorus(data: RingData): TorusInfo{
+    const newRingPosition: Ring = positionArray[data.orbitIndex]; // リングの軌道設定
     const newTorusInfo: TorusInfo = {
         id: uuidv4(),
-        color: data.ringColor,
-        rotateX: data.rotateX,
-        rotateY: data.rotateY,
-        positionX: data.positionX,
-        positionY: data.positionY,
-        scale: data.scale
+        color: `hsl(${data.ringHue}, 100%, 50%)`,
+        rotateX: newRingPosition.rotateX,
+        rotateY: newRingPosition.rotateY,
+        positionX: newRingPosition.positionX,
+        positionY: newRingPosition.positionY,
+        scale: torusScale
     };
     return newTorusInfo;
 }
@@ -67,12 +58,12 @@ export function getLatestRing(data: RingsData): RingData | null{
     return latestRing;
 }
 
-// 指定したインデックス以外の要素からランダムなRingPositionを取得する関数
-export function getRandomPositionExceptIndexes(positionArray: RingPosition[], excludedIndexes: number[]): RingPositionWithIndex | null{
-    // ランダムに選択される要素のインデックスを決定する
+// 指定した配列内に存在するindex以外の要素から、ランダムなindexを取得する関数
+export function getAvailableIndex(excludedIndexes: number[]): number | null{
+    // indexをランダムに取得するための配列を生成する
     const eligibleIndexes = positionArray
         .map((_, index) => index)
-        .filter(index => !excludedIndexes.includes(index));
+        .filter(index => !excludedIndexes.includes(index)); // indexが既に存在する場合は配列に追加しない
 
     if (eligibleIndexes.length === 0) {
       // すべての要素が除外された場合、nullを返す
@@ -80,7 +71,6 @@ export function getRandomPositionExceptIndexes(positionArray: RingPosition[], ex
     }
 
     const randomIndex = eligibleIndexes[Math.floor(Math.random() * eligibleIndexes.length)];
-    const randomValue = positionArray[randomIndex];
 
-    return { index: randomIndex, ringPosition: randomValue };
+    return randomIndex;
 }

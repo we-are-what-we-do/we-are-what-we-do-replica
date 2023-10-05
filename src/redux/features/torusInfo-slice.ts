@@ -2,12 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export type TorusInfo = {
     id: string;
-    color: number, 
+    color: string, 
     rotateX: number, 
     rotateY: number,
     positionX: number,
     positionY: number,
-    scale: number,
+    scale:     number,
 }
 
 const torusStore: TorusInfo[] = [];//オブジェクト形式で受け取ったリング情報を格納していく
@@ -17,7 +17,7 @@ export const torusInfo = createSlice({
     initialState: { value: torusStore },
     reducers: {
         pushTorusInfo: ((state, action) => { state.value.push(action.payload) }),
-        resetHandle: () => { return { value: torusStore } },
+        resetHandle  : () => { return { value: torusStore } },
     }
 });
 
