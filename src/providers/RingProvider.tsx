@@ -136,14 +136,9 @@ export function RingProvider({children}: {children: ReactNode}){
             userIp, // IPアドレス
             ringCount: (latestRing?.ringCount ?? 0) + 1, // リング数
             orbitIndex: newOrbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
-            rotateX: randomPosition.rotateX, // リング角度(右手親指)
-            rotateY: randomPosition.rotateY, // リング角度(右手人差し指)
-            positionX: randomPosition.positionX, // リング位置(横方向)
-            positionY: randomPosition.positionY, // リング位置(縦方向)
             ringHue, // リングの色調
-            scale: torusScale, //リングの大きさ
             creationDate:  new Date().getTime() // 撮影日時
-            };
+        };
 
             return newRingData;
     }
