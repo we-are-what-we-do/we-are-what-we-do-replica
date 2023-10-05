@@ -75,15 +75,15 @@ export default function App() {
 
   /* 写真撮影 */
   // const videoRef = useRef<HTMLVideoElement>(null);
-  const [threeCanvasElm, setThreeCanvasElm] = useState<HTMLCanvasElement | null>(null); // Three.jsによるリング用canvas要素(useRefだとuseEffectが使えないのでuseState)
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
 
   useEffect(() => {
-    console.log("threeCanvasElm", threeCanvasElm);
-    if (threeCanvasElm) {
-      rendererRef.current = new THREE.WebGLRenderer({ canvas: threeCanvasElm, preserveDrawingBuffer: true });
+    console.log("canvasRef.current", canvasRef.current);
+    if (canvasRef.current) {
+      rendererRef.current = new THREE.WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
     }
-  }, [threeCanvasElm]);
+  }, []);
 
   const captureImage = () => {
     console.log("rendererRef.current",rendererRef.current);
@@ -208,13 +208,10 @@ export default function App() {
             gl.setClearColor(0xFF0000, 0);
             gl.autoClear = false;
             gl.clearDepth()
-            
-            // three.jsによる非同期でのcanvas生成が終わったら、stateを更新する
-            const canvasElm: HTMLCanvasElement = gl.domElement;
-            setThreeCanvasElm(canvasElm); // 生成したcanvas要素をstateで保持
           }}
           gl={{ antialias: true, alpha: true }}
           camera={{ position: [0,0,10] }}
+          ref={canvasRef}
         >
           <TorusList />
           <OrbitControls/>
