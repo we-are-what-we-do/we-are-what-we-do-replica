@@ -357,7 +357,7 @@ const dataURLToBlob = (dataURL: string) => {
               <OrbitControls/>
           </Canvas>
 
-          <button onClick={captureImage}>Capture</button>
+          <button onClick={captureImage} style={{position: "absolute", top: "80%", left: "50%", height: "2rem", zIndex: 1000}}>Capture</button>
 
           {/* <button onClick={addTorus}>追加</button> */}
           {/* <Geolocation_test setPosition={setPosition} /> */}
