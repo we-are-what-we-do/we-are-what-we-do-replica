@@ -8,35 +8,47 @@ import e from "../assets/images/e.jpg"; //フェンス？
 import f from "../assets/images/f.jpg"; //？？？
 import { Vector3 } from "three";
 import { useFrame } from "react-three-fiber";
+import { WebGLRenderer } from "three/src/Three.js";
 
-function TorusList() {
+function TorusList({canvasRef, setDataURL}: {canvasRef: React.RefObject<HTMLCanvasElement>, setDataURL: React.Dispatch<React.SetStateAction<string>>}) {
 
   const torusList = useAppSelector((state) => state.torusInfo.value);
   const [ t1, t2, t3, t4, t5, t6 ] = useTexture([a, b, c, d, e, f]); //textureのHooks複数指定
 
-    //Torusのレスポンシブサイズ対応
-    useFrame((state) => {
-      const deviceWidth = window.innerWidth;
-      
-      if (deviceWidth >= 600 && deviceWidth <= 960) {
-        state.camera.position.x = 0;
-        state.camera.position.y = 0;
-        state.camera.position.z = 10;
-      } else if (deviceWidth >= 450 && deviceWidth <= 600) {
-        state.camera.position.x = 0;
-        state.camera.position.y = 0;
-        state.camera.position.z = 15;
-      } else if (deviceWidth <= 450) {
-        state.camera.position.x = 0;
-        state.camera.position.y = 0;
-        state.camera.position.z = 20;
-      } else {
-        state.camera.position.x = 0;
-        state.camera.position.y = 0;
-        state.camera.position.z = 6;
-      }
-      state.camera.lookAt(new Vector3(0, 0, 0));
-    });
+  //Torusのレスポンシブサイズ対応
+  useFrame((state) => {
+    const deviceWidth = window.innerWidth;
+    
+    if (deviceWidth >= 600 && deviceWidth <= 960) {
+      state.camera.position.x = 0;
+      state.camera.position.y = 0;
+      state.camera.position.z = 10;
+    } else if (deviceWidth >= 450 && deviceWidth <= 600) {
+      state.camera.position.x = 0;
+      state.camera.position.y = 0;
+      state.camera.position.z = 15;
+    } else if (deviceWidth <= 450) {
+      state.camera.position.x = 0;
+      state.camera.position.y = 0;
+      state.camera.position.z = 20;
+    } else {
+      state.camera.position.x = 0;
+      state.camera.position.y = 0;
+      state.camera.position.z = 6;
+    }
+    state.camera.lookAt(new Vector3(0, 0, 0));
+  });
+
+  // 3Dシーン内での変更を検知し、キャプチャを行う処理を定義します
+  useFrame((state) => {
+    if(canvasRef.current){
+      const gl: WebGLRenderer = state.gl;
+      const canvasElement: HTMLCanvasElement = gl.domElement;
+      const newDataURL: string = canvasElement.toDataURL("image/png");
+      setDataURL(newDataURL);
+      console.log(newDataURL)
+    }
+  });
 
   return (
     <>

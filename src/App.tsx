@@ -1,9 +1,8 @@
 import "./App.css";
 import { useContext, useEffect, useState, useRef } from "react";
 import { OrbitControls } from "@react-three/drei";
-import * as THREE from "three";
 import { saveAs } from "file-saver";
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import TorusList from './components/TorusList';
 // import  Geolocation_test  from './components/GeoLocation_test';
 import { getLocationConfig } from './api/fetchDb';
