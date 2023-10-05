@@ -3,8 +3,8 @@ import { RingData, RingsData } from "./../redux/features/handleRingData";
 
 
 /* 関数定義 */
-// const apiDomain: string = "https://api.wawwd.net/api/"; // アプリケーションサーバーのドメイン
-const apiDomain: string = "https://wawwdtestdb-default-rtdb.firebaseio.com/api/"; // 仮DBサーバーのドメイン
+// const apiDomain: string = "https://api.wawwd.net/"; // アプリケーションサーバーのドメイン
+const apiDomain: string = "https://wawwdtestdb-default-rtdb.firebaseio.com/"; // 仮DBサーバーのドメイン
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
@@ -25,8 +25,8 @@ async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promis
 
 // ピンの全設定データを取得する関数
 export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
-    // const apiEndpoint: string = "location-config";
-    const apiEndpoint: string = "location-config.json"; // 仮エンドポイント
+    // const apiEndpoint: string = "locations";
+    const apiEndpoint: string = "locations.json"; // 仮エンドポイント
     const response: Response = await makeGetRequest(apiEndpoint);
     const result: FeatureCollection<Point> = await response.json();
     return result;
@@ -34,8 +34,8 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
 
 // ピン一か所から、リングのデータを取得する関数
 export async function getRingData(location?: string): Promise<RingsData> {
-    // const apiEndpoint: string = "ring-data";
-    const apiEndpoint: string = "ring-data.json"; // 仮エンドポイント
+    // const apiEndpoint: string = "rings";
+    const apiEndpoint: string = "rings.json"; // 仮エンドポイント
     let queryParams: string = "";
     if(location){
         // ピンが指定されている場合、その一か所からのみリングのデータを取得する
@@ -73,15 +73,16 @@ async function makePostRequest(apiEndpoint: string, data: Object): Promise<Respo
 
 // リングのデータを送信する関数
 export async function postRingData(data: RingData): Promise<Response>{
-    // const apiEndpoint: string = "ring-data"; // リングのデータを送信するための、APIのエンドポイント
-    const apiEndpoint: string = "ring-data.json"; // 仮エンドポイント
+    // const apiEndpoint: string = "rings"; // リングのデータを送信するための、APIのエンドポイント
+    const apiEndpoint: string = "rings.json"; // 仮エンドポイント
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }
 
 // 撮影した写真を送信する関数
 export async function postNftImage(base64Data: string): Promise<Response>{
-    const apiEndpoint: string = "nft-image"; // 撮影した写真を送信するための、APIのエンドポイント
+    // const apiEndpoint: string = "nft"; // 撮影した写真を送信するための、APIのエンドポイント
+    const apiEndpoint: string = "nft.json"; // 仮エンドポイント
     const data: { image: string } = { image: base64Data };
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
