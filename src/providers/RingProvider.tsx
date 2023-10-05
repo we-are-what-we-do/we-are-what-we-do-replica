@@ -7,6 +7,9 @@ import { RingData, convertToTorus, getAvailableIndex } from '../redux/features/h
 import { postRingData } from '../api/fetchDb';
 
 
+const locationObj: Location = location; // ロケーションを退避
+
+
 /* 型定義 */
 // contextに渡すデータの型
 type RingContent = {
@@ -135,7 +138,9 @@ export function RingProvider({children}: {children: ReactNode}){
     }
 
     // リングの3Dオブジェクトを追加する関数
-    function addTorus(): void{
+    async function addTorus(): Promise<void>{
+        let needDrawClear: boolean = false; // リング追加の描画時に、canvasの初期化が必要かどうか
+
         // 追加するためのリングを生成する
         let newRingData: RingData | null = createTorus({
             usedOrbitIndexes,
@@ -149,7 +154,7 @@ export function RingProvider({children}: {children: ReactNode}){
         // DEIが完成している場合、描画を初期化してから、リング生成をもう一度試みる
         if(!newRingData){
             // 描画とリング軌道内位置の空き情報を初期化する
-            dispatch(resetHandle());
+            needDrawClear = true;
             const initialOrbitIndexes: number[] = []; // リングがないときの軌道番号配列
             setUsedOrbitIndexes(initialOrbitIndexes);
 
@@ -169,18 +174,28 @@ export function RingProvider({children}: {children: ReactNode}){
             }
         }
 
-        //リング情報をオブジェクトに詰め込みstoreへ送る
-        const newTorus: TorusInfo = convertToTorus(newRingData);
-        dispatch(pushTorusInfo(newTorus));
+        try{
+            // リングのデータを送信する
+            await postRingData(newRingData); //サーバーにリングデータを送信する
+            console.log("サーバーにデータを送信しました:\n", newRingData);
 
-        // 使用済みの軌道番号として保存しておく
-        const newOrbitIndex: number = newRingData?.orbitIndex ?? -1;
-        setUsedOrbitIndexes((prev) => [...prev, newOrbitIndex]);
+            //リング情報をオブジェクトに詰め込みstoreへ送る
+            const newTorus: TorusInfo = convertToTorus(newRingData);
+            if(needDrawClear) dispatch(resetHandle()); // DEIの新たな周を描画する場合、canvasを初期化する
+            dispatch(pushTorusInfo(newTorus));
 
-        // リングのデータを送信する
-        postRingData(newRingData);
-        setLatestRing(newRingData); // 最新のリングを更新する
-        console.log("サーバーにデータを送信しました:\n", newRingData);
+            // 最新のリングを更新する
+            setLatestRing(newRingData);
+
+            // 使用済みの軌道番号として保存しておく
+            const newOrbitIndex: number = newRingData?.orbitIndex ?? -1;
+            setUsedOrbitIndexes((prev) => [...prev, newOrbitIndex]);
+        }catch(error){
+            // サーバーにリングデータを送信できなかった際のエラーハンドリング
+            console.error("サーバーにデータを送信できませんでした\n以下の可能性があります\n- 送信しようとしたリングデータがコンフリクトを起こした\n- サーバーにアクセスできない", error);
+            alert("申し訳ございません。リングを追加できませんでした。\nしばらく待ってから再度お試しください。");
+            locationObj.reload(); //ページをリロードする
+        }
     };
 
     return (
