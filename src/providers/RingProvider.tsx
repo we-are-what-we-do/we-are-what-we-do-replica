@@ -3,8 +3,7 @@ import { DbContext } from './DbProvider';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
 import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusInfo-slice';
-import { Ring } from '../torusPosition';
-import { RingData, RingPositionWithIndex, convertToTorus, getRandomPositionExceptIndexes } from '../redux/features/handleRingData';
+import { RingData, convertToTorus, getAvailableIndex } from '../redux/features/handleRingData';
 import { postRingData } from '../api/fetchDb';
 
 
@@ -105,9 +104,7 @@ export function RingProvider({children}: {children: ReactNode}){
     }: CreateTorusArgument): RingData | null{
         const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
         const ringHue: number = Math.floor(Math.random() * 361); // リングの色調
-        let positionWithIndex: RingPositionWithIndex | null = null; // DEI内の軌道番号, リングの軌道設定
-        let newOrbitIndex: number = -1; // DEI内の軌道番号
-        let randomPosition: Ring | null = null; // ランダムなリング位置
+        let newOrbitIndex: number | null = null; // DEI内の軌道番号
 
         // 既に全てのリングが埋まっている場合
         if (usedOrbitIndexes.length >= orbitLength) {
@@ -116,16 +113,9 @@ export function RingProvider({children}: {children: ReactNode}){
 
         // DEI軌道の中から、空いているリングの位置をランダムに取得する
         // console.log("現在埋まっているリング位置:\n", usedOrbitIndexes);
-        positionWithIndex = getRandomPositionExceptIndexes(positionArray, usedOrbitIndexes); 
-        if(positionWithIndex){
-            newOrbitIndex = positionWithIndex.index;
-            randomPosition = positionWithIndex.ringPosition;
-        }else{
+        newOrbitIndex = getAvailableIndex(usedOrbitIndexes); 
+        if(newOrbitIndex === null){
             throw new Error("DEI軌道のリングが全て埋まっているのに、リングを作成しようとしました");
-        }
-
-        if(!randomPosition){
-            throw new Error("リングのrandomPositionが取得できていません");
         }
 
         // 最終的なRingDataを生成する
