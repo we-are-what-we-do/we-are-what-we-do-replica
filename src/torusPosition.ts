@@ -1,3 +1,4 @@
+// リングの軌道
 export type Ring = {
   positionX: number;
   positionY: number;
@@ -5,6 +6,10 @@ export type Ring = {
   rotateY:   number;
 }
 
+// リングの大きさ
+export const torusScale: number = 0.08;
+
+// リングの軌道設定配列
 export const positionArray: Ring[] = [
   //D
   {

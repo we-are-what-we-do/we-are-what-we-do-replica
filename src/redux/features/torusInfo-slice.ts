@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 export type TorusInfo = {
-    id:        number;
-    color:     number, 
-    rotateX:   number, 
-    rotateY:   number,
+    id: string;
+    color: string, 
+    rotateX: number, 
+    rotateY: number,
     positionX: number,
     positionY: number,
     scale:     number,
