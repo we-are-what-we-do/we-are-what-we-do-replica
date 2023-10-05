@@ -1,4 +1,4 @@
-import { RingPosition } from "../../torusPosition";
+import { Ring as RingPosition } from "../../torusPosition";
 import { TorusInfo } from "./torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
 
