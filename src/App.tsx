@@ -67,9 +67,9 @@ export default function App() {
   useEffect(() => {
     compareCurrentIPWithLastIP().then(result => {
       setIpFlag(result);
+      console.log(`ipFlag : ${result}`);
     });
   }, []);
-  console.log(`ipFlag : ${ipFlag}`);
 
 
 
@@ -79,12 +79,14 @@ export default function App() {
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
 
   useEffect(() => {
+    console.log("canvasRef.current",canvasRef.current);
     if (canvasRef.current) {
       rendererRef.current = new THREE.WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
     }
-  }, []);
+  }, [canvasRef]);
 
   const captureImage = () => {
+    console.log("rendererRef.current",rendererRef.current);
     if (rendererRef.current) {
       const dataURL = rendererRef.current.domElement.toDataURL('image/png');
       console.log(dataURL);
