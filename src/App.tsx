@@ -314,7 +314,7 @@ console.log(`gpsFlag : ${gpsFlag}`);
           marginLeft: "8rem"
         }}
         onClick={() => {
-          fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/api/rings.json", {
+          fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json", {
             method: 'DELETE'
           });
         }}
