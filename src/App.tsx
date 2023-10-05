@@ -1,6 +1,5 @@
 import "./App.css";
 import { useContext, useEffect, useState } from "react";
-
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
 import { Ring, positionArray } from "./torusPosition";
@@ -60,7 +59,8 @@ function App() {
   // サーバーから取得したリングデータを管理するcontext
   const {
     ringsData,
-    latestRing
+    latestRing,
+    setLatestRing
   } = useContext(DbContext);
 
   const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
@@ -159,6 +159,7 @@ function App() {
       creationDate:  new Date().getTime() // 撮影日時
     };
     postRingData(newRingData);
+    setLatestRing(newRingData);
     console.log("サーバーにデータを送信しました:\n", newRingData);
 
     // stateを更新する

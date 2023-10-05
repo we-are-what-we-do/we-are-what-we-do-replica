@@ -11,7 +11,7 @@ function TorusList() {
 
   const torusList = useAppSelector((state) => state.torusInfo.value);
 
-  const [ texture1, texture2, texture3, texture4, texture5, texture6 ] = useTexture([a, b, c, d, e, f]); //textureのHooks複数指定
+  const [ texture1, _texture2, _texture3, _texture4, _texture5, _texture6 ] = useTexture([a, b, c, d, e, f]); //textureのHooks複数指定
 
   return (
     <>
