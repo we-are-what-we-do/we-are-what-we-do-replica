@@ -76,22 +76,17 @@ export default function App() {
   /* 写真撮影 */
   // const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-
-  useEffect(() => {
-    console.log("canvasRef.current", canvasRef.current);
-    if (canvasRef.current) {
-      rendererRef.current = new THREE.WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
-    }
-  }, []);
 
   const captureImage = () => {
-    console.log("rendererRef.current",rendererRef.current);
-    if (rendererRef.current) {
-      const dataURL = rendererRef.current.domElement.toDataURL('image/png');
-      console.log(dataURL);
-      saveImage(dataURL);
-    }
+    console.log("canvasRef.current:", canvasRef.current);
+    if (!canvasRef.current) return;
+    const gl: WebGLRenderingContext | null = canvasRef.current.getContext("webgl");
+    console.log("gl:", gl);
+    if(!gl) return;
+    const canvasElm: HTMLCanvasElement = gl.canvas as HTMLCanvasElement;
+    const dataURL: string = canvasElm.toDataURL("image/png"); // base64形式の画像
+    console.log(dataURL);
+    saveImage(dataURL);
   };
 
   const saveImage = (dataURL: string) => {
