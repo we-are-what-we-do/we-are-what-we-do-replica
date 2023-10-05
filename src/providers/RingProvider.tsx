@@ -3,7 +3,7 @@ import { DbContext } from './DbProvider';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
 import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusInfo-slice';
-import { Ring, torusScale } from '../torusPosition';
+import { Ring } from '../torusPosition';
 import { RingData, RingPositionWithIndex, convertToTorus, getRandomPositionExceptIndexes } from '../redux/features/handleRingData';
 import { postRingData } from '../api/fetchDb';
 
