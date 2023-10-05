@@ -103,7 +103,7 @@ export function RingProvider({children}: {children: ReactNode}){
         userIp
     }: CreateTorusArgument): RingData | null{
         const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
-        const color: number = 0xffffff * Math.random(); // リングの色
+        const ringHue: number = Math.floor(Math.random() * 361); // リングの色調
         let positionWithIndex: RingPositionWithIndex | null = null; // DEI内の軌道番号, リングの軌道設定
         let newOrbitIndex: number = -1; // DEI内の軌道番号
         let randomPosition: Ring | null = null; // ランダムなリング位置
@@ -140,7 +140,7 @@ export function RingProvider({children}: {children: ReactNode}){
             rotateY: randomPosition.rotateY, // リング角度(右手人差し指)
             positionX: randomPosition.positionX, // リング位置(横方向)
             positionY: randomPosition.positionY, // リング位置(縦方向)
-            ringColor: color, // リング色
+            ringHue, // リングの色調
             scale: torusScale, //リングの大きさ
             creationDate:  new Date().getTime() // 撮影日時
             };

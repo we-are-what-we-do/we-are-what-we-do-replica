@@ -17,7 +17,7 @@ export type RingData = {
     "rotateY": number; // リング角度(右手人差し指)
     "positionX": number; // リング位置(横方向)
     "positionY": number; // リング位置(縦方向)
-    "ringColor": number; // リング色
+    "ringHue": number; // リングの色調(0～360)
     "scale": number; //リングの大きさ
     "creationDate":  number // 撮影日時
 };
@@ -46,7 +46,7 @@ export function convertToTori(data: RingsData): TorusInfo[]{
 export function convertToTorus(data: RingData): TorusInfo{
     const newTorusInfo: TorusInfo = {
         id: uuidv4(),
-        color: data.ringColor,
+        color: `hsl(${data.ringHue}, 100%, 50%)`,
         rotateX: data.rotateX,
         rotateY: data.rotateY,
         positionX: data.positionX,
