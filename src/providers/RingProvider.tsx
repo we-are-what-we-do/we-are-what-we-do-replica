@@ -94,6 +94,7 @@ export function RingProvider({children}: {children: ReactNode}){
     }
 
     // リングのデータを生成する関数
+    // DEI一周分が完成していて、新しいリングを生成できないときはnullを返す
     function createTorus({
         usedOrbitIndexes,
         location,
