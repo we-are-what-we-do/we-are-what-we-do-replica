@@ -3,7 +3,7 @@ import { useContext, useEffect, useState, useRef } from "react";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { saveAs } from "file-saver";
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import TorusList from './components/TorusList';
 // import  Geolocation_test  from './components/GeoLocation_test';
 import { getLocationConfig } from './api/fetchDb';
@@ -76,52 +76,11 @@ export default function App() {
   /* 写真撮影 */
   // const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-
-  function getCurrentCanvas(){
-    console.log("canvasRef.current", canvasRef.current)
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas });
-
-    // Add your 3D objects to the scene here
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-
-    camera.position.z = 5;
-
-    sceneRef.current = scene;
-    cameraRef.current = camera;
-    rendererRef.current = renderer;
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-
-      // Update your 3D scene here
-      if (sceneRef.current && cameraRef.current && rendererRef.current) {
-        rendererRef.current.render(sceneRef.current, cameraRef.current);
-      }
-    };
-
-    animate();
-  }
+  const [dataURL, setDataURL] = useState<string>("");
 
   const captureImage = () => {
-    getCurrentCanvas();
-
-    console.log("rendererRef.current", rendererRef.current)
-    if (rendererRef.current) {
-      const dataURL = rendererRef.current.domElement.toDataURL("image/png");
-      console.log(dataURL);
-      saveImage(dataURL);
-    }
+    console.log(dataURL);
+    if(dataURL !== "") saveImage(dataURL);
   };
 
   const saveImage = (dataURL: string) => {
@@ -243,7 +202,10 @@ export default function App() {
           camera={{ position: [0,0,10] }}
           ref={canvasRef}
         >
-          <TorusList />
+          <TorusList
+            canvasRef={canvasRef}
+            setDataURL={setDataURL}
+          />
           <OrbitControls/>
         </Canvas>
         <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
