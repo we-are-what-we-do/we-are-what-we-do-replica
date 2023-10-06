@@ -1,19 +1,15 @@
 import "./App.css";
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState } from "react";
 import { OrbitControls } from "@react-three/drei";
-import { saveAs } from "file-saver";
 import { Canvas } from '@react-three/fiber';
 import TorusList from './components/TorusList';
-// import  Geolocation_test  from './components/GeoLocation_test';
 import { getLocationConfig } from './api/fetchDb';
 import { FeatureCollection, Point } from 'geojson';
 import { haversineDistance } from './api/distanceCalculations';
-// import { LocationDataProvider } from './providers/LocationDataProvider';
 import LocationDataProvider from "./providers/LocationDataProvider";
 import { RingContext } from "./providers/RingProvider";
 import Camera from "./components/Camera";
-import { WebGLRenderer } from "three";
-import * as THREE from "three";
+import { CaptureContext } from "./providers/CaptureProvider";
 
 
 export default function App() {
@@ -27,6 +23,14 @@ export default function App() {
     setLocationJp,
     usedOrbitIndexes
   } = useContext(RingContext);
+
+  // 写真撮影(リング+カメラ)のためのcontext
+  const {
+    captureImage,
+    videoRef,
+    canvasRef
+  } = useContext(CaptureContext);
+
 
   // // // // // // // // // // // // // // // // // // // // // // 
   // compareCurrentIPWithLastIP
@@ -71,96 +75,6 @@ export default function App() {
       console.log(`ipFlag : ${result}`);
     });
   }, []);
-
-
-
-  /* 写真撮影 */
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-
-  useEffect(() => {
-    if (canvasRef.current) {
-      const renderer: WebGLRenderer = new WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
-      rendererRef.current = renderer;
-    }
-  }, []);
-
-  // カメラとリングのcanvas要素を合成して、base64形式の画像を返す関数
-  function captureImage(): string | null{
-    // カメラとリングのcanvas要素を、それぞれ取得する
-    const ringCanvas: HTMLCanvasElement | null = captureRingImage();
-    const cameraCanvas: HTMLCanvasElement | null = getVideoCanvas();
-    if(!ringCanvas) return null;
-    if(!cameraCanvas) return null;
-
-    // 2つのcanvas要素を合成したものを貼り付けるためのcanvas要素を作成する
-    const canvasElement: HTMLCanvasElement = document.createElement("canvas");
-    canvasElement.width = window.innerWidth;
-    canvasElement.height = window.innerHeight;
-
-    // 作成したcanvasに、2つのcanvas要素を貼り付ける
-    const canvasCtx: CanvasRenderingContext2D | null = canvasElement.getContext("2d");
-    if(!canvasCtx) return null;
-    canvasCtx.drawImage(cameraCanvas, 0, 0, canvasElement.width, canvasElement.height); // カメラを貼り付ける
-    canvasCtx.drawImage(ringCanvas, 0, 0, canvasElement.width, canvasElement.height); // リングを貼り付ける
-
-    // base64として出力する
-    const dataURL = canvasElement.toDataURL('image/png');
-    console.log(dataURL);
-    saveImage(dataURL); // 画像として保存する
-    return dataURL;
-  }
-
-  // カメラのvideo要素からcanvas要素を取得する関数
-  function getVideoCanvas(): HTMLCanvasElement | null{
-    // video要素を取得する
-    const videoElement: HTMLVideoElement | null = videoRef.current;
-    if(!videoElement) return null;
-
-    // video要素の描画を貼り付けるためのcanvas要素を作成する
-    const canvasElement: HTMLCanvasElement = document.createElement("canvas");
-    canvasElement.width = window.innerWidth;
-    canvasElement.height = window.innerHeight;
-
-    // 作成したcanvas要素にvideo要素の描画を貼り付ける
-    const canvasCtx: CanvasRenderingContext2D | null = canvasElement.getContext('2d');
-    if(!canvasCtx) return null;
-    canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
-
-    return canvasElement;
-  }
-
-  // リングのcanvas要素を取得する関数
-  function captureRingImage(): HTMLCanvasElement | null{
-    if (rendererRef.current) {
-      const renderer: WebGLRenderer = rendererRef.current;
-      const canvasElement: HTMLCanvasElement = renderer.domElement;
-      return canvasElement;
-    }else{
-      return null;
-    }
-  };
-
-  const saveImage = (dataURL: string) => {
-    // DataURLからBlobを作成
-    const blob = dataURLToBlob(dataURL);
-
-    // 'file-saver'ライブラリを使ってダウンロード
-    saveAs(blob, "screenshot.png");
-  };
-
-  const dataURLToBlob = (dataURL: string) => {
-    const byteString = window.atob(dataURL.split(",")[1]);
-    const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
-    const arrayBuffer = new ArrayBuffer(byteString.length);
-    const uint8Array = new Uint8Array(arrayBuffer);
-    for (let i = 0; i < byteString.length; i++) {
-      uint8Array[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([uint8Array], { type: mimeString });
-  };
-
 
 
   // // // // // // // // // // // // // // // // // // // // // // 
@@ -244,6 +158,7 @@ export default function App() {
       console.log(`gpsFlag : ${result}`);
     });
   }, []);
+
 
   return (
     <LocationDataProvider>
