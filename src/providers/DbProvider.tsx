@@ -47,9 +47,11 @@ export function DbProvider({children}: {children: ReactNode}){
     // リングのデータを、サーバーから取得したデータで初期化する関数
     async function initializeRingData(): Promise<void>{
         const newRingsData: RingsData = await getRingData() ?? {};
+        // リングデータを70個までに限定して切り出す(一応)
+        const extractedRingData: RingsData = getLatestLap(newRingsData);
         const newLatestRing: RingData | null = getLatestRing(newRingsData);
         let newTori: TorusInfo[] = convertToTori(newRingsData);
-        setRingsData(newRingsData);
+        setRingsData(extractedRingData);
         setLatestRing(newLatestRing);
         setTori(newTori);
 
@@ -84,4 +86,43 @@ export function DbProvider({children}: {children: ReactNode}){
             {children}
         </DbContext.Provider>
     );
+}
+
+
+/* 仮定義関数 */
+import { positionArray } from '../torusPosition';
+// オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
+// TODO 仮定義なので、APIの方でリングデータが0～70個に限定されていることを確認次第、削除する
+function getLastRings(obj: RingsData, lastAmount: number): RingsData{
+    const keys: string[] = Object.keys(obj);
+    const lastKeys: string[] = keys.slice(-lastAmount); // オブジェクトの最後のn個のキーを取得
+
+    const result: RingsData = {};
+    for (const key of lastKeys) {
+        result[key] = obj[key]; // キーを使用してプロパティを抽出
+    }
+
+    return result;
+}
+
+// 過去周のDEI周を切り捨てる関数
+// TODO 仮定義なので、APIの方でリングデータが0～71個に限定されていることを確認次第、削除する
+function getLatestLap(data: RingsData): RingsData{
+    const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
+    const ringAmount: number = Object.keys(data).length; // リングデータの数
+    let result: RingsData = {}; // 0～71個のリングデータ
+    if(ringAmount <= orbitLength){
+    // リングが0～71個の場合
+    result = Object.assign({}, data);
+    }else{
+    // リングが71個より多い場合
+    const latestLapLength: number = ringAmount % orbitLength; // 最新のDEI周が何個のリングでできているか
+    if(latestLapLength === 0){
+        // リング個数が71の倍数のとき
+        result = getLastRings(data, orbitLength);
+    }else{
+        result = getLastRings(data, latestLapLength);
+    }
+    }
+    return result;
 }

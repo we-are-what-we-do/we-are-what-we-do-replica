@@ -5,6 +5,7 @@ import { AppDispatch } from '../redux/store';
 import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusInfo-slice';
 import { RingData, convertToTorus, getAvailableIndex } from '../redux/features/handleRingData';
 import { postRingData } from '../api/fetchDb';
+import { positionArray } from '../torusPosition';
 
 
 const locationObj: Location = location; // ロケーションを退避
@@ -82,11 +83,8 @@ export function RingProvider({children}: {children: ReactNode}){
         dispatch(resetHandle()); // 全3Dを消去する
         setUsedOrbitIndexes([]);
 
-        // リングデータを71個までに限定して切り出す(一応)
-        const extractedRingData: RingsData = getLatestLap(ringsData);
-
         // 3Dオブジェクトの初期表示を行う
-        Object.entries(extractedRingData).forEach(([_key, value]) => {
+        Object.entries(ringsData).forEach(([_key, value]) => {
             // リングデータを使用して、3Dオブジェクトを1つ作成する
             const newTorus: TorusInfo = convertToTorus(value);
             dispatch(pushTorusInfo(newTorus)); //リング情報をオブジェクトに詰め込みstoreへ送る
@@ -213,44 +211,4 @@ export function RingProvider({children}: {children: ReactNode}){
             {children}
         </RingContext.Provider>
     );
-}
-
-
-/* 仮定義関数 */
-import { RingsData } from '../redux/features/handleRingData';
-import { positionArray } from '../torusPosition';
-// オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
-// TODO 仮定義なので、APIの方でリングデータが0～70個に限定されていることを確認次第、削除する
-function getLastRings(obj: RingsData, lastAmount: number): RingsData{
-    const keys: string[] = Object.keys(obj);
-    const lastKeys: string[] = keys.slice(-lastAmount); // オブジェクトの最後のn個のキーを取得
-
-    const result: RingsData = {};
-    for (const key of lastKeys) {
-    result[key] = obj[key]; // キーを使用してプロパティを抽出
-    }
-
-    return result;
-}
-
-// 過去周のDEI周を切り捨てる関数
-// TODO 仮定義なので、APIの方でリングデータが0～71個に限定されていることを確認次第、削除する
-function getLatestLap(data: RingsData): RingsData{
-    const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
-    const ringAmount: number = Object.keys(data).length; // リングデータの数
-    let result: RingsData = {}; // 0～71個のリングデータ
-    if(ringAmount <= orbitLength){
-    // リングが0～71個の場合
-    result = Object.assign({}, data);
-    }else{
-    // リングが71個より多い場合
-    const latestLapLength: number = ringAmount % orbitLength; // 最新のDEI周が何個のリングでできているか
-    if(latestLapLength === 0){
-        // リング個数が71の倍数のとき
-        result = getLastRings(data, orbitLength);
-    }else{
-        result = getLastRings(data, latestLapLength);
-    }
-    }
-    return result;
 }
