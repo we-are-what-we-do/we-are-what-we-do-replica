@@ -48,7 +48,7 @@ function TorusList() {
             scale={torus.scale}
           >
             <torusGeometry args={[5.5, 1.5, 8, 50]} />
-            <meshBasicMaterial color={torus.color} map={t5} /> {/* ここの「t番号」を変更するとテクスチャー変更できます(1~6) */}
+            <meshBasicMaterial color={torus.color} map={t5} />
           </mesh>
         ))}
     </>
