@@ -180,6 +180,11 @@ export default function App() {
             ref={canvasRef}
           >
               <TorusList/>
+              <ambientLight intensity={1} />
+              <directionalLight intensity={1.5} position={[1,1,1]} />
+              <directionalLight intensity={1.5} position={[1,1,-1]} />
+              <pointLight intensity={1} position={[1,1,5]}/>
+              <pointLight intensity={1} position={[1,1,-5]}/>
               <OrbitControls/>
           </Canvas>
           <button
