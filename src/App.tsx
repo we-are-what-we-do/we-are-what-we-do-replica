@@ -12,6 +12,7 @@ import { haversineDistance } from './api/distanceCalculations';
 import LocationDataProvider from "./providers/LocationDataProvider";
 import { RingContext } from "./providers/RingProvider";
 import Camera from "./components/Camera";
+import { WebGLRenderer } from "three";
 
 
 export default function App() {
@@ -75,11 +76,20 @@ export default function App() {
   /* 写真撮影 */
   // const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [dataURL, setDataURL] = useState<string>("");
+  const rendererRef = useRef<WebGLRenderer | null>(null);
 
+  useEffect(() => {
+    if (canvasRef.current) {
+      rendererRef.current = new WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
+    }
+  }, []);
+  
   const captureImage = () => {
-    console.log(dataURL);
-    if(dataURL !== "") saveImage(dataURL);
+    if (rendererRef.current) {
+      const dataURL = rendererRef.current.domElement.toDataURL('image/png');
+      console.log(dataURL);
+      saveImage(dataURL);
+    }
   };
 
   const saveImage = (dataURL: string) => {
@@ -201,10 +211,7 @@ export default function App() {
           camera={{ position: [0,0,10] }}
           ref={canvasRef}
         >
-          <TorusList
-            canvasRef={canvasRef}
-            setDataURL={setDataURL}
-          />
+          <TorusList/>
           <OrbitControls/>
         </Canvas>
         <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
