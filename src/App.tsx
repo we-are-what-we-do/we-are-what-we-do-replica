@@ -10,6 +10,7 @@ import LocationDataProvider from "./providers/LocationDataProvider";
 import { RingContext } from "./providers/RingProvider";
 import Camera from "./components/Camera";
 import { CaptureContext } from "./providers/CaptureProvider";
+import { CameraContext } from "./providers/CameraProvider";
 
 
 export default function App() {
@@ -24,10 +25,12 @@ export default function App() {
     usedOrbitIndexes
   } = useContext(RingContext);
 
+  // アウトカメラ/インカメラを切り替えるためのcontext
+  const { switchCameraFacing } = useContext(CameraContext);
+
   // 写真撮影(リング+カメラ)のためのcontext
   const {
     captureImage,
-    videoRef,
     canvasRef
   } = useContext(CaptureContext);
 
@@ -163,7 +166,7 @@ export default function App() {
   return (
     <LocationDataProvider>
         <div className="camera">
-          <Camera videoRef={videoRef}/>
+          <Camera/>
         </div>
         <div className='canvas'>
           <Canvas
@@ -179,11 +182,23 @@ export default function App() {
               <TorusList/>
               <OrbitControls/>
           </Canvas>
-          <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
           <button
-            /* TODO いらなくなったらこのbuttonごと消す */
+            onClick={addTorus}
             style={{
-              marginLeft: "8rem"
+              position: "absolute",
+              top: "85%",
+              left: "40%",
+              height: "2rem"
+            }}
+          >
+            追加(リング数: {usedOrbitIndexes.length})
+          </button>
+          <button
+            style={{
+              position: "absolute",
+              top: "85%",
+              left: "70%",
+              height: "2rem"
             }}
             onClick={() => {
               fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json", {
@@ -197,12 +212,23 @@ export default function App() {
             onClick={captureImage}
             style={{
               position: "absolute",
-              top: "80%",
-              left: "50%",
+              top: "75%",
+              left: "40%",
               height: "2rem"
             }}
           >
-            Capture
+            撮影
+          </button>
+          <button
+            onClick={switchCameraFacing}
+            style={{
+              position: "absolute",
+              top: "75%",
+              left: "60%",
+              height: "2rem"
+            }}
+          >
+            カメラ切り替え
           </button>
         </div>
     </LocationDataProvider>

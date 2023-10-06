@@ -1,13 +1,13 @@
-import { ReactNode, createContext, useEffect, useRef } from 'react';
+import { ReactNode, createContext, useEffect, useRef, useContext } from 'react';
 import { WebGLRenderer } from "three";
 import { saveAs } from "file-saver";
+import { CameraContext } from './CameraProvider';
 
 
 /* 型定義 */
 // contextに渡すデータの型
 type CaptureContext = {
     captureImage(): string | null;
-    videoRef: React.RefObject<HTMLVideoElement>;
     canvasRef: React.RefObject<HTMLCanvasElement>;
 };
 
@@ -15,7 +15,6 @@ type CaptureContext = {
 /* Provider */
 const initialData: CaptureContext = {
     captureImage: () => null,
-    videoRef: {} as React.RefObject<HTMLVideoElement>,
     canvasRef: {} as React.RefObject<HTMLCanvasElement>,
 };
 
@@ -24,9 +23,9 @@ export const CaptureContext = createContext<CaptureContext>(initialData);
 // 写真撮影(リング+カメラ)のためのプロバイダー
 export function CaptureProvider({children}: {children: ReactNode}){
     /* useState, useContext等 */
-    const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+    const { videoRef } = useContext(CameraContext);
 
 
     /* useEffect等 */
@@ -162,7 +161,6 @@ export function CaptureProvider({children}: {children: ReactNode}){
         <CaptureContext.Provider
             value={{
                 captureImage,
-                videoRef,
                 canvasRef
             }}
         >
