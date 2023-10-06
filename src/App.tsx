@@ -77,19 +77,14 @@ export default function App() {
   // const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<WebGLRenderer | null>(null);
-
-  useEffect(() => {
-    if (canvasRef.current) {
-      rendererRef.current = new WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
-    }
-  }, []);
   
   const captureImage = () => {
-    if (rendererRef.current) {
-      const dataURL = rendererRef.current.domElement.toDataURL('image/png');
-      console.log(dataURL);
-      saveImage(dataURL);
-    }
+    console.log("canvasRef.current", canvasRef.current);
+    if(!canvasRef.current) return;
+    const newRendererRef = new WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
+    const dataURL = newRendererRef.domElement.toDataURL('image/png');
+    console.log(dataURL);
+    saveImage(dataURL);
   };
 
   const saveImage = (dataURL: string) => {
