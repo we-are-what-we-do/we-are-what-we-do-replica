@@ -15,7 +15,7 @@ function TorusList() {
   const [ t1, t2, t3, t4, t5, t6 ] = useTexture([a, b, c, d, e, f]); //textureのHooks複数指定
 
   //Torusのレスポンシブサイズ対応
-  useFrame((state) => {
+/*   useFrame((state) => {
     const deviceWidth = window.innerWidth;
     
     if (deviceWidth >= 600 && deviceWidth <= 960) {
@@ -36,7 +36,7 @@ function TorusList() {
       state.camera.position.z = 6;
     }
     state.camera.lookAt(new Vector3(0, 0, 0));
-  });
+  }); */
 
   return (
     <>

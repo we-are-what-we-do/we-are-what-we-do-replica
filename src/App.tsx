@@ -13,6 +13,7 @@ import LocationDataProvider from "./providers/LocationDataProvider";
 import { RingContext } from "./providers/RingProvider";
 import Camera from "./components/Camera";
 import { WebGLRenderer } from "three";
+import * as THREE from "three";
 
 
 export default function App() {
@@ -74,37 +75,42 @@ export default function App() {
 
 
   /* 写真撮影 */
-  // const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rendererRef = useRef<WebGLRenderer | null>(null);
-  
-  const captureImage = () => {
-    console.log("canvasRef.current", canvasRef.current);
-    if(!canvasRef.current) return;
-    const newRendererRef = new WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
-    const dataURL = newRendererRef.domElement.toDataURL('image/png');
+// const videoRef = useRef<HTMLVideoElement>(null);
+const canvasRef = useRef<HTMLCanvasElement>(null);
+const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+
+useEffect(() => {
+  if (canvasRef.current) {
+    rendererRef.current = new THREE.WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
+  }
+}, []);
+
+const captureImage = () => {
+  if (rendererRef.current) {
+    const dataURL = rendererRef.current.domElement.toDataURL('image/png');
     console.log(dataURL);
     saveImage(dataURL);
-  };
+  }
+};
 
-  const saveImage = (dataURL: string) => {
-    // DataURLからBlobを作成
-    const blob = dataURLToBlob(dataURL);
+const saveImage = (dataURL: string) => {
+  // DataURLからBlobを作成
+  const blob = dataURLToBlob(dataURL);
 
-    // 'file-saver'ライブラリを使ってダウンロード
-    saveAs(blob, "screenshot.png");
-  };
+  // 'file-saver'ライブラリを使ってダウンロード
+  saveAs(blob, "screenshot.png");
+};
 
-  const dataURLToBlob = (dataURL: string) => {
-    const byteString = window.atob(dataURL.split(",")[1]);
-    const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
-    const arrayBuffer = new ArrayBuffer(byteString.length);
-    const uint8Array = new Uint8Array(arrayBuffer);
-    for (let i = 0; i < byteString.length; i++) {
-      uint8Array[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([uint8Array], { type: mimeString });
-  };
+const dataURLToBlob = (dataURL: string) => {
+  const byteString = window.atob(dataURL.split(",")[1]);
+  const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
+  const arrayBuffer = new ArrayBuffer(byteString.length);
+  const uint8Array = new Uint8Array(arrayBuffer);
+  for (let i = 0; i < byteString.length; i++) {
+    uint8Array[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([uint8Array], { type: mimeString });
+};
 
 
 
