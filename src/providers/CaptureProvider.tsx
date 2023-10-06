@@ -104,6 +104,7 @@ export function CaptureProvider({children}: {children: ReactNode}){
         const canvasCtx: CanvasRenderingContext2D | null = canvasElement.getContext('2d');
         if(!canvasCtx) return null;
 
+        // アスペクト比や、カメラの位置を調整する
         let width: number = 10;
         let height: number = 10;
         let top: number = 0;
