@@ -81,13 +81,15 @@ const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
 
 useEffect(() => {
   if (canvasRef.current) {
-    rendererRef.current = new THREE.WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
+    const renderer: WebGLRenderer = new WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
+    rendererRef.current = renderer;
   }
 }, []);
 
 const captureImage = () => {
   if (rendererRef.current) {
-    const dataURL = rendererRef.current.domElement.toDataURL('image/png');
+    const renderer: WebGLRenderer = rendererRef.current;
+    const dataURL = renderer.domElement.toDataURL('image/png');
     console.log(dataURL);
     saveImage(dataURL);
   }
@@ -205,7 +207,7 @@ const dataURLToBlob = (dataURL: string) => {
           <Canvas
             onCreated={({ gl }) => {
               gl.setClearColor(0xFF0000, 0);
-              gl.autoClear = false;
+              gl.autoClear = true;
               gl.clearDepth()
             }}
             gl={{ antialias: true, alpha: true }}

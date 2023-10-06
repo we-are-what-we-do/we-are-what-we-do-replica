@@ -9,6 +9,10 @@ import f from "../assets/images/f.jpg"; //？？？
 import { Vector3 } from "three";
 import { useFrame } from "react-three-fiber";
 
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../redux/store';
+import { resetHandle } from '../redux/features/torusInfo-slice';
+
 function TorusList() {
 
   const torusList = useAppSelector((state) => state.torusInfo.value);

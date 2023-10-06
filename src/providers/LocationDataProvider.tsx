@@ -10,7 +10,7 @@ export const LocationDataProvider: React.FC<LocationDataProviderProps> = ({ chil
   const [geoJSONData, setGeoJSONData] = useState<FeatureCollection<Point> | null>(null);
 
   useEffect(() => {
-    // データの取得とstateの更新
+    // // データの取得とstateの更新
     const fetchData = async () => {
       try {
         const data = await getLocationConfig();
@@ -20,7 +20,7 @@ export const LocationDataProvider: React.FC<LocationDataProviderProps> = ({ chil
       }
     };
 
-    // fetchData();
+    fetchData();
   }, []); // useEffectの第二引数に空の配列を渡すことで、このエフェクトはコンポーネントのマウント時にのみ実行されます
 
   // geoJSONDataがnullの場合、Loadingメッセージを表示するなどの処理を追加することもできます
