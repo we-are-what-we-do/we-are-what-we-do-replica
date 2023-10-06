@@ -100,7 +100,7 @@ export function CaptureProvider({children}: {children: ReactNode}){
         canvasElement.width = canvasWidth;
         canvasElement.height = canvasHeight;
 
-        // 作成したcanvas要素にvideo要素の描画を貼り付ける
+        // 作成したcanvas要素にvideo要素の描画を貼り付けるためのctxを取得する
         const canvasCtx: CanvasRenderingContext2D | null = canvasElement.getContext('2d');
         if(!canvasCtx) return null;
 
