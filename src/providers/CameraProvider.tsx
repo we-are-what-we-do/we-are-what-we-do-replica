@@ -29,39 +29,43 @@ export function CameraProvider({children}: {children: ReactNode}){
     /* useEffect等 */
     // 初回レンダリング時、カメラに接続する
     useEffect(() => {
-        const initCamera = async () => {
-            // カメラ接続を試みる
-            let stream: MediaStream | null = null;
-
-            // デフォルトはアウトカメラ接続
-            stream = await accessCamera("out");
-
-            // アウトカメラ接続がダメなら、インカメラ接続も試す
-            if(stream === null){
-                stream = await accessCamera("in");
-            };
-
-            if(stream){
-                // アウトカメラorインカメラのアクセスに成功した場合
-                console.log("カメラのアクセスに成功");
-                // window.alert("カメラのアクセスに成功");
-
-                // video要素のsrcObjectにカメラを設定する
-                if(videoRef.current){
-                    videoRef.current.srcObject = stream;
-                };
-            }else{
-                // アウトカメラとインカメラ両方に接続できなかった場合
-                console.error("カメラのアクセスに失敗");
-                window.alert("アプリを使用するにはカメラの許可が必要です");
-            };
-            return;
-        };
-        initCamera();
+        initCamera().then((newStream) => {
+            setLatestStream(newStream);
+        });
     }, []);
 
 
     /* 関数定義 */
+    // カメラに初回接続する関数
+    async function initCamera(): Promise<MediaStream | null>{
+        // カメラ接続を試みる
+        let stream: MediaStream | null = null;
+
+        // デフォルトはアウトカメラ接続
+        stream = await accessCamera("out");
+
+        // アウトカメラ接続がダメなら、インカメラ接続も試す
+        if(stream === null){
+            stream = await accessCamera("in");
+        };
+
+        if(stream){
+            // アウトカメラorインカメラのアクセスに成功した場合
+            console.log("カメラのアクセスに成功");
+            // window.alert("カメラのアクセスに成功");
+
+            // video要素のsrcObjectにカメラを設定する
+            if(videoRef.current){
+                videoRef.current.srcObject = stream;
+            };
+        }else{
+            // アウトカメラとインカメラ両方に接続できなかった場合
+            console.error("カメラのアクセスに失敗");
+            window.alert("アプリを使用するにはカメラの許可が必要です");
+        };
+        return stream;
+    }
+
     // インカメラ/アウトカメラを切り替える関数
     async function switchCameraFacing(): Promise<void>{
         if(cameraFacing === null) return; // カメラが許可されていない場合、処理しない
