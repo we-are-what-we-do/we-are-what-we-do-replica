@@ -20,17 +20,19 @@ export const LocationDataProvider: React.FC<LocationDataProviderProps> = ({ chil
       }
     };
 
-    fetchData();
+    // fetchData();
   }, []); // useEffectの第二引数に空の配列を渡すことで、このエフェクトはコンポーネントのマウント時にのみ実行されます
 
   // geoJSONDataがnullの場合、Loadingメッセージを表示するなどの処理を追加することもできます
-  if (!geoJSONData) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div>
-      {/* ここにchildrenや他のコンポーネントにgeoJSONDataを渡す処理を書く */}
+      {(geoJSONData == null) && (
+        <div
+          style={{position: "absolute"}}
+        >
+          Loading...
+        </div>
+      )}
       {children}
     </div>
   );

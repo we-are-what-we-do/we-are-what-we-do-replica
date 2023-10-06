@@ -198,49 +198,50 @@ const dataURLToBlob = (dataURL: string) => {
 
   return (
     <LocationDataProvider>
-      <div className="camera">
-        <Camera/>
-      </div>
-      <div className='canvas'>
-        <Canvas
-          onCreated={({ gl }) => {
-            gl.setClearColor(0xFF0000, 0);
-            gl.autoClear = false;
-            gl.clearDepth()
-          }}
-          gl={{ antialias: true, alpha: true }}
-          camera={{ position: [0,0,10] }}
-          ref={canvasRef}
-        >
-          <TorusList/>
-          <OrbitControls/>
-        </Canvas>
-        <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
-        <button
-          /* TODO いらなくなったらこのbuttonごと消す */
-          style={{
-            marginLeft: "8rem"
-          }}
-          onClick={() => {
-            fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json", {
-              method: 'DELETE'
-            });
-          }}
-        >
-          サーバーデータ削除
-        </button>
-        <button
-          onClick={captureImage}
-          style={{
-            position: "absolute",
-            top: "80%",
-            left: "50%",
-            height: "2rem"
-          }}
-        >
-          Capture
-        </button>
-      </div>
+        <div className="camera">
+          <Camera/>
+        </div>
+        <div className='canvas'>
+          <Canvas
+            onCreated={({ gl }) => {
+              gl.setClearColor(0xFF0000, 0);
+              gl.autoClear = false;
+              gl.clearDepth()
+            }}
+            gl={{ antialias: true, alpha: true }}
+            camera={{ position: [0,0,10] }}
+            ref={canvasRef}
+          >
+              <TorusList/>
+              <OrbitControls/>
+          </Canvas>
+          <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
+          <button
+            /* TODO いらなくなったらこのbuttonごと消す */
+            style={{
+              marginLeft: "8rem"
+            }}
+            onClick={() => {
+              fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json", {
+                method: 'DELETE'
+              });
+            }}
+          >
+            サーバーデータ削除
+          </button>
+          <button
+            onClick={captureImage}
+            style={{
+              position: "absolute",
+              top: "80%",
+              left: "50%",
+              height: "2rem"
+            }}
+          >
+            Capture
+          </button>
+          <button onClick={captureImage} style={{position: "absolute", top: "80%"}}>Capture</button>
+        </div>
     </LocationDataProvider>
   );
 }
