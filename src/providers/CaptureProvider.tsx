@@ -79,18 +79,18 @@ export function CaptureProvider({children}: {children: ReactNode}){
         const videoHeight: number = videoRect.height; // videoの縦幅を取得
         const windowWidth: number = window.innerWidth; // windowの横幅を取得
         const windowHeight: number = window.innerHeight; // windowの縦幅を取得
-        console.log(
+        /* console.log(
             "videoWidth: ", videoWidth,
             "\nvideoHeight: ", videoHeight,
             "\nwindowWidth: ", windowWidth,
             "\nwindowHeight: ", windowHeight
-        )
+        ) */
         const videoAspectRatio: number = videoWidth / videoHeight; // videoのアスペクト比を取得
         const windowAspectRatio: number = windowWidth / windowHeight; // windowのアスペクト比を取得
-        console.log(
+        /* console.log(
             "videoAspectRatio: ", videoAspectRatio,
             "\nwindowAspectRatio: ", windowAspectRatio
-        )
+        ) */
 
         // video要素の描画を貼り付けるためのcanvas要素を作成する
         const canvasElement: HTMLCanvasElement = document.createElement("canvas");
@@ -111,12 +111,12 @@ export function CaptureProvider({children}: {children: ReactNode}){
         let left: number = 0;
         if(windowAspectRatio > videoAspectRatio) {
             // windowのアスペクト比がvideoよりも横長の場合
-            console.log("画面が、カメラに比べて横長です");
+            // console.log("画面が、カメラに比べて横長です");
             width = windowWidth;
             height = videoHeight;
         }else{
             // windowのアスペクト比がvideoよりも縦長の場合
-            console.log("画面が、カメラに比べて縦長です");
+            // console.log("画面が、カメラに比べて縦長です");
             width = videoWidth;
             height = windowHeight;
             left = - Math.abs(windowWidth - videoWidth) / 2;
