@@ -13,7 +13,7 @@ function Camera({videoRef}: {videoRef: React.RefObject<HTMLVideoElement>}){
         }
 
         console.log("カメラのアクセスに成功");
-        window.alert("カメラのアクセスに成功");
+        // window.alert("カメラのアクセスに成功");
         setIsCameraAccessible(true);
       } catch (error) {
         console.error("カメラのアクセスに失敗:", error);

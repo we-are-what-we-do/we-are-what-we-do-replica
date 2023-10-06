@@ -28,7 +28,7 @@ export const LocationDataProvider: React.FC<LocationDataProviderProps> = ({ chil
     <div>
       {(geoJSONData == null) && (
         <div
-          style={{position: "absolute", top: "50%", left: "50%"}}
+          style={{position: "absolute", top: "50%", left: "calc(50% - 3rem)"}}
         >
           Loading...
         </div>
