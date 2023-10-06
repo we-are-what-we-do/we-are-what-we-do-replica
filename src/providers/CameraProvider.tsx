@@ -24,6 +24,7 @@ export function CameraProvider({children}: {children: ReactNode}){
     /* useState, useContext等 */
     const [cameraFacing, setCameraFacing] = useState<"out" | "in" | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
+    const [latestStream, setLatestStream] = useState<MediaStream | null>(null); // 現在のstreamを保存する
 
     /* useEffect等 */
     // 初回レンダリング時、カメラに接続する
@@ -68,7 +69,12 @@ export function CameraProvider({children}: {children: ReactNode}){
         let nextFacing: "out" | "in" = (cameraFacing === "out") ? "in" : "out"; // 切り替え先のカメラの向き
 
         // カメラを切り替える
-        stream = await accessCamera("in"); // もう一方のカメラに接続を試みる
+        // stream = await accessCamera(nextFacing); // もう一方のカメラに接続を試みる
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "user" // カメラの向きを設定する
+            }
+        });
 
         if(stream && videoRef.current){
             // カメラ切り替えが成功した場合、video要素のsrcObjectにカメラを設定する
