@@ -49,14 +49,16 @@ export function CaptureProvider({children}: {children: ReactNode}){
 
         // 2つのcanvas要素を合成したものを貼り付けるためのcanvas要素を作成する
         const canvasElement: HTMLCanvasElement = document.createElement("canvas");
-        canvasElement.width = cameraCanvas.width;
-        canvasElement.height = cameraCanvas.height;
+        const width: number = cameraCanvas.width;
+        const height: number = cameraCanvas.height;
+        canvasElement.width = width;
+        canvasElement.height = height;
 
         // 作成したcanvasに、2つのcanvas要素を貼り付ける
         const canvasCtx: CanvasRenderingContext2D | null = canvasElement.getContext("2d");
         if(!canvasCtx) return null;
-        canvasCtx.drawImage(cameraCanvas, 0, 0, canvasElement.width, canvasElement.height); // カメラを貼り付ける
-        canvasCtx.drawImage(ringCanvas, 0, 0, canvasElement.width, canvasElement.height); // リングを貼り付ける
+        canvasCtx.drawImage(cameraCanvas, 0, 0, width, height); // カメラを貼り付ける
+        canvasCtx.drawImage(ringCanvas, 0, 0, width, height); // リングを貼り付ける
 
         // base64として出力する
         const dataURL = canvasElement.toDataURL('image/png');
@@ -73,14 +75,35 @@ export function CaptureProvider({children}: {children: ReactNode}){
 
         // video要素の描画を貼り付けるためのcanvas要素を作成する
         const canvasElement: HTMLCanvasElement = document.createElement("canvas");
-        const videoRect: DOMRect = videoElement.getBoundingClientRect();
-        canvasElement.width = videoRect.width;
-        canvasElement.height = videoRect.height;
+        const width: number = window.innerWidth;
+        const height: number = window.innerHeight;
+        canvasElement.width = width;
+        canvasElement.height = height;
 
         // 作成したcanvas要素にvideo要素の描画を貼り付ける
         const canvasCtx: CanvasRenderingContext2D | null = canvasElement.getContext('2d');
         if(!canvasCtx) return null;
-        canvasCtx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+        const videoRect: DOMRect = videoElement.getBoundingClientRect();
+        const videoWidth: number = videoRect.width; // videoの横幅を取得
+        const videoHeight: number = videoRect.height; // videoの縦幅を取得
+        const windowWidth: number = window.innerWidth; // windowの横幅を取得
+        const windowHeight: number = window.innerHeight; // windowの縦幅を取得
+        console.log(
+            "videoWidth: ", videoWidth,
+            "\nvideoHeight: ", videoHeight,
+            "\nwindowWidth: ", windowWidth,
+            "\nwindowHeight: ", windowHeight
+        )
+        const top: number = Math.abs(windowWidth - videoWidth) / 2; // videoのx軸を取得
+        const left: number = Math.abs(windowHeight - videoHeight) / 2; // videoのy軸を取得
+        // canvasCtx.drawImage(videoElement, top, left, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight);
+        const videoAspectRatio: number = videoWidth / videoHeight;
+        const windowAspectRatio: number = windowWidth / windowHeight;
+        console.log(
+            "videoAspectRatio: ", videoAspectRatio,
+            "\nwindowAspectRatio: ", windowAspectRatio
+        )
+        canvasCtx.drawImage(videoElement, 0, 0, windowWidth, windowHeight);
 
         return canvasElement;
     }
