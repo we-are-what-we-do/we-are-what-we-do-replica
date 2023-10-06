@@ -62,7 +62,7 @@ export function CaptureProvider({children}: {children: ReactNode}){
 
         // base64として出力する
         const dataURL = canvasElement.toDataURL('image/png');
-        console.log(dataURL);
+        // console.log(dataURL);
         saveImage(dataURL); // 画像として保存する
         return dataURL;
     }
@@ -73,16 +73,7 @@ export function CaptureProvider({children}: {children: ReactNode}){
         const videoElement: HTMLVideoElement | null = videoRef.current;
         if(!videoElement) return null;
 
-        // video要素の描画を貼り付けるためのcanvas要素を作成する
-        const canvasElement: HTMLCanvasElement = document.createElement("canvas");
-        const width: number = window.innerWidth;
-        const height: number = window.innerHeight;
-        canvasElement.width = width;
-        canvasElement.height = height;
-
-        // 作成したcanvas要素にvideo要素の描画を貼り付ける
-        const canvasCtx: CanvasRenderingContext2D | null = canvasElement.getContext('2d');
-        if(!canvasCtx) return null;
+        // video要素とwindowの横幅, 縦幅を取得する
         const videoRect: DOMRect = videoElement.getBoundingClientRect();
         const videoWidth: number = videoRect.width; // videoの横幅を取得
         const videoHeight: number = videoRect.height; // videoの縦幅を取得
@@ -94,17 +85,44 @@ export function CaptureProvider({children}: {children: ReactNode}){
             "\nwindowWidth: ", windowWidth,
             "\nwindowHeight: ", windowHeight
         )
-        const top: number = Math.abs(windowWidth - videoWidth) / 2; // videoのx軸を取得
-        const left: number = Math.abs(windowHeight - videoHeight) / 2; // videoのy軸を取得
-        // canvasCtx.drawImage(videoElement, top, left, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight);
-        const videoAspectRatio: number = videoWidth / videoHeight;
-        const windowAspectRatio: number = windowWidth / windowHeight;
+        const videoAspectRatio: number = videoWidth / videoHeight; // videoのアスペクト比を取得
+        const windowAspectRatio: number = windowWidth / windowHeight; // windowのアスペクト比を取得
         console.log(
             "videoAspectRatio: ", videoAspectRatio,
             "\nwindowAspectRatio: ", windowAspectRatio
         )
-        canvasCtx.drawImage(videoElement, 0, 0, windowWidth, windowHeight);
 
+        // video要素の描画を貼り付けるためのcanvas要素を作成する
+        const canvasElement: HTMLCanvasElement = document.createElement("canvas");
+        // ウィンドウのサイズにcanvasを合わせる
+        const canvasWidth: number = windowWidth;
+        const canvasHeight: number = windowHeight;
+        canvasElement.width = canvasWidth;
+        canvasElement.height = canvasHeight;
+
+        // 作成したcanvas要素にvideo要素の描画を貼り付ける
+        const canvasCtx: CanvasRenderingContext2D | null = canvasElement.getContext('2d');
+        if(!canvasCtx) return null;
+
+        let width: number = 10;
+        let height: number = 10;
+        let top: number = 0;
+        let left: number = 0;
+        if(windowAspectRatio > videoAspectRatio) {
+            // windowのアスペクト比がvideoよりも横長の場合
+            console.log("画面が、カメラに比べて横長です");
+            width = windowWidth;
+            height = videoHeight;
+        }else{
+            // windowのアスペクト比がvideoよりも縦長の場合
+            console.log("画面が、カメラに比べて縦長です");
+            width = videoWidth;
+            height = windowHeight;
+            left = - Math.abs(windowWidth - videoWidth) / 2;
+        }
+
+        // 作成したcanvas要素にvideo要素の描画を貼り付ける
+        canvasCtx.drawImage(videoElement, left, top, width, height);
         return canvasElement;
     }
 
