@@ -51,7 +51,7 @@ export default function App() {
     // 追加したリングのデータを取得する
     const newRingData: RingData = await addTorus();
 
-    // 写真撮影(リング)をする
+    // 写真撮影(リング+カメラ)をする
     // 撮影した写真をダウンロードする
     // 撮影した写真をbase64形式で取得する
     const newImage: string | null = captureImage();

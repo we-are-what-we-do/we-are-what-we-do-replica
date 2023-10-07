@@ -1,7 +1,7 @@
 import { useAppSelector } from "../redux/store";
 import { useThree } from "react-three-fiber";
 
- function TorusList() {
+function TorusList() {
   const torusList = useAppSelector((state) => state.torusInfo.value);
 
   useThree((state) => {
