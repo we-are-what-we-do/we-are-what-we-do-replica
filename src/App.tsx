@@ -52,7 +52,6 @@ export default function App() {
     const newRingData: RingData = await addTorus();
 
     // 写真撮影(リング+カメラ)をする
-    // 撮影した写真をダウンロードする
     // 撮影した写真をbase64形式で取得する
     const newImage: string | null = captureImage();
     if(newImage === null){
@@ -72,7 +71,7 @@ export default function App() {
         await postNftImage(newImage); // base64形式の画像をサーバーに送信する
         console.log("サーバーにデータを送信しました:\n", newRingData);
 
-        // 画像として保存する
+        // 撮影した写真をダウンロードする
         saveImage(newImage);
 
         // 最新のリングを更新する
