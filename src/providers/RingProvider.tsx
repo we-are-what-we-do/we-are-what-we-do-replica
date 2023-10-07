@@ -4,23 +4,21 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
 import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusInfo-slice';
 import { RingData, convertToTorus, getAvailableIndex } from '../redux/features/handleRingData';
-import { postRingData } from '../api/fetchDb';
 import { positionArray } from '../torusPosition';
-
-
-const locationObj: Location = location; // ロケーションを退避
 
 
 /* 型定義 */
 // contextに渡すデータの型
 type RingContent = {
-    addTorus: () => void,
+    addTorus: () => Promise<RingData>;
     setCurrentIp: React.Dispatch<React.SetStateAction<string>>;
     setCurrentLatitude: React.Dispatch<React.SetStateAction<number | null>>;
     setCurrentLongitude: React.Dispatch<React.SetStateAction<number | null>>;
     setLocation: React.Dispatch<React.SetStateAction<string | null>>;
     setLocationJp: React.Dispatch<React.SetStateAction<string | null>>;
+    setUsedOrbitIndexes: React.Dispatch<React.SetStateAction<number[]>>;
     usedOrbitIndexes: number[];
+    initializeRingDraw: () => void;
 };
 
 type CreateTorusArgument = {
@@ -35,13 +33,15 @@ type CreateTorusArgument = {
 
 /* Provider */
 const initialData: RingContent = {
-    addTorus: () => {},
+    addTorus: () => Promise.resolve({} as RingData),
     setCurrentIp: () => {},
     setCurrentLatitude: () => {},
     setCurrentLongitude: () => {},
     setLocation: () => {},
     setLocationJp: () => {},
-    usedOrbitIndexes: []
+    setUsedOrbitIndexes: () => {},
+    usedOrbitIndexes: [],
+    initializeRingDraw: () => {}
 };
 
 export const RingContext = createContext<RingContent>(initialData);
@@ -51,8 +51,7 @@ export function RingProvider({children}: {children: ReactNode}){
     // サーバーから取得したリングデータを管理するcontext
     const {
         ringsData,
-        latestRing,
-        setLatestRing
+        latestRing
     } = useContext(DbContext);
 
     const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
@@ -81,7 +80,7 @@ export function RingProvider({children}: {children: ReactNode}){
     function initializeRingDraw(): void{
         // 初期化処理
         dispatch(resetHandle()); // 全3Dを消去する
-        setUsedOrbitIndexes([]);
+        const newUsedOrbitIndexes: number[] = [];
 
         // 3Dオブジェクトの初期表示を行う
         Object.entries(ringsData).forEach(([_key, value]) => {
@@ -89,8 +88,10 @@ export function RingProvider({children}: {children: ReactNode}){
             const newTorus: TorusInfo = convertToTorus(value);
             dispatch(pushTorusInfo(newTorus)); //リング情報をオブジェクトに詰め込みstoreへ送る
 
-            setUsedOrbitIndexes((prev) => [...prev, value.orbitIndex]); // 使用済みの軌道番号として保管する
+            newUsedOrbitIndexes.push(value.orbitIndex); // 使用済みの軌道番号として保管する
         });
+
+        setUsedOrbitIndexes([]);
     }
 
     // リングのデータを生成する関数
@@ -136,7 +137,7 @@ export function RingProvider({children}: {children: ReactNode}){
     }
 
     // リングの3Dオブジェクトを追加する関数
-    async function addTorus(): Promise<void>{
+    async function addTorus(): Promise<RingData>{
         let needDrawClear: boolean = false; // リング追加の描画時に、canvasの初期化が必要かどうか
 
         // 追加するためのリングを生成する
@@ -172,28 +173,13 @@ export function RingProvider({children}: {children: ReactNode}){
             }
         }
 
-        try{
-            // リングのデータを送信する
-            await postRingData(newRingData); //サーバーにリングデータを送信する
-            console.log("サーバーにデータを送信しました:\n", newRingData);
+        //リング情報をオブジェクトに詰め込みstoreへ送る
+        const newTorus: TorusInfo = convertToTorus(newRingData);
+        if(needDrawClear) await dispatch(resetHandle()); // DEIの新たな周を描画する場合、canvasを初期化する
+        await dispatch(pushTorusInfo(newTorus));
 
-            //リング情報をオブジェクトに詰め込みstoreへ送る
-            const newTorus: TorusInfo = convertToTorus(newRingData);
-            if(needDrawClear) dispatch(resetHandle()); // DEIの新たな周を描画する場合、canvasを初期化する
-            dispatch(pushTorusInfo(newTorus));
-
-            // 最新のリングを更新する
-            setLatestRing(newRingData);
-
-            // 使用済みの軌道番号として保存しておく
-            const newOrbitIndex: number = newRingData?.orbitIndex ?? -1;
-            setUsedOrbitIndexes((prev) => [...prev, newOrbitIndex]);
-        }catch(error){
-            // サーバーにリングデータを送信できなかった際のエラーハンドリング
-            console.error("サーバーにデータを送信できませんでした\n以下の可能性があります\n- 送信しようとしたリングデータがコンフリクトを起こした\n- サーバーにアクセスできない", error);
-            alert("申し訳ございません、リングを追加できませんでした。\nしばらく待ってから再度お試しください。");
-            locationObj.reload(); //ページをリロードする
-        }
+        // 描画として追加したリングのデータを返す
+        return newRingData;
     };
 
     return (
@@ -205,7 +191,9 @@ export function RingProvider({children}: {children: ReactNode}){
                 setCurrentLongitude,
                 setLocation,
                 setLocationJp,
-                usedOrbitIndexes
+                setUsedOrbitIndexes,
+                usedOrbitIndexes,
+                initializeRingDraw
             }}
         >
             {children}

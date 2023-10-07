@@ -3,17 +3,24 @@ import { useContext, useEffect, useState } from "react";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
 import TorusList from './components/TorusList';
-import { getLocationConfig } from './api/fetchDb';
+import { getLocationConfig, postNftImage, postRingData } from './api/fetchDb';
 import { FeatureCollection, Point } from 'geojson';
 import { haversineDistance } from './api/distanceCalculations';
 import LocationDataProvider from "./providers/LocationDataProvider";
-import { RingContext } from "./providers/RingProvider";
 import Camera from "./components/Camera";
 import { CaptureContext } from "./providers/CaptureProvider";
 import { CameraContext } from "./providers/CameraProvider";
+import { DbContext } from "./providers/DbProvider";
+import { RingContext } from "./providers/RingProvider";
+import { RingData } from "./redux/features/handleRingData";
 
 
 export default function App() {
+    // サーバーから取得したリングデータを管理するcontext
+    const {
+      setLatestRing
+  } = useContext(DbContext);
+
   // リングのデータを追加するためのcontext
   const {
     addTorus,
@@ -22,7 +29,9 @@ export default function App() {
     setCurrentLongitude,
     setLocation,
     setLocationJp,
-    usedOrbitIndexes
+    setUsedOrbitIndexes,
+    usedOrbitIndexes,
+    initializeRingDraw
   } = useContext(RingContext);
 
   // アウトカメラ/インカメラを切り替えるためのcontext
@@ -31,8 +40,58 @@ export default function App() {
   // 写真撮影(リング+カメラ)のためのcontext
   const {
     captureImage,
+    saveImage,
     canvasRef
   } = useContext(CaptureContext);
+
+
+  // 撮影ボタンを押したときの処理
+  async function handleTakePhotoButton(): Promise<void>{
+    // 新しいリングを追加して描画する
+    // 追加したリングのデータを取得する
+    const newRingData: RingData = await addTorus();
+
+    // 写真撮影(リング)をする
+    // 撮影した写真をダウンロードする
+    // 撮影した写真をbase64形式で取得する
+    const newImage: string | null = captureImage();
+    if(newImage === null){
+      console.error("base64形式の画像を取得できませんでした");
+      alert("申し訳ございません、写真を撮影できませんでした。");
+      return;
+    }
+
+    // 撮影した写真に確認を取る
+    const isPhotoOk: boolean = confirm("撮影画像はこちらでよいですか");
+
+    if(isPhotoOk){
+      // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
+      try{
+        // リングのデータを送信する
+        await postRingData(newRingData); //サーバーにリングデータを送信する
+        await postNftImage(newImage); // base64形式の画像をサーバーに送信する
+        console.log("サーバーにデータを送信しました:\n", newRingData);
+
+        // 画像として保存する
+        saveImage(newImage);
+
+        // 最新のリングを更新する
+        setLatestRing(newRingData);
+
+        // 使用済みの軌道番号として保存しておく
+        const newOrbitIndex: number = newRingData?.orbitIndex ?? -1;
+        setUsedOrbitIndexes((prev) => [...prev, newOrbitIndex]);
+      }catch(error){
+        // サーバーにリングデータを送信できなかった際のエラーハンドリング
+        console.error("サーバーにデータを送信できませんでした\n以下の可能性があります\n- 送信しようとしたリングデータがコンフリクトを起こした\n- サーバーにアクセスできない", error);
+        alert("申し訳ございません、リングを追加できませんでした。\nしばらく待ってから再度お試しください。");
+        location.reload(); //ページをリロードする
+      }
+    }else{
+      // 再撮影を望む場合、描画に追加したリングを初期化して処理を止める
+      initializeRingDraw(); // リング描画を初期化する
+    }
+  }
 
 
   // // // // // // // // // // // // // // // // // // // // // // 
@@ -188,6 +247,17 @@ export default function App() {
               <OrbitControls/>
           </Canvas>
           <button
+            onClick={handleTakePhotoButton}
+            style={{
+              position: "absolute",
+              top: "65%",
+              left: "50%",
+              height: "2rem"
+            }}
+          >
+            撮影
+          </button>
+          <button
             onClick={addTorus}
             style={{
               position: "absolute",
@@ -222,7 +292,7 @@ export default function App() {
               height: "2rem"
             }}
           >
-            撮影
+            キャプチャ
           </button>
           <button
             onClick={switchCameraFacing}

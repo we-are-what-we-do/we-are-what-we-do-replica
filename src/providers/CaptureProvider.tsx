@@ -8,6 +8,7 @@ import { CameraContext } from './CameraProvider';
 // contextに渡すデータの型
 type CaptureContext = {
     captureImage(): string | null;
+    saveImage: (dataURL: string) => void;
     canvasRef: React.RefObject<HTMLCanvasElement>;
 };
 
@@ -15,6 +16,7 @@ type CaptureContext = {
 /* Provider */
 const initialData: CaptureContext = {
     captureImage: () => null,
+    saveImage: () => {},
     canvasRef: {} as React.RefObject<HTMLCanvasElement>,
 };
 
@@ -60,9 +62,8 @@ export function CaptureProvider({children}: {children: ReactNode}){
         canvasCtx.drawImage(ringCanvas, 0, 0, width, height); // リングを貼り付ける
 
         // base64として出力する
-        const dataURL = canvasElement.toDataURL('image/png');
+        const dataURL: string = canvasElement.toDataURL('image/png');
         // console.log(dataURL);
-        saveImage(dataURL); // 画像として保存する
         return dataURL;
     }
 
@@ -137,15 +138,17 @@ export function CaptureProvider({children}: {children: ReactNode}){
         }
     };
 
-    const saveImage = (dataURL: string) => {
+    // base64形式の画像を画像ファイルとしてダウンロードする関数
+    function saveImage(dataURL: string): void{
         // DataURLからBlobを作成
-        const blob = dataURLToBlob(dataURL);
+        const blob: Blob = dataURLToBlob(dataURL);
 
         // 'file-saver'ライブラリを使ってダウンロード
         saveAs(blob, "screenshot.png");
     };
 
-    const dataURLToBlob = (dataURL: string) => {
+    // base64形式の画像からBlobオブジェクトを作成する関数
+    function dataURLToBlob(dataURL: string): Blob{
         const byteString = window.atob(dataURL.split(",")[1]);
         const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
         const arrayBuffer = new ArrayBuffer(byteString.length);
@@ -161,6 +164,7 @@ export function CaptureProvider({children}: {children: ReactNode}){
         <CaptureContext.Provider
             value={{
                 captureImage,
+                saveImage,
                 canvasRef
             }}
         >
