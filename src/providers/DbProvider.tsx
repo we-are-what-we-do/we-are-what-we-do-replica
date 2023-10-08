@@ -17,7 +17,6 @@ type DbContent = {
     toriData: TorusInfo[];
     initializeRingData: (location?: string) => Promise<void>;
     addTorusData: (newTorus: TorusInfo) => void;
-    setLatestRing: React.Dispatch<React.SetStateAction<RingData | null>>;
 };
 
 
@@ -27,8 +26,7 @@ const initialData: DbContent = {
     latestRing: null,
     toriData: [],
     initializeRingData: () => Promise.resolve(),
-    addTorusData: () => {},
-    setLatestRing: () => {}
+    addTorusData: () => {}
 };
 
 export const DbContext = createContext<DbContent>(initialData);
@@ -77,10 +75,8 @@ export function DbProvider({children}: {children: ReactNode}){
                 ringsData,
                 latestRing,
                 toriData,
-
                 initializeRingData,
                 addTorusData,
-                setLatestRing
             }}
         >
             {children}

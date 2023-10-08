@@ -15,23 +15,26 @@ import { RingContext } from "./providers/RingProvider";
 import { RingData } from "./redux/features/handleRingData";
 
 
+// TODO 後で消す
+import { useAppSelector } from "./redux/store";
+import { TorusInfo } from "./redux/features/torusInfo-slice";
+import { positionArray } from "./torusPosition";
+
+
 export default function App() {
     // サーバーから取得したリングデータを管理するcontext
     const {
-      setLatestRing
+      latestRing
   } = useContext(DbContext);
 
   // リングのデータを追加するためのcontext
   const {
-    addTorus,
+    getRingDataToAdd,
     setCurrentIp,
     setCurrentLatitude,
     setCurrentLongitude,
     setLocation,
-    setLocationJp,
-    setUsedOrbitIndexes,
-    usedOrbitIndexes,
-    initializeRingDraw
+    setLocationJp
   } = useContext(RingContext);
 
   // アウトカメラ/インカメラを切り替えるためのcontext
@@ -44,42 +47,50 @@ export default function App() {
     canvasRef
   } = useContext(CaptureContext);
 
+  // 既にリングを追加したかどうかを管理するstate
+  const [isDonePostRing, setIsDonePostRing] = useState<boolean>(false);
+
+  const torusList: TorusInfo[] = useAppSelector((state: { // TODO 後で消す
+    torusInfo: {
+        value: TorusInfo[];
+    };
+}) => state.torusInfo.value);
+
 
   // 撮影ボタンを押したときの処理
   async function handleTakePhotoButton(): Promise<void>{
-    // 新しいリングを追加して描画する
-    // 追加したリングのデータを取得する
-    const newRingData: RingData = await addTorus();
-
-    // 写真撮影(リング+カメラ)をする
-    // 撮影した写真をbase64形式で取得する
-    const newImage: string | null = captureImage();
-    if(newImage === null){
-      console.error("base64形式の画像を取得できませんでした");
-      alert("申し訳ございません、写真を撮影できませんでした。");
-      return;
-    }
-
-    // 撮影した写真に確認を取る
+    // 撮影する写真に確認を取る
+    if(isDonePostRing) console.log("再撮影を行います\n(リングデータの送信は行いません)");
     const isPhotoOk: boolean = confirm("撮影画像はこちらでよいですか");
 
     if(isPhotoOk){
       // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
       try{
-        // リングのデータを送信する
-        await postRingData(newRingData); //サーバーにリングデータを送信する
-        await postNftImage(newImage); // base64形式の画像をサーバーに送信する
-        console.log("サーバーにデータを送信しました:\n", newRingData);
+        // 追加したリングのデータを取得する
+        const addedRingData: RingData | null = getRingDataToAdd();
+
+        // 写真(リング+カメラ)を撮影をして、base64形式で取得する
+        const newImage: string | null = captureImage();
+
+        // エラーハンドリング
+        if(!addedRingData) throw new Error("追加したリングデータを取得できませんでした");
+        if(!newImage) throw new Error("写真を撮影できませんでした");
+
+        // リングデータを送信する
+        if(isDonePostRing){
+          // リングデータを送信済みの場合、写真ダウンロードのみ行う
+          console.log("既にリングデータをサーバーに送信済みです")
+        }else{
+          // リングデータをまだ送信していない場合、リングデータを送信する
+          await postRingData(addedRingData); //サーバーにリングデータを送信する
+          await postNftImage(newImage); // base64形式の画像をサーバーに送信する
+          console.log("サーバーにデータを送信しました:\n", addedRingData);
+
+          setIsDonePostRing(true); // リングデータを送信済みとしてstateを更新する
+        };
 
         // 撮影した写真をダウンロードする
         saveImage(newImage);
-
-        // 最新のリングを更新する
-        setLatestRing(newRingData);
-
-        // 使用済みの軌道番号として保存しておく
-        const newOrbitIndex: number = newRingData?.orbitIndex ?? -1;
-        setUsedOrbitIndexes((prev) => [...prev, newOrbitIndex]);
       }catch(error){
         // サーバーにリングデータを送信できなかった際のエラーハンドリング
         console.error("サーバーにデータを送信できませんでした\n以下の可能性があります\n- 送信しようとしたリングデータがコンフリクトを起こした\n- サーバーにアクセスできない", error);
@@ -87,8 +98,8 @@ export default function App() {
         location.reload(); //ページをリロードする
       }
     }else{
-      // 再撮影を望む場合、描画に追加したリングを初期化して処理を止める
-      initializeRingDraw(); // リング描画を初期化する
+      // 再撮影を望む場合、処理を止める
+      console.log("再撮影のために処理を中断しました");
     }
   }
 
@@ -102,22 +113,19 @@ export default function App() {
   const [ipFlag, setIpFlag] = useState<number>(0);
 
   async function compareCurrentIPWithLastIP() : Promise<number> {
-    // ipFlagの戻り値　デフォルト0
+    // ipFlagの戻り値 デフォルト0
     let result = 0;
     
     try {
       // 現在のIPアドレスを取得
       const response = await fetch('https://api.ipify.org?format=json');
       const data = await response.json();
-      const currentIP = data.ip;
+      const currentIP: string = data.ip;
       setCurrentIp(currentIP); // useStateで現在のipを保管する
       console.log(`Your current IP is: ${currentIP}`);
 
-      // 前回登録時のIPアドレスを取得（latestRing.userIpと仮定）
-      const latestRing = {
-        userIp: "123.456.789.000",  //テスト用データ　要削除
-      };
-      const lastIP = latestRing.userIp;
+      // 前回登録時のIPアドレスを取得
+      const lastIP: string | null = latestRing?.userIp ?? null;
       console.log(`LatestRing user IP is: ${lastIP}`);
       
       if (currentIP !== lastIP) {
@@ -223,51 +231,52 @@ export default function App() {
 
   return (
     <LocationDataProvider>
-        <div className="camera">
-          <Camera/>
-        </div>
-        <div className='canvas'>
-          <Canvas
-            onCreated={({ gl }) => {
-              gl.setClearColor(0xFF0000, 0);
-              gl.autoClear = true;
-              gl.clearDepth()
-            }}
-            gl={{ antialias: true, alpha: true }}
-            camera={{ position: [0,0,10] }}
-            ref={canvasRef}
-          >
-              <TorusList/>
-              <ambientLight intensity={1} />
-              <directionalLight intensity={1.5} position={[1,1,1]} />
-              <directionalLight intensity={1.5} position={[1,1,-1]} />
-              <pointLight intensity={1} position={[1,1,5]}/>
-              <pointLight intensity={1} position={[1,1,-5]}/>
-              <OrbitControls/>
-          </Canvas>
-          <button
-            onClick={handleTakePhotoButton}
-            style={{
-              position: "absolute",
-              top: "80%",
-              left: "50%",
-              height: "2rem"
-            }}
-          >
-            撮影
-          </button>
-          <button
-            onClick={switchCameraFacing}
-            style={{
-              position: "absolute",
-              top: "80%",
-              left: "70%",
-              height: "2rem"
-            }}
-          >
-            カメラ切り替え
-          </button>
-        </div>
+      <div className="camera">
+        <Camera/>
+      </div>
+      <div className='canvas'>
+        <Canvas
+          onCreated={({ gl }) => {
+            gl.setClearColor(0xFF0000, 0);
+            gl.autoClear = true;
+            gl.clearDepth()
+          }}
+          gl={{ antialias: true, alpha: true }}
+          camera={{ position: [0,0,10] }}
+          ref={canvasRef}
+        >
+          <TorusList/>
+          <ambientLight intensity={1} />
+          <directionalLight intensity={1.5} position={[1,1,1]} />
+          <directionalLight intensity={1.5} position={[1,1,-1]} />
+          <pointLight intensity={1} position={[1,1,5]}/>
+          <pointLight intensity={1} position={[1,1,-5]}/>
+          <OrbitControls/>
+        </Canvas>
+      </div>
+      <span style={{position: "absolute", top: "90%"}}>リング数: {torusList.length}/{positionArray.length}</span>
+      <button
+        onClick={handleTakePhotoButton}
+        style={{
+          position: "absolute",
+          top: "80%",
+          left: "50%",
+          height: "2rem"
+        }}
+      >
+        撮影
+      </button>
+      <button
+        onClick={switchCameraFacing}
+        style={{
+          position: "absolute",
+          top: "80%",
+          left: "70%",
+          height: "2rem"
+        }}
+      >
+        カメラ切り替え
+      </button>
     </LocationDataProvider>
   );
 }
