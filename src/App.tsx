@@ -92,7 +92,6 @@ export default function App() {
           // 写真ダウンロードのみ行う
           if(hasPostRing.current) console.log("既にリングデータをサーバーに送信済みです");
           if(!Boolean(ipFlag)) console.log("連続撮影はできません");
-          console.log("連続撮影はできません\nあるいは既にリングデータをサーバーに送信済みです");
           alert("連続撮影はできません。別地点を含む他の人が撮影した後に、撮影できます。"); // I002
         }else{
           // リングデータをまだ送信していない場合、リングデータを送信する
