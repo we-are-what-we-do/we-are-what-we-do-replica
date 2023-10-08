@@ -38,6 +38,7 @@ export default function App() {
 
   // アウトカメラ/インカメラを切り替えるためのcontext
   const {
+    videoRef,
     switchCameraFacing
   } = useContext(CameraContext);
 
@@ -65,6 +66,8 @@ export default function App() {
   async function handleTakePhotoButton(): Promise<void>{
     // 撮影する写真に確認を取る
     if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
+    videoRef.current?.pause(); // カメラを一時停止する
+    // TODO OrbitControlsも一時停止する
     const isPhotoOk: boolean = confirm("撮影画像はこちらでよいですか"); // I004
 
     if(isPhotoOk){
@@ -113,6 +116,8 @@ export default function App() {
       // 再撮影を望む場合、処理を止める
       console.log("撮影やり直しのために処理を中断しました");
     }
+
+    videoRef.current?.play(); // カメラを再生する
   }
 
 
