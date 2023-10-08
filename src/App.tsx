@@ -67,7 +67,11 @@ export default function App() {
     // 撮影する写真に確認を取る
     if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
     videoRef.current?.pause(); // カメラを一時停止する
-    // TODO OrbitControlsも一時停止する
+
+    // 写真(リング+カメラ)を撮影をして、base64形式で取得する
+    const newImage: string | null = captureImage();
+
+    // 撮影した写真に確認を取る
     const isPhotoOk: boolean = confirm("撮影画像はこちらでよいですか"); // I004
 
     if(isPhotoOk){
@@ -75,9 +79,6 @@ export default function App() {
       try{
         // 描画に追加したリングのデータを取得する
         const addedRingData: RingData | null = getRingDataToAdd();
-
-        // 写真(リング+カメラ)を撮影をして、base64形式で取得する
-        const newImage: string | null = captureImage();
 
         // エラーハンドリング
         if(!addedRingData) throw new Error("追加したリングデータを取得できませんでした");
