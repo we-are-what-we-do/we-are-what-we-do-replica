@@ -198,15 +198,17 @@ function App() {
 
 
 
-  // テストメッセージ表示、ロジックを組んで、適切な箇所に配置
-  // メッセージ表示（Error）
-  showErrorToast("E001");
+  useEffect(() => {
+    // テストメッセージ表示、ロジックを組んで、適切な箇所に配置
+    // メッセージ表示（Error）
+    showErrorToast("E001");
 
-  // メッセージ表示（Info）
-  showInfoToast("I002");
+    // メッセージ表示（Info）
+    showInfoToast("I002");
 
-  // メッセージ表示（はい or いいえ）　
-  showConfirmToast();
+    // メッセージ表示（はい or いいえ）　
+    showConfirmToast();
+  }, []);
 
 
   return(
