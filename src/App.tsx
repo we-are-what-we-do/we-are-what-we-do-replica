@@ -45,8 +45,7 @@ export default function App() {
   const {
     captureImage,
     saveImage,
-    canvasRef,
-    getVideoCanvas
+    canvasRef
   } = useContext(CaptureContext);
 
   // 既にリングを追加したかどうかを管理するstate
@@ -99,18 +98,6 @@ export default function App() {
     }else{
       // 再撮影を望む場合、処理を止める
       console.log("撮影やり直しのために処理を中断しました");
-    }
-  }
-
-  // カメラと停止と再生を切り替える関数
-  async function toggleCameraStop(): Promise<void>{
-    if(!stoppedCameraRef.current){
-      // カメラが再生中の場合、カメラの上に静止画を貼り付けて描画を停止しておく
-      alert("カメラを停止しました。")
-      stoppedCameraRef.current = getVideoCanvas();
-    }else{
-      // カメラ描画が静止中の場合、静止画を退けてカメラを再生する
-      stoppedCameraRef.current = null;
     }
   }
 
@@ -356,17 +343,6 @@ export default function App() {
         }}
       >
         リングデータ削除(テスト用)
-      </button>
-      <button
-        onClick={toggleCameraStop}
-        style={{
-          position: "absolute",
-          top: "80%",
-          left: "30%",
-          height: "2rem"
-        }}
-      >
-        再生/停止
       </button>
       <span style={{position: "absolute", top: "90%"}}>リング数: {usedOrbitIndexes.length}/{positionArray.length}</span>
     </LocationDataProvider>

@@ -10,7 +10,6 @@ type CaptureContext = {
     captureImage: () => string | null;
     saveImage: (dataURL: string) => void;
     canvasRef: React.RefObject<HTMLCanvasElement>;
-    getVideoCanvas: () => HTMLCanvasElement | null;
 };
 
 
@@ -18,8 +17,7 @@ type CaptureContext = {
 const initialData: CaptureContext = {
     captureImage: () => null,
     saveImage: () => {},
-    canvasRef: {} as React.RefObject<HTMLCanvasElement>,
-    getVideoCanvas: () => null
+    canvasRef: {} as React.RefObject<HTMLCanvasElement>
 };
 
 export const CaptureContext = createContext<CaptureContext>(initialData);
@@ -167,8 +165,7 @@ export function CaptureProvider({children}: {children: ReactNode}){
             value={{
                 captureImage,
                 saveImage,
-                canvasRef,
-                getVideoCanvas
+                canvasRef
             }}
         >
             {children}
