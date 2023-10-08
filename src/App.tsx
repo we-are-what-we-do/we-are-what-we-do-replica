@@ -100,7 +100,7 @@ export default function App() {
   // サーバーにリングを追加する処理(テスト用)
   async function testAddRing(): Promise<void>{
     let addedRingData: RingData | null = null;
-    if(isDonePostRing){
+    if(hasPostRing.current){
       // 初期追加のリングを送信済みの場合
       // リングを追加して描画する
       const newTorus = addTorus(usedOrbitIndexes);
@@ -122,7 +122,7 @@ export default function App() {
         return;
       };
 
-      setIsDonePostRing(true); // リングデータを送信済みとしてstateを更新する
+      hasPostRing.current = true; // リングデータを送信済みとしてstateを更新する
     };
 
     //サーバーにリングデータを送信する
