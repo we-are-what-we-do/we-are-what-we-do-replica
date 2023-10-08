@@ -52,7 +52,7 @@ export default function App() {
     canvasRef
   } = useContext(CaptureContext);
 
-  // 既にリングを追加したかどうかを管理するstate
+  // 既にリングを追加したかどうかを管理するref
   const hasPostRing = useRef<boolean>(false);
 
   // 3Dの視点移動(OrbitControl)が有効かどうかを管理するstate
@@ -71,6 +71,7 @@ export default function App() {
     // 撮影する写真に確認を取る
     if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
     videoRef.current?.pause(); // カメラを一時停止する
+    setEnableOrbitControl(false); // 3Dの視点を固定する
 
     // 写真(リング+カメラ)を撮影をして、base64形式で取得する
     const newImage: string | null = captureImage();
@@ -123,6 +124,7 @@ export default function App() {
     }
 
     videoRef.current?.play(); // カメラを再生する
+    setEnableOrbitControl(true); // 3Dの視点固定を解除する
   }
 
 
