@@ -13,6 +13,10 @@ import { haversineDistance } from './api/distanceCalculations';
 import LocationDataProvider from "./providers/LocationDataProvider";
 import { RingContext } from "./providers/RingProvider";
 import Camera from "./components/Camera";
+import { toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
+import {showErrorToast, showInfoToast, showConfirmToast} from "./components/ToastHelpers"
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
@@ -192,6 +196,19 @@ function App() {
   }, []);
   console.log(`gpsFlag : ${gpsFlag}`);
 
+
+
+  // テストメッセージ表示、ロジックを組んで、適切な箇所に配置
+  // メッセージ表示（Error）
+  showErrorToast("E001");
+
+  // メッセージ表示（Info）
+  showInfoToast("I002");
+
+  // メッセージ表示（はい or いいえ）　
+  showConfirmToast();
+
+
   return(
     <LocationDataProvider> 
       {errorMessage && (
@@ -210,7 +227,7 @@ function App() {
             <OrbitControls/>
         </Canvas>
         <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
-      <button
+        <button
         /* TODO いらなくなったらこのbuttonごと消す */
         style={{
           marginLeft: "8rem"
@@ -222,11 +239,9 @@ function App() {
         }}
       >
         サーバーデータ削除
-      </button>
-        {/* <Geolocation_test setPosition={setPosition} /> */}
+        </button>  
+        <ToastContainer />
       </div>
-      
-      {/* <Geolocation_test setPosition={setPosition} /> */}
     </LocationDataProvider>
   );
 }
