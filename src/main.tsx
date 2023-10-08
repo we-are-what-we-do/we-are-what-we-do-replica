@@ -11,16 +11,3 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </Providers>
   </React.StrictMode>,
 )
-
-
-//テスト用コード(コンソール上で実行)
-declare global {
-  interface Window {
-      testDeleteData(): void;
-  }
-}
-window.testDeleteData = async function (): Promise<void>{ // firebase(仮DB)のデータを削除する
-  fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json", {
-    method: 'DELETE'
-  });
-}

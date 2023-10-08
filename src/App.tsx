@@ -13,18 +13,14 @@ import { CameraContext } from "./providers/CameraProvider";
 import { DbContext } from "./providers/DbProvider";
 import { RingContext } from "./providers/RingProvider";
 import { RingData } from "./redux/features/handleRingData";
-
-
-// TODO 後で消す
-import { useAppSelector } from "./redux/store";
-import { TorusInfo } from "./redux/features/torusInfo-slice";
 import { positionArray } from "./torusPosition";
 
 
 export default function App() {
     // サーバーから取得したリングデータを管理するcontext
     const {
-      latestRing
+      latestRing,
+      setLatestRing
   } = useContext(DbContext);
 
   // リングのデータを追加するためのcontext
@@ -35,7 +31,9 @@ export default function App() {
     setCurrentLongitude,
     setLocation,
     setLocationJp,
-    addTorus
+    addTorus,
+    usedOrbitIndexes,
+    setUsedOrbitIndexes
   } = useContext(RingContext);
 
   // アウトカメラ/インカメラを切り替えるためのcontext
@@ -51,17 +49,11 @@ export default function App() {
   // 既にリングを追加したかどうかを管理するstate
   const [isDonePostRing, setIsDonePostRing] = useState<boolean>(false);
 
-  const torusList: TorusInfo[] = useAppSelector((state: { // TODO 後で消す
-    torusInfo: {
-        value: TorusInfo[];
-    };
-}) => state.torusInfo.value);
-
 
   // 撮影ボタンを押したときの処理
   async function handleTakePhotoButton(): Promise<void>{
     // 撮影する写真に確認を取る
-    if(isDonePostRing) console.log("再撮影を行います\n(リングデータの送信は行いません)");
+    if(isDonePostRing) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
     const isPhotoOk: boolean = confirm("撮影画像はこちらでよいですか");
 
     if(isPhotoOk){
@@ -100,7 +92,7 @@ export default function App() {
       }
     }else{
       // 再撮影を望む場合、処理を止める
-      console.log("再撮影のために処理を中断しました");
+      console.log("撮影やり直しのために処理を中断しました");
     }
   }
 
@@ -111,14 +103,16 @@ export default function App() {
     if(isDonePostRing){
       // 初期追加のリングを送信済みの場合
       // リングを追加して描画する
-      const newTorus = addTorus();
+      const newTorus = addTorus(usedOrbitIndexes);
 
       // 描画に追加したリングのデータを取得する
       addedRingData = getRingDataToAdd(newTorus);
-      if(!addedRingData){
+      if(addedRingData === null){
         // リング描画を既に追加してしまっていて後に戻れないため、エラーを投げる(console.errorではダメ)
         throw new Error("追加するリングデータを取得できませんでした");
       };
+
+      setUsedOrbitIndexes((prev) => [...prev, addedRingData!.orbitIndex]);
     }else{
       // まだ初期追加のリングを送信していない場合
       // 既に描画に追加したリングのデータを取得する
@@ -128,12 +122,15 @@ export default function App() {
         return;
       };
 
-      //サーバーにリングデータを送信する
-      await postRingData(addedRingData);
-      console.log("サーバーにデータを送信しました:\n", addedRingData);
-
       setIsDonePostRing(true); // リングデータを送信済みとしてstateを更新する
-    }
+    };
+
+    //サーバーにリングデータを送信する
+    await postRingData(addedRingData);
+    console.log("サーバーにデータを送信しました:\n", addedRingData);
+
+    // テスト用のstate更新
+    setLatestRing(addedRingData);
   }
 
 
@@ -320,7 +317,23 @@ export default function App() {
       >
         リング追加(テスト用)
       </button>
-      <span style={{position: "absolute", top: "90%"}}>リング数: {torusList.length}/{positionArray.length}</span>
+      <button
+        onClick={() => {
+          fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json", {
+            method: 'DELETE'
+          });
+          location.reload();
+        }}
+        style={{
+          position: "absolute",
+          top: "90%",
+          left: "70%",
+          height: "2rem"
+        }}
+      >
+        リングデータ削除(テスト用)
+      </button>
+      <span style={{position: "absolute", top: "90%"}}>リング数: {usedOrbitIndexes.length}/{positionArray.length}</span>
     </LocationDataProvider>
   );
 }

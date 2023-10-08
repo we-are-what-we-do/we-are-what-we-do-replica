@@ -17,7 +17,9 @@ type RingContent = {
     setCurrentLongitude: React.Dispatch<React.SetStateAction<number | null>>;
     setLocation: React.Dispatch<React.SetStateAction<string | null>>;
     setLocationJp: React.Dispatch<React.SetStateAction<string | null>>;
-    addTorus: () => AddedTorusInfo;
+    addTorus: (usedOrbitIndexes: number[]) => AddedTorusInfo;
+    usedOrbitIndexes: number[];
+    setUsedOrbitIndexes: React.Dispatch<React.SetStateAction<number[]>>
 };
 
 // 追加したリング(TorusInfo)のデータ
@@ -33,6 +35,10 @@ type TorusWithData = {
 }
 
 
+/* 定数定義 */
+const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
+
+
 /* Provider */
 const initialData: RingContent = {
     getRingDataToAdd: () => null,
@@ -42,10 +48,13 @@ const initialData: RingContent = {
     setLocation: () => {},
     setLocationJp: () => {},
     addTorus: () => ({} as AddedTorusInfo),
+    usedOrbitIndexes: [],
+    setUsedOrbitIndexes: () => {}
 };
 
 export const RingContext = createContext<RingContent>(initialData);
 
+// リング追加を司るプロバイダー
 export function RingProvider({children}: {children: ReactNode}){
     /* useState, useContext等 */
     // サーバーから取得したリングデータを管理するcontext
@@ -80,7 +89,7 @@ export function RingProvider({children}: {children: ReactNode}){
     function initializeRingDraw(): void{
         // 描画の初期化処理
         dispatch(resetHandle()); // 全3Dを消去する
-        const newUsedOrbitIndexes: number[] = [];
+        let newUsedOrbitIndexes: number[] = [];
 
         // 3Dオブジェクトの初期表示を行う
         Object.entries(ringsData).forEach(([_key, value]) => {
@@ -92,8 +101,9 @@ export function RingProvider({children}: {children: ReactNode}){
         });
 
         // リングを追加する
-        const newTorus: AddedTorusInfo = addTorus();
+        const newTorus: AddedTorusInfo = addTorus(newUsedOrbitIndexes);
         const newOrbitIndex: number = newTorus.orbitIndex;
+        if(newUsedOrbitIndexes.length >= orbitLength) newUsedOrbitIndexes = [];
         newUsedOrbitIndexes.push(newOrbitIndex);
 
         setUsedOrbitIndexes(newUsedOrbitIndexes); // 使用済みの軌道indexをstateで保管する
@@ -103,7 +113,6 @@ export function RingProvider({children}: {children: ReactNode}){
     // リングのデータ(TorusInfo)を生成する関数
     // DEI一周分が完成していて、新しいリングを生成できないときはnullを返す
     function createTorus(usedOrbitIndexes: number[]): TorusWithData | null{
-        const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
         const ringHue: number = Math.floor(Math.random() * 361); // リングの色調
         let newOrbitIndex: number | null = null; // DEI内の軌道番号
 
@@ -144,26 +153,28 @@ export function RingProvider({children}: {children: ReactNode}){
 
     // リングの3Dオブジェクトを追加して描画する関数
     // 追加したリングの軌道indexを返す
-    function addTorus(): AddedTorusInfo{
+    function addTorus(orbitIndexes: number[]): AddedTorusInfo{
         let needDrawClear: boolean = false; // リング追加の描画時に、canvasの初期化が必要かどうか
 
         // 追加するためのリングを生成する
-        let newTorusData: TorusWithData | null = createTorus(usedOrbitIndexes);
+        let newTorusData: TorusWithData | null = createTorus(orbitIndexes);
 
         // DEIが完成している場合、描画を初期化してから、リング生成をもう一度試みる
         if(!newTorusData){
             // 描画とリング軌道内位置の空き情報を初期化する
             needDrawClear = true;
             const initialOrbitIndexes: number[] = []; // リングがないときの軌道番号配列
-            setUsedOrbitIndexes(initialOrbitIndexes);
 
             // リング生成をもう一度試みる
-            newTorusData = createTorus(usedOrbitIndexes);
+            newTorusData = createTorus(initialOrbitIndexes);
 
             // それでもダメだった場合、エラーを返す
             if(!newTorusData){
                 throw new Error("新たなDEI周にリングを生成できませんでした。");
-            }
+            };
+
+            // 描画を初期化したので、stateで保管している軌道index配列も初期化する
+            setUsedOrbitIndexes(initialOrbitIndexes);
         }
 
         //リング情報をオブジェクトに詰め込みstoreへ送る
@@ -174,7 +185,7 @@ export function RingProvider({children}: {children: ReactNode}){
         // 描画として追加したリングの軌道indexを返す
         const result: AddedTorusInfo = {
             orbitIndex: newTorusData.torusData.orbitIndex,
-            ringHue: newTorusData.torusData.orbitIndex
+            ringHue: newTorusData.torusData.ringHue
         };
         return result;
     };
@@ -215,7 +226,9 @@ export function RingProvider({children}: {children: ReactNode}){
                 setCurrentLongitude,
                 setLocation,
                 setLocationJp,
-                addTorus
+                addTorus,
+                usedOrbitIndexes,
+                setUsedOrbitIndexes
             }}
         >
             {children}
