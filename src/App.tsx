@@ -55,8 +55,8 @@ export default function App() {
   // 既にリングを追加したかどうかを管理するstate
   const hasPostRing = useRef<boolean>(false);
 
-  // カメラを一時停止させるために貼り付けておく静止画
-  const stoppedCameraRef = useRef<HTMLCanvasElement | null>(null);
+  // 3Dの視点移動(OrbitControl)が有効かどうかを管理するstate
+  const [enableOrbitControl, setEnableOrbitControl] = useState<boolean>(true);
 
 
   // 初回レンダリング時、案内を送信する
@@ -222,7 +222,7 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function compareCurrentLocationWithPin() : Promise<number> {
-    // gpsFlagの戻り値　デフォルト0
+    // gpsFlagの戻り値 デフォルト0
     let result = 0;
 
     // 現在地の緯度経度を取得するPromiseを返す関数
@@ -302,13 +302,7 @@ export default function App() {
         </div>
       )}
       <div className="camera">
-        {Boolean(stoppedCameraRef.current) ? (
-          <>
-            {stoppedCameraRef.current}
-          </>
-        ) : (
-          <Camera/>
-        )}
+        <Camera/>
       </div>
       <div className='canvas'>
         <Canvas
@@ -330,7 +324,7 @@ export default function App() {
           <directionalLight intensity={1.5} position={[1,1,-1]} />
           <pointLight intensity={1} position={[1,1,5]}/>
           <pointLight intensity={1} position={[1,1,-5]}/>
-          <OrbitControls/>
+          <OrbitControls enabled={enableOrbitControl}/>
         </Canvas>
       </div>
       <button
@@ -381,7 +375,18 @@ export default function App() {
         }}
       >
         リングデータ削除(テスト用)
-      </button>  
+      </button>
+      <button
+        onClick={() => setEnableOrbitControl((prev) => !prev)}
+        style={{
+          position: "absolute",
+          top: "80%",
+          left: "40%",
+          height: "2rem"
+        }}
+      >
+        視点固定切り替え
+      </button>
       <span style={{position: "absolute", top: "90%"}}>リング数: {usedOrbitIndexes.length}/{positionArray.length}</span>
       <ToastContainer />
     </LocationDataProvider>
