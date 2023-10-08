@@ -34,7 +34,8 @@ export default function App() {
     setCurrentLatitude,
     setCurrentLongitude,
     setLocation,
-    setLocationJp
+    setLocationJp,
+    addTorus
   } = useContext(RingContext);
 
   // アウトカメラ/インカメラを切り替えるためのcontext
@@ -66,7 +67,7 @@ export default function App() {
     if(isPhotoOk){
       // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
       try{
-        // 追加したリングのデータを取得する
+        // 描画に追加したリングのデータを取得する
         const addedRingData: RingData | null = getRingDataToAdd();
 
         // 写真(リング+カメラ)を撮影をして、base64形式で取得する
@@ -100,6 +101,38 @@ export default function App() {
     }else{
       // 再撮影を望む場合、処理を止める
       console.log("再撮影のために処理を中断しました");
+    }
+  }
+
+
+  // サーバーにリングを追加する処理(テスト用)
+  async function testAddRing(): Promise<void>{
+    let addedRingData: RingData | null = null;
+    if(isDonePostRing){
+      // 初期追加のリングを送信済みの場合
+      // リングを追加して描画する
+      const newTorus = addTorus();
+
+      // 描画に追加したリングのデータを取得する
+      addedRingData = getRingDataToAdd(newTorus);
+      if(!addedRingData){
+        // リング描画を既に追加してしまっていて後に戻れないため、エラーを投げる(console.errorではダメ)
+        throw new Error("追加するリングデータを取得できませんでした");
+      };
+    }else{
+      // まだ初期追加のリングを送信していない場合
+      // 既に描画に追加したリングのデータを取得する
+      addedRingData = getRingDataToAdd();
+      if(!addedRingData){
+        console.error("追加したリングデータを取得できませんでした");
+        return;
+      };
+
+      //サーバーにリングデータを送信する
+      await postRingData(addedRingData);
+      console.log("サーバーにデータを送信しました:\n", addedRingData);
+
+      setIsDonePostRing(true); // リングデータを送信済みとしてstateを更新する
     }
   }
 
@@ -254,7 +287,6 @@ export default function App() {
           <OrbitControls/>
         </Canvas>
       </div>
-      <span style={{position: "absolute", top: "90%"}}>リング数: {torusList.length}/{positionArray.length}</span>
       <button
         onClick={handleTakePhotoButton}
         style={{
@@ -277,6 +309,18 @@ export default function App() {
       >
         カメラ切り替え
       </button>
+      <button
+        onClick={testAddRing}
+        style={{
+          position: "absolute",
+          top: "90%",
+          left: "50%",
+          height: "2rem"
+        }}
+      >
+        リング追加(テスト用)
+      </button>
+      <span style={{position: "absolute", top: "90%"}}>リング数: {torusList.length}/{positionArray.length}</span>
     </LocationDataProvider>
   );
 }

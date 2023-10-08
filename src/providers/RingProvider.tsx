@@ -11,12 +11,13 @@ import { v4 as uuidv4 } from 'uuid';
 /* 型定義 */
 // contextに渡すデータの型
 type RingContent = {
-    getRingDataToAdd: () => RingData | null;
+    getRingDataToAdd: (newTorus?: AddedTorusInfo | null) => RingData | null;
     setCurrentIp: React.Dispatch<React.SetStateAction<string | null>>;
     setCurrentLatitude: React.Dispatch<React.SetStateAction<number | null>>;
     setCurrentLongitude: React.Dispatch<React.SetStateAction<number | null>>;
     setLocation: React.Dispatch<React.SetStateAction<string | null>>;
     setLocationJp: React.Dispatch<React.SetStateAction<string | null>>;
+    addTorus: () => AddedTorusInfo;
 };
 
 // 追加したリング(TorusInfo)のデータ
@@ -39,7 +40,8 @@ const initialData: RingContent = {
     setCurrentLatitude: () => {},
     setCurrentLongitude: () => {},
     setLocation: () => {},
-    setLocationJp: () => {}
+    setLocationJp: () => {},
+    addTorus: () => ({} as AddedTorusInfo),
 };
 
 export const RingContext = createContext<RingContent>(initialData);
@@ -178,7 +180,7 @@ export function RingProvider({children}: {children: ReactNode}){
     };
 
     // サーバーに送信するためのリングデータを取得する関数
-    function getRingDataToAdd(): RingData | null{
+    function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus): RingData | null{
         let result: RingData | null = null;
 
         if(location === null) return result;
@@ -186,7 +188,7 @@ export function RingProvider({children}: {children: ReactNode}){
         if(currentLatitude === null) return result;
         if(currentLongitude === null) return result;
         if(currentIp === null) return result;
-        if(addedTorus === null) return result;
+        if(newTorus === null) return result;
 
         const newRingData: RingData = {
             location, // 撮影場所
@@ -195,8 +197,8 @@ export function RingProvider({children}: {children: ReactNode}){
             longitude: currentLongitude, // 撮影地点の経度
             userIp: currentIp, // IPアドレス
             ringCount: (latestRing?.ringCount ?? 0) + 1, // リング数
-            orbitIndex: addedTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
-            ringHue: addedTorus.ringHue, // リングの色調
+            orbitIndex: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
+            ringHue: newTorus.ringHue, // リングの色調
             creationDate:  new Date().getTime() // 撮影日時
         };
         result = newRingData;
@@ -212,7 +214,8 @@ export function RingProvider({children}: {children: ReactNode}){
                 setCurrentLatitude,
                 setCurrentLongitude,
                 setLocation,
-                setLocationJp
+                setLocationJp,
+                addTorus
             }}
         >
             {children}
