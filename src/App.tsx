@@ -215,7 +215,7 @@ export default function App() {
   const [gpsFlag, setGpsFlag] = useState<number>(0);
 
   // errorMessage
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [_errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function compareCurrentLocationWithPin() : Promise<number> {
     // gpsFlagの戻り値　デフォルト0
@@ -308,10 +308,10 @@ export default function App() {
           camera={{ position: [0,0,10] }}
           ref={canvasRef}
         >
-          {/* {Boolean(gpsFlag) && (
+          {//Boolean(gpsFlag) && (
+          (Boolean(gpsFlag) || true) && ( // TODO どこでもリング表示機能(テスト)を削除する
             <TorusList/> // リングはピン設置箇所の近くでのみ表示される
-          )} */}
-          <TorusList/>
+          )}
           <ambientLight intensity={1} />
           <directionalLight intensity={1.5} position={[1,1,1]} />
           <directionalLight intensity={1.5} position={[1,1,-1]} />
