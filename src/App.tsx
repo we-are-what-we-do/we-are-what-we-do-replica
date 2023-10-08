@@ -249,7 +249,7 @@ export default function App() {
             onClick={handleTakePhotoButton}
             style={{
               position: "absolute",
-              top: "65%",
+              top: "80%",
               left: "50%",
               height: "2rem"
             }}
@@ -257,48 +257,11 @@ export default function App() {
             撮影
           </button>
           <button
-            onClick={addTorus}
-            style={{
-              position: "absolute",
-              top: "85%",
-              left: "40%",
-              height: "2rem"
-            }}
-          >
-            追加(リング数: {usedOrbitIndexes.length})
-          </button>
-          <button
-            style={{
-              position: "absolute",
-              top: "85%",
-              left: "70%",
-              height: "2rem"
-            }}
-            onClick={() => {
-              fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json", {
-                method: 'DELETE'
-              });
-            }}
-          >
-            サーバーデータ削除
-          </button>
-          <button
-            onClick={captureImage}
-            style={{
-              position: "absolute",
-              top: "75%",
-              left: "40%",
-              height: "2rem"
-            }}
-          >
-            キャプチャ
-          </button>
-          <button
             onClick={switchCameraFacing}
             style={{
               position: "absolute",
-              top: "75%",
-              left: "60%",
+              top: "80%",
+              left: "70%",
               height: "2rem"
             }}
           >
