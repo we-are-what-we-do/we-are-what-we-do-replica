@@ -81,7 +81,8 @@ export async function postRingData(data: RingData): Promise<Response>{
 
 // 撮影した写真を送信する関数
 export async function postNftImage(base64Data: string): Promise<Response>{
-    const apiEndpoint: string = "nft"; // 撮影した写真を送信するための、APIのエンドポイント
+    // const apiEndpoint: string = "nft"; // 撮影した写真を送信するための、APIのエンドポイント
+    const apiEndpoint: string = "nft.json"; // 仮エンドポイント
     const data: { image: string } = { image: base64Data };
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;

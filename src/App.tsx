@@ -1,73 +1,166 @@
 import "./App.css";
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { OrbitControls } from "@react-three/drei";
-import * as THREE from "three";
-import { saveAs } from "file-saver";
 import { Canvas } from '@react-three/fiber';
 import TorusList from './components/TorusList';
-// import  Geolocation_test  from './components/GeoLocation_test';
-import { getLocationConfig } from './api/fetchDb';
+import { getLocationConfig, postNftImage, postRingData } from './api/fetchDb';
 import { FeatureCollection, Point } from 'geojson';
 import { haversineDistance } from './api/distanceCalculations';
-// import { LocationDataProvider } from './providers/LocationDataProvider';
 import LocationDataProvider from "./providers/LocationDataProvider";
-import { RingContext } from "./providers/RingProvider";
 import Camera from "./components/Camera";
 import { toast } from 'react-toastify';
 import { ToastContainer } from 'react-toastify';
 import {showErrorToast, showInfoToast, showConfirmToast} from "./components/ToastHelpers"
 import 'react-toastify/dist/ReactToastify.css';
+import { CaptureContext } from "./providers/CaptureProvider";
+import { CameraContext } from "./providers/CameraProvider";
+import { DbContext } from "./providers/DbProvider";
+import { RingContext } from "./providers/RingProvider";
+import { RingData } from "./redux/features/handleRingData";
+import { positionArray } from "./torusPosition";
 
 
-function App() {
+export default function App() {
+    // サーバーから取得したリングデータを管理するcontext
+    const {
+      latestRing,
+      setLatestRing
+  } = useContext(DbContext);
+
   // リングのデータを追加するためのcontext
   const {
-    addTorus,
+    getRingDataToAdd,
     setCurrentIp,
     setCurrentLatitude,
     setCurrentLongitude,
     setLocation,
     setLocationJp,
-    usedOrbitIndexes
+    addTorus,
+    usedOrbitIndexes,
+    setUsedOrbitIndexes
   } = useContext(RingContext);
 
-  //three.jsのbase64変換？？
-  const canvasRef   = useRef<HTMLCanvasElement>  (null!);
-  const rendererRef = useRef<THREE.WebGLRenderer>(null!);
+  // アウトカメラ/インカメラを切り替えるためのcontext
+  const {
+    videoRef,
+    switchCameraFacing
+  } = useContext(CameraContext);
 
+  // 写真撮影(リング+カメラ)のためのcontext
+  const {
+    captureImage,
+    saveImage,
+    canvasRef
+  } = useContext(CaptureContext);
+
+  // 既にリングを追加したかどうかを管理するstate
+  const hasPostRing = useRef<boolean>(false);
+
+  // カメラを一時停止させるために貼り付けておく静止画
+  const stoppedCameraRef = useRef<HTMLCanvasElement | null>(null);
+
+
+  // 初回レンダリング時、案内を送信する
   useEffect(() => {
-    if (canvasRef.current) {
-      rendererRef.current = new THREE.WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
-    }
+    alert("撮影ボタンを押して、ARリングを増やしましょう。リングの大きさや位置は指で調整することができます。"); // I003
   }, []);
 
-  const captureImage = () => {
-    if (rendererRef.current) {
-      const dataURL = rendererRef.current.domElement.toDataURL('image/png');
-      console.log(dataURL);
-      saveImage(dataURL);
+
+  // 撮影ボタンを押したときの処理
+  async function handleTakePhotoButton(): Promise<void>{
+    // 撮影する写真に確認を取る
+    if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
+    videoRef.current?.pause(); // カメラを一時停止する
+
+    // 写真(リング+カメラ)を撮影をして、base64形式で取得する
+    const newImage: string | null = captureImage();
+
+    // 撮影した写真に確認を取る
+    const isPhotoOk: boolean = confirm("撮影画像はこちらでよいですか"); // I004
+
+    if(isPhotoOk){
+      // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
+      try{
+        // 描画に追加したリングのデータを取得する
+        const addedRingData: RingData | null = getRingDataToAdd();
+
+        // エラーハンドリング
+        if(!addedRingData) throw new Error("追加したリングデータを取得できませんでした");
+        if(!newImage) throw new Error("写真を撮影できませんでした");
+
+        // リングデータを送信する
+        // if((hasPostRing.current) || (!Boolean(ipFlag))){
+        if(hasPostRing.current){ // TODO 後で条件を修正し、連続撮影を防ぐ
+          // 連続撮影になる場合
+          // あるいは既にリングデータを送信済みの場合
+          // 写真ダウンロードのみ行う
+          if(hasPostRing.current) console.log("既にリングデータをサーバーに送信済みです");
+          if(!Boolean(ipFlag)) console.log("連続撮影はできません");
+          alert("連続撮影はできません。別地点を含む他の人が撮影した後に、撮影できます。"); // I002
+        }else{
+          // リングデータをまだ送信していない場合、リングデータを送信する
+          await postRingData(addedRingData); //サーバーにリングデータを送信する
+          await postNftImage(newImage); // base64形式の画像をサーバーに送信する
+          console.log("サーバーにデータを送信しました:\n", addedRingData);
+
+          hasPostRing.current = true; // リングデータを送信済みとしてstateを更新する
+
+          alert("ありがとうございます！ARリングの生成に成功しました。"); // I005
+        };
+
+        // 撮影した写真をダウンロードする
+        saveImage(newImage);
+      }catch(error){
+        // サーバーにリングデータを送信できなかった際のエラーハンドリング
+        console.error("サーバーにデータを送信できませんでした\n以下の可能性があります\n- 送信しようとしたリングデータがコンフリクトを起こした\n- サーバーにアクセスできない", error);
+        alert("システムエラーが発生しました。しばらく待ってから再度お試しください。"); // E099
+        location.reload(); //ページをリロードする
+      }
+    }else{
+      // 再撮影を望む場合、処理を止める
+      console.log("撮影やり直しのために処理を中断しました");
     }
-  };
 
-  const saveImage = (dataURL: string) => {
-    // DataURLからBlobを作成
-    const blob = dataURLToBlob(dataURL);
+    videoRef.current?.play(); // カメラを再生する
+  }
 
-    // 'file-saver'ライブラリを使ってダウンロード
-    saveAs(blob, "screenshot.png");
-  };
 
-  const dataURLToBlob = (dataURL: string) => {
-    const byteString  = window.atob(dataURL.split(",")[1]);
-    const mimeString  = dataURL.split(",")[0].split(":")[1].split(";")[0];
-    const arrayBuffer = new ArrayBuffer(byteString.length);
-    const uint8Array  = new Uint8Array(arrayBuffer);
+  // サーバーにリングを追加する処理(テスト用)
+  async function testAddRing(): Promise<void>{
+    let addedRingData: RingData | null = null;
+    if(hasPostRing.current){
+      // 初期追加のリングを送信済みの場合
+      // リングを追加して描画する
+      const newTorus = addTorus(usedOrbitIndexes);
 
-    for (let i = 0; i < byteString.length; i++) {
-      uint8Array[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([uint8Array], { type: mimeString });
-  };
+      // 描画に追加したリングのデータを取得する
+      addedRingData = getRingDataToAdd(newTorus);
+      if(addedRingData === null){
+        // リング描画を既に追加してしまっていて後に戻れないため、エラーを投げる(console.errorではダメ)
+        throw new Error("追加するリングデータを取得できませんでした");
+      };
+
+      setUsedOrbitIndexes((prev) => [...prev, addedRingData!.orbitIndex]);
+    }else{
+      // まだ初期追加のリングを送信していない場合
+      // 既に描画に追加したリングのデータを取得する
+      addedRingData = getRingDataToAdd();
+      if(!addedRingData){
+        console.error("追加したリングデータを取得できませんでした");
+        return;
+      };
+
+      hasPostRing.current = true; // リングデータを送信済みとしてstateを更新する
+    };
+
+    //サーバーにリングデータを送信する
+    await postRingData(addedRingData);
+    console.log("サーバーにデータを送信しました:\n", addedRingData);
+
+    // テスト用のstate更新
+    setLatestRing(addedRingData);
+  }
+
 
   // // // // // // // // // // // // // // // // // // // // // // 
   // compareCurrentIPWithLastIP
@@ -78,29 +171,26 @@ function App() {
   const [ipFlag, setIpFlag] = useState<number>(0);
 
   async function compareCurrentIPWithLastIP() : Promise<number> {
-    // ipFlagの戻り値　デフォルト0
+    // ipFlagの戻り値 デフォルト0
     let result = 0;
     
     try {
       // 現在のIPアドレスを取得
       const response = await fetch('https://api.ipify.org?format=json');
       const data = await response.json();
-      const currentIP = data.ip;
+      const currentIP: string = data.ip;
       setCurrentIp(currentIP); // useStateで現在のipを保管する
       console.log(`Your current IP is: ${currentIP}`);
 
-      // 前回登録時のIPアドレスを取得（latestRing.userIpと仮定）
-      const latestRing = {
-        userIp: "123.456.789.000",  //テスト用データ　要削除
-      };
-      const lastIP = latestRing.userIp;
+      // 前回登録時のIPアドレスを取得
+      const lastIP: string | null = latestRing?.userIp ?? null;
       console.log(`LatestRing user IP is: ${lastIP}`);
       
       if (currentIP !== lastIP) {
         result = 1; // IPアドレスが異なる場合、resultを1に設定
       }
     } catch (error) {
-      console.error("There was an error fetching the IP address:", error);
+      console.error("Error fetching GeoJSON Point data or getting current location:", error);
     }
     return result; 
   }
@@ -109,9 +199,9 @@ function App() {
   useEffect(() => {
     compareCurrentIPWithLastIP().then(result => {
       setIpFlag(result);
+      console.log(`ipFlag : ${result}`);
     });
   }, []);
-  console.log(`ipFlag : ${ipFlag}`);
 
 
   // // // // // // // // // // // // // // // // // // // // // // 
@@ -185,6 +275,8 @@ function App() {
     } catch (error) {
       console.error("Error fetching GeoJSON Point data or getting current location:", error);
     }
+
+    if(!Boolean(result)) alert("ARリングはピン設置箇所の近くでのみ表示されます。"); // I001
     return result; 
   }
 
@@ -192,9 +284,9 @@ function App() {
   useEffect(() => {
     compareCurrentLocationWithPin().then(result => {
       setGpsFlag(result);
+      console.log(`gpsFlag : ${result}`);
     });
   }, []);
-  console.log(`gpsFlag : ${gpsFlag}`);
 
 
 
@@ -218,33 +310,89 @@ function App() {
           {errorMessage}
         </div>
       )}
-
       <div className="camera">
-        <Camera/>
+        {Boolean(stoppedCameraRef.current) ? (
+          <>
+            {stoppedCameraRef.current}
+          </>
+        ) : (
+          <Camera/>
+        )}
       </div>
-
       <div className='canvas'>
-        <Canvas camera={{ position: [0,0,10] } }>
-            <TorusList />
-            <OrbitControls/>
+        <Canvas
+          onCreated={({ gl }) => {
+            gl.setClearColor(0xFF0000, 0);
+            gl.autoClear = true;
+            gl.clearDepth()
+          }}
+          gl={{ antialias: true, alpha: true }}
+          camera={{ position: [0,0,10] }}
+          ref={canvasRef}
+        >
+          {//Boolean(gpsFlag) && (
+          (Boolean(gpsFlag) || true) && ( // TODO どこでもリング表示機能(テスト)を削除する
+            <TorusList/> // リングはピン設置箇所の近くでのみ表示される
+          )}
+          <ambientLight intensity={1} />
+          <directionalLight intensity={1.5} position={[1,1,1]} />
+          <directionalLight intensity={1.5} position={[1,1,-1]} />
+          <pointLight intensity={1} position={[1,1,5]}/>
+          <pointLight intensity={1} position={[1,1,-5]}/>
+          <OrbitControls/>
         </Canvas>
-        <button onClick={addTorus}>追加(リング数: {usedOrbitIndexes.length})</button>
-        <button
-        /* TODO いらなくなったらこのbuttonごと消す */
+      </div>
+      <button
+        onClick={handleTakePhotoButton}
         style={{
-          marginLeft: "8rem"
+          position: "absolute",
+          top: "80%",
+          left: "50%",
+          height: "2rem"
         }}
+      >
+        撮影
+      </button>
+      <button
+        onClick={switchCameraFacing}
+        style={{
+          position: "absolute",
+          top: "80%",
+          left: "70%",
+          height: "2rem"
+        }}
+      >
+        カメラ切り替え
+      </button>
+      <button
+        onClick={testAddRing}
+        style={{
+          position: "absolute",
+          top: "90%",
+          left: "50%",
+          height: "2rem"
+        }}
+      >
+        リング追加(テスト用)
+      </button>
+      <button
         onClick={() => {
           fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json", {
             method: 'DELETE'
           });
+          location.reload();
+        }}
+        style={{
+          position: "absolute",
+          top: "90%",
+          left: "70%",
+          height: "2rem"
         }}
       >
-        サーバーデータ削除
-        </button>  
-        <ToastContainer />
-      </div>
+        リングデータ削除(テスト用)
+      </button>  
+      <span style={{position: "absolute", top: "90%"}}>リング数: {usedOrbitIndexes.length}/{positionArray.length}</span>
+      <ToastContainer />
     </LocationDataProvider>
   );
 }
-export default App;

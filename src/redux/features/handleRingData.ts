@@ -37,7 +37,7 @@ export function convertToTorus(data: RingData): TorusInfo{
     const newRingPosition: Ring = positionArray[data.orbitIndex]; // リングの軌道設定
     const newTorusInfo: TorusInfo = {
         id: uuidv4(),
-        color: `hsl(${data.ringHue}, 100%, 50%)`,
+        color: getRingColor(data.ringHue),
         rotateX: newRingPosition.rotateX,
         rotateY: newRingPosition.rotateY,
         positionX: newRingPosition.positionX,
@@ -45,6 +45,11 @@ export function convertToTorus(data: RingData): TorusInfo{
         scale: torusScale
     };
     return newTorusInfo;
+}
+
+// 色調からリングの色を取得する関数
+export function getRingColor(ringHue: number): string{
+    return `hsl(${ringHue}, 100%, 50%)`;
 }
 
 // 全データの中から、直前に追加されたリングのデータを取得する関数
