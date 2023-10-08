@@ -87,13 +87,19 @@ export function CameraProvider({children}: {children: ReactNode}){
 
         // カメラを切り替える
         stream = await accessCamera(nextFacing); // もう一方のカメラに接続を試みる
-        if(stream && videoRef.current){
+        if(!videoRef.current) return;
+        if(stream){
             // カメラ切り替えが成功した場合、video要素のsrcObjectにカメラを設定する
             videoRef.current.srcObject = stream;
             setCameraFacing(nextFacing);
         }else{
             console.error("カメラを切り替えられませんでした");
             window.alert("申し訳ございません、カメラを切り替えられませんでした。");
+
+            // カメラ切り替えが失敗した場合、切り替え前のカメラに戻しておく
+            stream = await accessCamera(cameraFacing);
+            if(!stream) throw new Error("切り替え前のカメラの向きに戻せませんでした");
+            videoRef.current.srcObject = stream;
         };
     }
 

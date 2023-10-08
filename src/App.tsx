@@ -37,17 +37,23 @@ export default function App() {
   } = useContext(RingContext);
 
   // アウトカメラ/インカメラを切り替えるためのcontext
-  const { switchCameraFacing } = useContext(CameraContext);
+  const {
+    switchCameraFacing
+  } = useContext(CameraContext);
 
   // 写真撮影(リング+カメラ)のためのcontext
   const {
     captureImage,
     saveImage,
-    canvasRef
+    canvasRef,
+    getVideoCanvas
   } = useContext(CaptureContext);
 
   // 既にリングを追加したかどうかを管理するstate
   const hasPostRing = useRef<boolean>(false);
+
+  // カメラを一時停止させるために貼り付けておく静止画
+  const stoppedCameraRef = useRef<HTMLCanvasElement | null>(null);
 
 
   // 撮影ボタンを押したときの処理
@@ -93,6 +99,18 @@ export default function App() {
     }else{
       // 再撮影を望む場合、処理を止める
       console.log("撮影やり直しのために処理を中断しました");
+    }
+  }
+
+  // カメラと停止と再生を切り替える関数
+  async function toggleCameraStop(): Promise<void>{
+    if(!stoppedCameraRef.current){
+      // カメラが再生中の場合、カメラの上に静止画を貼り付けて描画を停止しておく
+      alert("カメラを停止しました。")
+      stoppedCameraRef.current = getVideoCanvas();
+    }else{
+      // カメラ描画が静止中の場合、静止画を退けてカメラを再生する
+      stoppedCameraRef.current = null;
     }
   }
 
@@ -262,7 +280,13 @@ export default function App() {
   return (
     <LocationDataProvider>
       <div className="camera">
-        <Camera/>
+        {Boolean(stoppedCameraRef.current) ? (
+          <>
+            {stoppedCameraRef.current}
+          </>
+        ) : (
+          <Camera/>
+        )}
       </div>
       <div className='canvas'>
         <Canvas
@@ -332,6 +356,17 @@ export default function App() {
         }}
       >
         リングデータ削除(テスト用)
+      </button>
+      <button
+        onClick={toggleCameraStop}
+        style={{
+          position: "absolute",
+          top: "80%",
+          left: "30%",
+          height: "2rem"
+        }}
+      >
+        再生/停止
       </button>
       <span style={{position: "absolute", top: "90%"}}>リング数: {usedOrbitIndexes.length}/{positionArray.length}</span>
     </LocationDataProvider>

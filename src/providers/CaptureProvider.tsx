@@ -7,9 +7,10 @@ import { CameraContext } from './CameraProvider';
 /* 型定義 */
 // contextに渡すデータの型
 type CaptureContext = {
-    captureImage(): string | null;
+    captureImage: () => string | null;
     saveImage: (dataURL: string) => void;
     canvasRef: React.RefObject<HTMLCanvasElement>;
+    getVideoCanvas: () => HTMLCanvasElement | null;
 };
 
 
@@ -18,6 +19,7 @@ const initialData: CaptureContext = {
     captureImage: () => null,
     saveImage: () => {},
     canvasRef: {} as React.RefObject<HTMLCanvasElement>,
+    getVideoCanvas: () => null
 };
 
 export const CaptureContext = createContext<CaptureContext>(initialData);
@@ -165,7 +167,8 @@ export function CaptureProvider({children}: {children: ReactNode}){
             value={{
                 captureImage,
                 saveImage,
-                canvasRef
+                canvasRef,
+                getVideoCanvas
             }}
         >
             {children}
