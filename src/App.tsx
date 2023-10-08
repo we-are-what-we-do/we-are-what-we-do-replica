@@ -1,5 +1,5 @@
 import "./App.css";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
 import TorusList from './components/TorusList';
@@ -47,13 +47,13 @@ export default function App() {
   } = useContext(CaptureContext);
 
   // 既にリングを追加したかどうかを管理するstate
-  const [isDonePostRing, setIsDonePostRing] = useState<boolean>(false);
+  const hasPostRing = useRef<boolean>(false);
 
 
   // 撮影ボタンを押したときの処理
   async function handleTakePhotoButton(): Promise<void>{
     // 撮影する写真に確認を取る
-    if(isDonePostRing) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
+    if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
     const isPhotoOk: boolean = confirm("撮影画像はこちらでよいですか");
 
     if(isPhotoOk){
@@ -70,7 +70,7 @@ export default function App() {
         if(!newImage) throw new Error("写真を撮影できませんでした");
 
         // リングデータを送信する
-        if(isDonePostRing){
+        if(hasPostRing.current){
           // リングデータを送信済みの場合、写真ダウンロードのみ行う
           console.log("既にリングデータをサーバーに送信済みです")
         }else{
@@ -79,7 +79,7 @@ export default function App() {
           await postNftImage(newImage); // base64形式の画像をサーバーに送信する
           console.log("サーバーにデータを送信しました:\n", addedRingData);
 
-          setIsDonePostRing(true); // リングデータを送信済みとしてstateを更新する
+          hasPostRing.current = true; // リングデータを送信済みとしてstateを更新する
         };
 
         // 撮影した写真をダウンロードする
