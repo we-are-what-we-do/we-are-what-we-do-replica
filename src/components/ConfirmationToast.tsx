@@ -1,5 +1,5 @@
 import React from 'react';
-import { ERROR_MESSAGES, INFO_MESSAGES } from '../MessageMap';
+import { INFO_MESSAGES } from '../MessageMap';
 
 interface ConfirmToastProps {
   onYes: () => void;

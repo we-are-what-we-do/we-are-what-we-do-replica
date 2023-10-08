@@ -1,4 +1,5 @@
 import { ReactNode, createContext, useState, useEffect, useRef } from 'react';
+import { showErrorToast } from '../components/ToastHelpers';
 
 
 /* 型定義 */
@@ -66,7 +67,7 @@ export function CameraProvider({children}: {children: ReactNode}){
         }else{
             // アウトカメラとインカメラ両方に接続できなかった場合
             console.error("カメラのアクセスに失敗");
-            window.alert("アプリを使用するにはカメラの許可が必要です");
+            showErrorToast("E001"); // 「カメラの許可が必要です」というメッセージボックスを表示する
         };
         return stream;
     }
@@ -76,7 +77,7 @@ export function CameraProvider({children}: {children: ReactNode}){
         if(!(cameraFacing === "out" || cameraFacing === "in")){
             // カメラが許可されていない場合、処理しない
             console.error("カメラが許可されていません");
-            window.alert("申し訳ございません、カメラを切り替えられませんでした。");
+            showErrorToast("E099"); // TODO 「カメラを切り替えられませんでした」というメッセージボックスを表示する
             return;
         }
         let stream: MediaStream | null = null;
@@ -99,7 +100,7 @@ export function CameraProvider({children}: {children: ReactNode}){
             setCameraFacing(nextFacing);
         }else{
             console.error("カメラを切り替えられませんでした");
-            window.alert("申し訳ございません、カメラを切り替えられませんでした。");
+            showErrorToast("E099"); // TODO 「カメラを切り替えられませんでした」というメッセージボックスを表示する
 
             // カメラ切り替えが失敗した場合、切り替え前のカメラに戻しておく
             stream = await accessCamera(cameraFacing);

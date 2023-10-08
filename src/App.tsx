@@ -8,7 +8,6 @@ import { FeatureCollection, Point } from 'geojson';
 import { haversineDistance } from './api/distanceCalculations';
 import LocationDataProvider from "./providers/LocationDataProvider";
 import Camera from "./components/Camera";
-import { toast } from 'react-toastify';
 import { ToastContainer } from 'react-toastify';
 import {showErrorToast, showInfoToast, showConfirmToast} from "./components/ToastHelpers"
 import 'react-toastify/dist/ReactToastify.css';
@@ -62,7 +61,8 @@ export default function App() {
 
   // 初回レンダリング時、案内を送信する
   useEffect(() => {
-    alert("撮影ボタンを押して、ARリングを増やしましょう。リングの大きさや位置は指で調整することができます。"); // I003
+    // 「ARリングを増やしましょう。」というメッセージボックスを表示する
+    showInfoToast("I003");
   }, []);
 
 
@@ -76,7 +76,7 @@ export default function App() {
     const newImage: string | null = captureImage();
 
     // 撮影した写真に確認を取る
-    const isPhotoOk: boolean = confirm("撮影画像はこちらでよいですか"); // I004
+    const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
 
     if(isPhotoOk){
       // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
@@ -96,7 +96,7 @@ export default function App() {
           // 写真ダウンロードのみ行う
           if(hasPostRing.current) console.log("既にリングデータをサーバーに送信済みです");
           if(!Boolean(ipFlag)) console.log("連続撮影はできません");
-          alert("連続撮影はできません。別地点を含む他の人が撮影した後に、撮影できます。"); // I002
+          showInfoToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
         }else{
           // リングデータをまだ送信していない場合、リングデータを送信する
           await postRingData(addedRingData); //サーバーにリングデータを送信する
@@ -105,7 +105,8 @@ export default function App() {
 
           hasPostRing.current = true; // リングデータを送信済みとしてstateを更新する
 
-          alert("ありがとうございます！ARリングの生成に成功しました。"); // I005
+          // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
+          showInfoToast("I005");
         };
 
         // 撮影した写真をダウンロードする
@@ -113,7 +114,7 @@ export default function App() {
       }catch(error){
         // サーバーにリングデータを送信できなかった際のエラーハンドリング
         console.error("サーバーにデータを送信できませんでした\n以下の可能性があります\n- 送信しようとしたリングデータがコンフリクトを起こした\n- サーバーにアクセスできない", error);
-        alert("システムエラーが発生しました。しばらく待ってから再度お試しください。"); // E099
+        showErrorToast("E099"); // 「しばらく待ってから再度お試しください。」というメッセージボックスを表示する
         location.reload(); //ページをリロードする
       }
     }else{
@@ -276,8 +277,12 @@ export default function App() {
       console.error("Error fetching GeoJSON Point data or getting current location:", error);
     }
 
-    if(!Boolean(result)) alert("ARリングはピン設置箇所の近くでのみ表示されます。"); // I001
-    return result; 
+    // GPSがピンの範囲外の場合、「ARリングはピン設置箇所の近くでのみ表示されます。」というメッセージボックスを表示する
+    if(!Boolean(result)){
+      showErrorToast("E001");
+    };
+
+    return result;
   }
 
   // GeoJSON Pointデータと現在地の比較を実行した結果をgpsFlagにセット
@@ -286,20 +291,6 @@ export default function App() {
       setGpsFlag(result);
       console.log(`gpsFlag : ${result}`);
     });
-  }, []);
-
-
-
-  useEffect(() => {
-    // テストメッセージ表示、ロジックを組んで、適切な箇所に配置
-    // メッセージ表示（Error）
-    showErrorToast("E001");
-
-    // メッセージ表示（Info）
-    showInfoToast("I002");
-
-    // メッセージ表示（はい or いいえ）　
-    showConfirmToast();
   }, []);
 
 

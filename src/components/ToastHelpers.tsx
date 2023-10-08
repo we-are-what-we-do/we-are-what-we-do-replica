@@ -14,17 +14,24 @@ export const showInfoToast = (infoCode: string) => {
   toast.info(message);
 };
 
-export const showConfirmToast = () => {
-    toast(<ConfirmToast
-      onYes={() => {
-        toast.dismiss();
-        console.log("Yes was clicked");
-      }}
-      onNo={() => {
-        toast.dismiss();
-        console.log("No was clicked");
-      }}
-    />, {
-      autoClose: false  // トーストを自動的に閉じない
-    });
-  };
+export const showConfirmToast = async () => {
+  return new Promise<boolean>((resolve) => {
+    toast(
+      <ConfirmToast
+        onYes={() => {
+          toast.dismiss();
+          console.log("Yes was clicked");
+          resolve(true);
+        }}
+        onNo={() => {
+          toast.dismiss();
+          console.log("No was clicked");
+          resolve(false);
+        }}
+      />,
+      {
+        autoClose: false, // トーストを自動的に閉じない
+      }
+    );
+  });
+};
