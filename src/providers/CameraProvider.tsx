@@ -73,7 +73,12 @@ export function CameraProvider({children}: {children: ReactNode}){
 
     // インカメラ/アウトカメラを切り替える関数
     async function switchCameraFacing(): Promise<void>{
-        if(!(cameraFacing === "out" || cameraFacing === "in")) return; // カメラが許可されていない場合、処理しない
+        if(!(cameraFacing === "out" || cameraFacing === "in")){
+            // カメラが許可されていない場合、処理しない
+            console.error("カメラが許可されていません");
+            window.alert("申し訳ございません、カメラを切り替えられませんでした。");
+            return;
+        }
         let stream: MediaStream | null = null;
         let nextFacing: "out" | "in" = (cameraFacing === "out") ? "in" : "out"; // 切り替え先のカメラの向き
 
