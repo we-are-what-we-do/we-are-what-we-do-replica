@@ -50,11 +50,17 @@ export default function App() {
   const hasPostRing = useRef<boolean>(false);
 
 
+  // 初回レンダリング時、案内を送信する
+  useEffect(() => {
+    alert("撮影ボタンを押して、ARリングを増やしましょう。リングの大きさや位置は指で調整することができます。"); // I003
+  }, []);
+
+
   // 撮影ボタンを押したときの処理
   async function handleTakePhotoButton(): Promise<void>{
     // 撮影する写真に確認を取る
     if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
-    const isPhotoOk: boolean = confirm("撮影画像はこちらでよいですか");
+    const isPhotoOk: boolean = confirm("撮影画像はこちらでよいですか"); // I004
 
     if(isPhotoOk){
       // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
@@ -70,9 +76,15 @@ export default function App() {
         if(!newImage) throw new Error("写真を撮影できませんでした");
 
         // リングデータを送信する
-        if(hasPostRing.current){
-          // リングデータを送信済みの場合、写真ダウンロードのみ行う
-          console.log("既にリングデータをサーバーに送信済みです")
+        // if((hasPostRing.current) || (!Boolean(ipFlag))){
+        if(hasPostRing.current){ // TODO 後で条件を修正し、連続撮影を防ぐ
+          // 連続撮影になる場合
+          // あるいは既にリングデータを送信済みの場合
+          // 写真ダウンロードのみ行う
+          if(hasPostRing.current) console.log("既にリングデータをサーバーに送信済みです");
+          if(!Boolean(ipFlag)) console.log("連続撮影はできません");
+          console.log("連続撮影はできません\nあるいは既にリングデータをサーバーに送信済みです");
+          alert("連続撮影はできません。別地点を含む他の人が撮影した後に、撮影できます。"); // I002
         }else{
           // リングデータをまだ送信していない場合、リングデータを送信する
           await postRingData(addedRingData); //サーバーにリングデータを送信する
@@ -80,6 +92,8 @@ export default function App() {
           console.log("サーバーにデータを送信しました:\n", addedRingData);
 
           hasPostRing.current = true; // リングデータを送信済みとしてstateを更新する
+
+          alert("ありがとうございます！ARリングの生成に成功しました。"); // I005
         };
 
         // 撮影した写真をダウンロードする
@@ -87,7 +101,7 @@ export default function App() {
       }catch(error){
         // サーバーにリングデータを送信できなかった際のエラーハンドリング
         console.error("サーバーにデータを送信できませんでした\n以下の可能性があります\n- 送信しようとしたリングデータがコンフリクトを起こした\n- サーバーにアクセスできない", error);
-        alert("申し訳ございません、リングを追加できませんでした。\nしばらく待ってから再度お試しください。");
+        alert("システムエラーが発生しました。しばらく待ってから再度お試しください。"); // E099
         location.reload(); //ページをリロードする
       }
     }else{
@@ -247,6 +261,8 @@ export default function App() {
     } catch (error) {
       console.error("Error fetching GeoJSON Point data or getting current location:", error);
     }
+
+    if(!Boolean(result)) alert("ARリングはピン設置箇所の近くでのみ表示されます。"); // I001
     return result; 
   }
 
@@ -275,6 +291,9 @@ export default function App() {
           camera={{ position: [0,0,10] }}
           ref={canvasRef}
         >
+          {/* {Boolean(gpsFlag) && (
+            <TorusList/> // リングはピン設置箇所の近くでのみ表示される
+          )} */}
           <TorusList/>
           <ambientLight intensity={1} />
           <directionalLight intensity={1.5} position={[1,1,1]} />
