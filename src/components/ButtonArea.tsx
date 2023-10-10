@@ -1,11 +1,17 @@
 import { useContext } from "react";
 import { postNftImage, postRingData } from './../api/fetchDb';
-import {showErrorToast, showInfoToast, showConfirmToast} from "./ToastHelpers"
+import { RingData } from "../redux/features/handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
 import { CameraContext } from "./../providers/CameraProvider";
 import { RingContext } from "./../providers/RingProvider";
-import { RingData } from "../redux/features/handleRingData";
 import { IpContext } from "../providers/IpProvider";
+import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
+import { ReactSVG } from "react-svg";
+import circleButton from "../assets/images/circleButton.svg";
+import Stack from '@mui/material/Stack';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 
 export default function ButtonArea(props: {
     enableOrbitControl: boolean;
@@ -104,14 +110,20 @@ export default function ButtonArea(props: {
     }
 
     return (
-        <div>
+        <Stack
+            direction="row"
+            spacing={1}
+            style={{
+                position: "absolute",
+                top: "80%",
+                width: "100%"
+            }}
+        >
             <button
                 onClick={handleTakePhotoButton}
                 style={{
-                position: "absolute",
-                top: "80%",
-                left: "50%",
-                height: "2rem"
+                    position: "relative",
+                    left: "50%"
                 }}
             >
                 撮影
@@ -119,14 +131,22 @@ export default function ButtonArea(props: {
             <button
                 onClick={() => switchCameraFacing(enableOrbitControl)}
                 style={{
-                position: "absolute",
-                top: "80%",
-                left: "70%",
-                height: "2rem"
+                    position: "relative",
+                    left: "70%"
                 }}
             >
                 カメラ切り替え
             </button>
-        </div>
+            <IconButton aria-label="delete">
+                <DeleteIcon />
+            </IconButton>
+            <IconButton aria-label="delete" color="primary">
+                <ReactSVG
+                    src={circleButton}
+                    width="5px"
+                    height="5px"
+                />
+            </IconButton>
+        </Stack>
     );
 };

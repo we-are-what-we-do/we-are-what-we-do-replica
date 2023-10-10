@@ -77,7 +77,7 @@ export default function TestButtons(props: {
 
 
     return (
-        <div>
+        <div hidden={true}>
             <button
                 onClick={testAddRing}
                 style={{

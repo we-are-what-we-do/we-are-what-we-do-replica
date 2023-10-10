@@ -9,7 +9,7 @@ function Camera(){
 
   return (
     <>
-      <video ref={videoRef} autoPlay playsInline></video>
+      <video id="video" ref={videoRef} autoPlay playsInline></video>
 
       <div className='camera-success-message'>
         {cameraFacing ? (
