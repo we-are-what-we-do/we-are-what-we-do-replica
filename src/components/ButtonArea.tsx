@@ -18,7 +18,7 @@ import Cameraswitch from '@mui/icons-material/Cameraswitch';
 /* 定数定義 */
 const ICON_SIZE: string = "5rem"; // ボタンの大きさ
 const ICON_COLOR: string = "#FFFFFF"; // ボタンの色
-const DISABLED_COLOR: string = "rgba(0, 0, 0, 0.26)"; // 無効なボタンの色
+const DISABLED_COLOR: string = "rgba(100, 100, 100, 0.26)"; // 無効なボタンの色
 
 
 // MUIのスタイルテーマ
