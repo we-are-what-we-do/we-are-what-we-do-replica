@@ -11,23 +11,33 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import Refresh from '@mui/icons-material/Refresh';
+import CameraRear from '@mui/icons-material/CameraRear';
+import CameraFront from '@mui/icons-material/CameraFront';
 import Cameraswitch from '@mui/icons-material/Cameraswitch';
 
 
 /* 定数定義 */
 const ICON_SIZE: string = "5rem"; // ボタンの大きさ
 const ICON_COLOR: string = "#FFFFFF"; // ボタンの色
-const BUTTON_THEME: string = "#FFFFFF"; // ボタンのテーマカラー(クリック時の色)
+const DISABLED_COLOR: string = "rgba(0, 0, 0, 0.26)"; // 無効なボタンの色
 
 
 // MUIのスタイルテーマ
 const theme = createTheme({
     palette: {
         primary: {
-            main: ICON_COLOR // プライマリーカラーを設定
-        },
-        secondary: {
-            main: BUTTON_THEME // セカンダリーカラーを設定
+            main: ICON_COLOR // プライマリーカラー(ボタンの色)を設定
+        }
+    },
+    components: {
+        MuiIconButton: {
+            styleOverrides: {
+                root: {
+                    "&:disabled": {
+                        color: DISABLED_COLOR
+                    }
+                }
+            }
         }
     }
 });
@@ -61,7 +71,9 @@ export default function ButtonArea(props: {
     // アウトカメラ/インカメラを切り替えるためのcontext
     const {
         videoRef,
-        switchCameraFacing
+        switchCameraFacing,
+        cameraFacing,
+        enableBothCamera
     } = useContext(CameraContext);
 
     // 写真撮影(リング+カメラ)のためのcontext
@@ -132,6 +144,7 @@ export default function ButtonArea(props: {
         setEnableOrbitControl(true); // 3Dの視点固定を解除する
     }
 
+
     return (
         <ThemeProvider theme={theme}>
             <Stack
@@ -144,7 +157,7 @@ export default function ButtonArea(props: {
                 }}
             >
                 <IconButton
-                    aria-label="delete"
+                    aria-label="reset-view"
                     color="secondary"
                     onClick={() =>{
                         const width: number = window.innerWidth;
@@ -160,8 +173,8 @@ export default function ButtonArea(props: {
                     />
                 </IconButton>
                 <IconButton
-                    aria-label="capture"
-                    color="secondary"
+                    aria-label="capture-display"
+                    color="primary"
                     onClick={handleTakePhotoButton}
                 >
                     <DoubleCircleIcon
@@ -171,17 +184,33 @@ export default function ButtonArea(props: {
                     />
                 </IconButton>
                 <IconButton
-                    aria-label="delete"
-                    color="secondary"
+                    aria-label="switch-camera"
+                    color="primary"
+                    // disabled={!enableBothCamera}
                     onClick={() => switchCameraFacing(enableOrbitControl)}
                 >
-                    <Cameraswitch
-                        style={{
-                            width: ICON_SIZE,
-                            height: ICON_SIZE
-                        }}
-                        color="primary"
-                    />
+                    {(cameraFacing === "out") ? (
+                        <CameraFront
+                            style={{
+                                width: ICON_SIZE,
+                                height: ICON_SIZE
+                            }}
+                        />
+                    ): ((cameraFacing === "in") ? (
+                        <CameraRear
+                            style={{
+                                width: ICON_SIZE,
+                                height: ICON_SIZE
+                            }}
+                        />
+                    ): (
+                        <Cameraswitch
+                            style={{
+                                width: ICON_SIZE,
+                                height: ICON_SIZE
+                            }}
+                        />
+                    ))}
                 </IconButton>
             </Stack>
         </ThemeProvider>

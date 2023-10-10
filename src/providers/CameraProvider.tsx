@@ -8,6 +8,7 @@ type CameraContext = {
     videoRef: React.RefObject<HTMLVideoElement>;
     cameraFacing: "out" | "in" | "other" | null;
     switchCameraFacing(isNotCapturing: boolean): Promise<void>;
+    enableBothCamera: boolean;
 };
 
 
@@ -15,7 +16,8 @@ type CameraContext = {
 const initialData: CameraContext = {
     videoRef: {} as React.RefObject<HTMLVideoElement>,
     cameraFacing: null,
-    switchCameraFacing: () => Promise.resolve()
+    switchCameraFacing: () => Promise.resolve(),
+    enableBothCamera: false
 };
 
 export const CameraContext = createContext<CameraContext>(initialData);
@@ -26,6 +28,7 @@ export function CameraProvider({children}: {children: ReactNode}){
     const [cameraFacing, setCameraFacing] = useState<"out" | "in" | "other" | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const [currentStream, setCurrentStream] = useState<MediaStream | null>(null); // 現在のstreamを保存する
+    const [enableBothCamera, setEnableBothCamera] = useState<boolean>(false); // インカメラ, アウトカメラが両方有効かどうか
 
     /* useEffect等 */
     // 初回レンダリング時、カメラに接続する
@@ -43,22 +46,38 @@ export function CameraProvider({children}: {children: ReactNode}){
         let stream: MediaStream | null = null;
 
         // デフォルトはアウトカメラ接続
-        stream = await accessCamera("out");
+        const outStream: MediaStream | null = await accessCamera("out");
 
         // アウトカメラ接続がダメなら、インカメラ接続も試す
-        if(stream === null){
-            stream = await accessCamera("in");
+        const inStream: MediaStream | null = await accessCamera("in");
+
+        // アウトカメラ接続もインカメラ接続がダメなら、デフォルトカメラ接続を試す
+        let otherStream: MediaStream | null = null;
+        if((!outStream) && (!inStream)){
+            otherStream = await accessCamera("other");
         };
 
-        // インカメラ接続がダメなら、デフォルトカメラ接続も試す
-        if(stream === null){
-            stream = await accessCamera("other");
-        };
-
-        if(stream){
-            // アウトカメラorインカメラのアクセスに成功した場合
+        if(outStream || inStream || otherStream){
+            // いずれかのカメラ接続に成功した場合
             console.log("カメラのアクセスに成功");
             // window.alert("カメラのアクセスに成功");
+
+            // アウトカメラ > インカメラ > 他カメラの優先度でstreamを設定する
+            if(outStream){
+                stream = outStream;
+                setCameraFacing("out");
+            }else if(inStream){
+                stream = inStream;
+                setCameraFacing("in");
+            }else if(otherStream){
+                stream = otherStream;
+                setCameraFacing("other");
+            }
+
+            // インカメラ, アウトカメラの両方が有効かどうかを保存しておく
+            if(outStream && inStream){
+                setEnableBothCamera(true);
+            }
 
             // video要素のsrcObjectにカメラを設定する
             if(videoRef.current){
@@ -74,17 +93,25 @@ export function CameraProvider({children}: {children: ReactNode}){
 
     // インカメラ/アウトカメラを切り替える関数
     async function switchCameraFacing(isNotCapturing: boolean): Promise<void>{
+        // 例外処理
         if(!isNotCapturing){
             // 撮影処理、撮影確認待機中の場合はカメラの切り替えを防止する
             console.error("撮影処理中のためカメラを切り替えられません");
             return;
         }
-        if(!(cameraFacing === "out" || cameraFacing === "in")){
+        if(!enableBothCamera){
             // カメラが許可されていない場合、処理しない
-            console.error("カメラが許可されていません");
+            console.error("両面のカメラが許可されていません");
             showErrorToast("E099"); // 「システムエラー」というメッセージボックスを表示する
             return;
         }
+        if(!(cameraFacing === "out" || cameraFacing === "in")){
+            // 現在インカメラ, アウトカメラのどちらでもない場合、処理しない
+            console.error("現在使用しているカメラは、前面カメラでも背面カメラでもありません");
+            showErrorToast("E099"); // 「システムエラー」というメッセージボックスを表示する
+            return;
+        }
+
         let stream: MediaStream | null = null;
         let nextFacing: "out" | "in" = (cameraFacing === "out") ? "in" : "out"; // 切り替え先のカメラの向き
 
@@ -144,8 +171,6 @@ export function CameraProvider({children}: {children: ReactNode}){
             // アウトカメラの接続に失敗した際のエラーハンドリング
         };
 
-        setCameraFacing(cameraFacing); // 接続に成功したカメラの向きをuseStateで保持する
-
         return stream;
     }
 
@@ -156,7 +181,8 @@ export function CameraProvider({children}: {children: ReactNode}){
             value={{
                 videoRef,
                 cameraFacing,
-                switchCameraFacing
+                switchCameraFacing,
+                enableBothCamera
             }}
         >
             {children}

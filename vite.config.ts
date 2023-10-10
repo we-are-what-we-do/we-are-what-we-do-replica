@@ -7,9 +7,9 @@ export default defineConfig({
   base: "./",
   plugins: [
     react(),
-    // basicSsl()
+    basicSsl()
   ],
-  // server: {
-  //   host: true,
-  // }
+  server: {
+    host: true,
+  }
 })
