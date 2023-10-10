@@ -28,6 +28,7 @@ export const showConfirmToast = async () => {
           // console.log("No was clicked");
           resolve(false);
         }}
+        
       />,
       {
         autoClose: false, // トーストを自動的に閉じない

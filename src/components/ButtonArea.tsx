@@ -8,7 +8,6 @@ import { IpContext } from "../providers/IpProvider";
 import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
 import DoubleCircleIcon from "./DoubleCircleIcon";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import Refresh from '@mui/icons-material/Refresh';
 import CameraRear from '@mui/icons-material/CameraRear';
@@ -96,9 +95,10 @@ export default function ButtonArea(props: {
 
         // 撮影した写真に確認を取る
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
+        console.log(isPhotoOk)
 
         if(isPhotoOk){
-        // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
+            // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
             try{
                 // 描画に追加したリングのデータを取得する
                 const addedRingData: RingData | null = getRingDataToAdd();
@@ -147,13 +147,13 @@ export default function ButtonArea(props: {
 
     return (
         <ThemeProvider theme={theme}>
-            <Stack
-                direction="row"
-                spacing={1}
+            <div
                 style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-evenly",
                     position: "absolute",
-                    top: "80%",
-                    width: "100%"
+                    bottom: "1rem"
                 }}
             >
                 <IconButton
@@ -212,7 +212,7 @@ export default function ButtonArea(props: {
                         />
                     ))}
                 </IconButton>
-            </Stack>
+            </div>
         </ThemeProvider>
     );
 };
