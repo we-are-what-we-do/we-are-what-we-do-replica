@@ -1,5 +1,7 @@
 import { createContext, useState, ReactNode, useEffect, useContext } from 'react';
 import { DbContext } from './DbProvider';
+import { IpContext } from './IpProvider';
+import { GpsContext } from './GpsProvider';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
 import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusInfo-slice';
@@ -12,11 +14,6 @@ import { v4 as uuidv4 } from 'uuid';
 // contextに渡すデータの型
 type RingContent = {
     getRingDataToAdd: (newTorus?: AddedTorusInfo | null) => RingData | null;
-    setCurrentIp: React.Dispatch<React.SetStateAction<string | null>>;
-    setCurrentLatitude: React.Dispatch<React.SetStateAction<number | null>>;
-    setCurrentLongitude: React.Dispatch<React.SetStateAction<number | null>>;
-    setLocation: React.Dispatch<React.SetStateAction<string | null>>;
-    setLocationJp: React.Dispatch<React.SetStateAction<string | null>>;
     addTorus: (usedOrbitIndexes: number[]) => AddedTorusInfo;
     usedOrbitIndexes: number[];
     setUsedOrbitIndexes: React.Dispatch<React.SetStateAction<number[]>>
@@ -42,11 +39,6 @@ const orbitLength: number = positionArray.length; // DEI一周に必要なリン
 /* Provider */
 const initialData: RingContent = {
     getRingDataToAdd: () => null,
-    setCurrentIp: () => {},
-    setCurrentLatitude: () => {},
-    setCurrentLongitude: () => {},
-    setLocation: () => {},
-    setLocationJp: () => {},
     addTorus: () => ({} as AddedTorusInfo),
     usedOrbitIndexes: [],
     setUsedOrbitIndexes: () => {}
@@ -63,16 +55,22 @@ export function RingProvider({children}: {children: ReactNode}){
         latestRing
     } = useContext(DbContext);
 
+    // IPアドレスの状態を管理するcontext
+    const {
+        currentIp
+    } = useContext(IpContext);
+
+    // GPSの状態を管理するcontext
+    const {
+        location,
+        locationJp,
+        currentLatitude,
+        currentLongitude
+    } = useContext(GpsContext);
+
     // リングデータを管理するstate
     const [addedTorus, setAddedTorus] = useState<AddedTorusInfo |null>(null); // 追加したリング(AddedTorusInfo)のデータ
     const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
-
-    // リングデータをサーバーに送信する際に必要な情報を管理するstate.
-    const [location, setLocation] = useState<string | null>(null); // 現在値
-    const [locationJp, setLocationJp] = useState<string | null>(null); // 現在地(和名)
-    const [currentLatitude, setCurrentLatitude] = useState<number | null>(null); // 現在地の緯度
-    const [currentLongitude, setCurrentLongitude] = useState<number | null>(null); // 現在地の経度
-    const [currentIp, setCurrentIp] = useState<string | null>(null); // ユーザーのipアドレス
 
     // dispatch
     const dispatch = useDispatch<AppDispatch>();
@@ -221,11 +219,6 @@ export function RingProvider({children}: {children: ReactNode}){
         <RingContext.Provider
             value={{
                 getRingDataToAdd,
-                setCurrentIp,
-                setCurrentLatitude,
-                setCurrentLongitude,
-                setLocation,
-                setLocationJp,
                 addTorus,
                 usedOrbitIndexes,
                 setUsedOrbitIndexes

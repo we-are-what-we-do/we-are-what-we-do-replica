@@ -55,7 +55,7 @@ export function DbProvider({children}: {children: ReactNode}){
         setLatestRing(newLatestRing);
         setTori(newTori);
 
-        // TODO 後で消す
+        // TODO セキュリティの観点から、後で消す
         console.log(
             "サーバーからデータを取得しました:\n", newRingsData,
             "\nリング数:", Object.keys(newRingsData).length
@@ -91,7 +91,7 @@ export function DbProvider({children}: {children: ReactNode}){
 /* 仮定義関数 */
 import { positionArray } from '../torusPosition';
 // オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
-// TODO 仮定義なので、APIの方でリングデータが0～70個に限定されていることを確認次第、削除する
+// TODO サーバーサイドに最新リングのみを取得するapiを作った方がいいかも
 function getLastRings(obj: RingsData, lastAmount: number): RingsData{
     const keys: string[] = Object.keys(obj);
     const lastKeys: string[] = keys.slice(-lastAmount); // オブジェクトの最後のn個のキーを取得
@@ -111,17 +111,17 @@ function getLatestLap(data: RingsData): RingsData{
     const ringAmount: number = Object.keys(data).length; // リングデータの数
     let result: RingsData = {}; // 0～71個のリングデータ
     if(ringAmount <= orbitLength){
-    // リングが0～71個の場合
-    result = Object.assign({}, data);
+        // リングが0～70個の場合
+        result = Object.assign({}, data);
     }else{
-    // リングが71個より多い場合
-    const latestLapLength: number = ringAmount % orbitLength; // 最新のDEI周が何個のリングでできているか
-    if(latestLapLength === 0){
-        // リング個数が71の倍数のとき
-        result = getLastRings(data, orbitLength);
-    }else{
-        result = getLastRings(data, latestLapLength);
-    }
+        // リングが70個より多い場合
+        const latestLapLength: number = ringAmount % orbitLength; // 最新のDEI周が何個のリングでできているか
+        if(latestLapLength === 0){
+            // リング個数が70の倍数のとき
+            result = getLastRings(data, orbitLength); // 0個ではなく、70個取得する
+        }else{
+            result = getLastRings(data, latestLapLength);
+        }
     }
     return result;
 }

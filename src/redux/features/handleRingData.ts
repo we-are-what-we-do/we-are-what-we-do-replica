@@ -25,7 +25,7 @@ export type RingsData = {
 // RingsData型をTorusInfo[]型に変換する関数
 export function convertToTori(data: RingsData): TorusInfo[]{
     const result: TorusInfo[] = new Array;
-    Object.entries(data).forEach(([_key, value], _index) => { // TODO 全データを舐めるのは止めた方がいいかも
+    Object.entries(data).forEach(([_key, value], _index) => {
         const newLocalTorus: TorusInfo = convertToTorus(value);
         result.push(newLocalTorus);
     });

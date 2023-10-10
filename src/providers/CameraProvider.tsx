@@ -7,7 +7,7 @@ import { showErrorToast } from '../components/ToastHelpers';
 type CameraContext = {
     videoRef: React.RefObject<HTMLVideoElement>;
     cameraFacing: "out" | "in" | "other" | null;
-    switchCameraFacing(): Promise<void>;
+    switchCameraFacing(isNotCapturing: boolean): Promise<void>;
 };
 
 
@@ -73,11 +73,16 @@ export function CameraProvider({children}: {children: ReactNode}){
     }
 
     // インカメラ/アウトカメラを切り替える関数
-    async function switchCameraFacing(): Promise<void>{
+    async function switchCameraFacing(isNotCapturing: boolean): Promise<void>{
+        if(!isNotCapturing){
+            // 撮影処理、撮影確認待機中の場合はカメラの切り替えを防止する
+            console.error("撮影処理中のためカメラを切り替えられません");
+            return;
+        }
         if(!(cameraFacing === "out" || cameraFacing === "in")){
             // カメラが許可されていない場合、処理しない
             console.error("カメラが許可されていません");
-            showErrorToast("E099"); // TODO 「カメラを切り替えられませんでした」というメッセージボックスを表示する
+            showErrorToast("E099"); // 「システムエラー」というメッセージボックスを表示する
             return;
         }
         let stream: MediaStream | null = null;
@@ -87,7 +92,7 @@ export function CameraProvider({children}: {children: ReactNode}){
         if(currentStream){
             currentStream.getVideoTracks().forEach((camera) => {
                 camera.stop();
-                console.log("camera stop");
+                // console.log("camera stop");
             });
         }
 
@@ -100,7 +105,7 @@ export function CameraProvider({children}: {children: ReactNode}){
             setCameraFacing(nextFacing);
         }else{
             console.error("カメラを切り替えられませんでした");
-            showErrorToast("E099"); // TODO 「カメラを切り替えられませんでした」というメッセージボックスを表示する
+            showErrorToast("E099"); // 「システムエラー」というメッセージボックスを表示する
 
             // カメラ切り替えが失敗した場合、切り替え前のカメラに戻しておく
             stream = await accessCamera(cameraFacing);
