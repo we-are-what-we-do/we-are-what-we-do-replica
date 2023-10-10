@@ -47,6 +47,7 @@ export function CameraProvider({children}: {children: ReactNode}){
 
         // デフォルトはアウトカメラ接続
         const outStream: MediaStream | null = await accessCamera("out");
+        // const outStream: MediaStream | null = null;
 
         // アウトカメラ接続がダメなら、インカメラ接続も試す
         const inStream: MediaStream | null = await accessCamera("in");
@@ -78,6 +79,7 @@ export function CameraProvider({children}: {children: ReactNode}){
             if(outStream && inStream){
                 setEnableBothCamera(true);
             }
+            alert(`${outStream}, ${inStream}, ${otherStream}`)
 
             // video要素のsrcObjectにカメラを設定する
             if(videoRef.current){
@@ -102,12 +104,14 @@ export function CameraProvider({children}: {children: ReactNode}){
         if(!enableBothCamera){
             // カメラが許可されていない場合、処理しない
             console.error("両面のカメラが許可されていません");
+            alert("両面のカメラが許可されていません");
             showErrorToast("E099"); // 「システムエラー」というメッセージボックスを表示する
             return;
         }
         if(!(cameraFacing === "out" || cameraFacing === "in")){
             // 現在インカメラ, アウトカメラのどちらでもない場合、処理しない
             console.error("現在使用しているカメラは、前面カメラでも背面カメラでもありません");
+            alert("現在使用しているカメラは、前面カメラでも背面カメラでもありません");
             showErrorToast("E099"); // 「システムエラー」というメッセージボックスを表示する
             return;
         }
@@ -125,6 +129,7 @@ export function CameraProvider({children}: {children: ReactNode}){
 
         // カメラを切り替える
         stream = await accessCamera(nextFacing); // もう一方のカメラに接続を試みる
+
         if(!videoRef.current) return;
         if(stream){
             // カメラ切り替えが成功した場合、video要素のsrcObjectにカメラを設定する
@@ -133,11 +138,6 @@ export function CameraProvider({children}: {children: ReactNode}){
         }else{
             console.error("カメラを切り替えられませんでした");
             showErrorToast("E099"); // 「システムエラー」というメッセージボックスを表示する
-
-            // カメラ切り替えが失敗した場合、切り替え前のカメラに戻しておく
-            stream = await accessCamera(cameraFacing);
-            if(!stream) throw new Error("切り替え前のカメラの向きに戻せませんでした");
-            videoRef.current.srcObject = stream;
         };
     }
 
