@@ -17,6 +17,7 @@ import { DbContext } from "./providers/DbProvider";
 import { RingContext } from "./providers/RingProvider";
 import { RingData } from "./redux/features/handleRingData";
 import { positionArray } from "./torusPosition";
+import { Vector3 } from "three";
 
 
 export default function App() {
@@ -296,6 +297,24 @@ export default function App() {
   }, []);
 
 
+  /* DEIの初期表示をレスポンシブに行う */
+  const [positionZ, setPositionZ] = useState<Vector3>(new Vector3(0,0,10));
+  useEffect(() => {
+    // コンポーネントの初回マウント時、DEIリングをレスポンシブな位置に設定する
+    const width = window.innerWidth;
+    
+    if (width >= 600 && width <= 960) {
+      setPositionZ(new Vector3(0,0,10));
+    } else if (width >= 450 && width <= 600) {
+      setPositionZ(new Vector3(0,0,15));
+    } else if (width <= 450) {
+      setPositionZ(new Vector3(0,0,20));
+    } else {
+      setPositionZ(new Vector3(0,0,6));
+    }
+  }, []);
+
+
   return(
     <LocationDataProvider> 
       {errorMessage && (
@@ -314,7 +333,7 @@ export default function App() {
             gl.clearDepth()
           }}
           gl={{ antialias: true, alpha: true }}
-          camera={{ position: [0,0,10] }}
+          camera={{ position: positionZ }}
           ref={canvasRef}
         >
           {//Boolean(gpsFlag) && (

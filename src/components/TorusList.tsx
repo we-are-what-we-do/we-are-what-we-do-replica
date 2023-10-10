@@ -1,29 +1,7 @@
 import { useAppSelector } from "../redux/store";
-import { useThree } from "react-three-fiber";
 
 function TorusList() {
   const torusList = useAppSelector((state) => state.torusInfo.value);
-
-  useThree((state) => {
-    const deviceWidth = window.innerWidth;
-      if (deviceWidth >= 600 && deviceWidth <= 960) {
-        state.camera.position.x = 0;
-        state.camera.position.y = 0;
-        state.camera.position.z = 10;
-      } else if (deviceWidth >= 450 && deviceWidth <= 600) {
-        state.camera.position.x = 0;
-        state.camera.position.y = 0;
-        state.camera.position.z = 15;
-      } else if (deviceWidth <= 450) {
-        state.camera.position.x = 0;
-        state.camera.position.y = 0;
-        state.camera.position.z = 20;
-      } else {
-        state.camera.position.x = 0;
-        state.camera.position.y = 0;
-        state.camera.position.z = 6;
-      }
-  });
 
   return (
     <>
