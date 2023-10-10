@@ -1,8 +1,8 @@
-import { createContext, useState, ReactNode, useEffect, useContext } from 'react';
+import { createContext, useState, ReactNode, useEffect } from 'react';
 import { FeatureCollection, Point } from 'geojson';
 import { getLocationConfig } from '../api/fetchDb';
 import { haversineDistance } from '../api/distanceCalculations';
-import { showErrorToast, showInfoToast } from '../components/ToastHelpers';
+import { showInfoToast } from '../components/ToastHelpers';
 
 
 /* 定数定義 */
