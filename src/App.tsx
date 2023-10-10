@@ -43,11 +43,16 @@ export default function App() {
 
 
   /* DEIの初期表示をレスポンシブに行う */
+  // position-zをuseStateで管理する
   const [positionZ, setPositionZ] = useState<Vector3>(new Vector3(0,0,10));
+  // コンポーネントの初回マウント時、DEIリングをレスポンシブな位置に設定する
   useEffect(() => {
-    // コンポーネントの初回マウント時、DEIリングをレスポンシブな位置に設定する
     const width = window.innerWidth;
-    
+    initializePositionZ(width);
+  }, []);
+
+  // 3Dオブジェクトにおける視点を、レスポンシブな初期位置に設定する関数
+  function initializePositionZ(width: number){
     if (width >= 600 && width <= 960) {
       setPositionZ(new Vector3(0,0,10));
     } else if (width >= 450 && width <= 600) {
@@ -57,7 +62,7 @@ export default function App() {
     } else {
       setPositionZ(new Vector3(0,0,6));
     }
-  }, []);
+  }
 
 
   return(
@@ -102,6 +107,7 @@ export default function App() {
         enableOrbitControl={enableOrbitControl}
         setEnableOrbitControl={setEnableOrbitControl}
         hasPostRing={hasPostRing}
+        initializePositionZ={initializePositionZ}
       />
       <ToastContainer />
     </LocationDataProvider>

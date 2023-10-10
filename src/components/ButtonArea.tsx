@@ -6,22 +6,46 @@ import { CameraContext } from "./../providers/CameraProvider";
 import { RingContext } from "./../providers/RingProvider";
 import { IpContext } from "../providers/IpProvider";
 import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
-import CircleButton from "./CircleButton";
+import DoubleCircleIcon from "./DoubleCircleIcon";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
+import Refresh from '@mui/icons-material/Refresh';
+import Cameraswitch from '@mui/icons-material/Cameraswitch';
 
 
+/* 定数定義 */
+const ICON_SIZE: string = "5rem"; // ボタンの大きさ
+const ICON_COLOR: string = "#FFFFFF"; // ボタンの色
+const BUTTON_THEME: string = "#FFFFFF"; // ボタンのテーマカラー(クリック時の色)
+
+
+// MUIのスタイルテーマ
+const theme = createTheme({
+    palette: {
+        primary: {
+            main: ICON_COLOR // プライマリーカラーを設定
+        },
+        secondary: {
+            main: BUTTON_THEME // セカンダリーカラーを設定
+        }
+    }
+});
+
+
+// ボタン類のコンポーネント
 export default function ButtonArea(props: {
     enableOrbitControl: boolean;
     setEnableOrbitControl: React.Dispatch<React.SetStateAction<boolean>>;
     hasPostRing: React.MutableRefObject<boolean>;
+    initializePositionZ(width: number): void;
 }) {
     /* useState等 */
     const {
         enableOrbitControl,
         setEnableOrbitControl,
-        hasPostRing
+        hasPostRing,
+        initializePositionZ
     } = props;
 
     // GPSの状態を管理するcontext
@@ -109,43 +133,57 @@ export default function ButtonArea(props: {
     }
 
     return (
-        <Stack
-            direction="row"
-            spacing={1}
-            style={{
-                position: "absolute",
-                top: "80%",
-                width: "100%"
-            }}
-        >
-            <button
-                onClick={handleTakePhotoButton}
+        <ThemeProvider theme={theme}>
+            <Stack
+                direction="row"
+                spacing={1}
                 style={{
-                    position: "relative",
-                    left: "50%"
+                    position: "absolute",
+                    top: "80%",
+                    width: "100%"
                 }}
             >
-                撮影
-            </button>
-            <button
-                onClick={() => switchCameraFacing(enableOrbitControl)}
-                style={{
-                    position: "relative",
-                    left: "70%"
-                }}
-            >
-                カメラ切り替え
-            </button>
-            <IconButton aria-label="delete">
-                <DeleteIcon />
-            </IconButton>
-            <IconButton aria-label="delete" color="primary">
-                <CircleButton
-                    width="5rem"
-                    height="5rem"
-                    color="white"
-                />
-            </IconButton>
-        </Stack>
+                <IconButton
+                    aria-label="delete"
+                    color="secondary"
+                    onClick={() =>{
+                        const width: number = window.innerWidth;
+                        initializePositionZ(width);
+                    }}
+                >
+                    <Refresh
+                        style={{
+                            width: ICON_SIZE,
+                            height: ICON_SIZE
+                        }}
+                        color="primary"
+                    />
+                </IconButton>
+                <IconButton
+                    aria-label="capture"
+                    color="secondary"
+                    onClick={handleTakePhotoButton}
+                >
+                    <DoubleCircleIcon
+                        width={ICON_SIZE}
+                        height={ICON_SIZE}
+                        color={ICON_COLOR}
+                    />
+                </IconButton>
+                <IconButton
+                    aria-label="delete"
+                    color="secondary"
+                    onClick={() => switchCameraFacing(enableOrbitControl)}
+                >
+                    <Cameraswitch
+                        style={{
+                            width: ICON_SIZE,
+                            height: ICON_SIZE
+                        }}
+                        color="primary"
+                    />
+                </IconButton>
+            </Stack>
+        </ThemeProvider>
     );
 };

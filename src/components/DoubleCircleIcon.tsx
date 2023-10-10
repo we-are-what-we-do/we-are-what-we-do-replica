@@ -1,5 +1,5 @@
 // 二重丸のsvgコンポーネント
-export default function CircleButton(props: {
+export default function DoubleCircleIcon(props: {
     color: string;
     width: string;
     height: string;
