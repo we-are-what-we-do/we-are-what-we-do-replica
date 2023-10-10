@@ -6,8 +6,7 @@ import { CameraContext } from "./../providers/CameraProvider";
 import { RingContext } from "./../providers/RingProvider";
 import { IpContext } from "../providers/IpProvider";
 import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
-import { ReactSVG } from "react-svg";
-import circleButton from "../assets/images/circleButton.svg";
+import CircleButton from "./CircleButton";
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -141,10 +140,10 @@ export default function ButtonArea(props: {
                 <DeleteIcon />
             </IconButton>
             <IconButton aria-label="delete" color="primary">
-                <ReactSVG
-                    src={circleButton}
-                    width="5px"
-                    height="5px"
+                <CircleButton
+                    width="5rem"
+                    height="5rem"
+                    color="white"
                 />
             </IconButton>
         </Stack>
