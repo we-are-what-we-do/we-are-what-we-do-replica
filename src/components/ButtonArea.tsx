@@ -71,7 +71,8 @@ export default function ButtonArea(props: {
     const {
         videoRef,
         switchCameraFacing,
-        cameraFacing
+        cameraFacing,
+        enableBothCamera
     } = useContext(CameraContext);
 
     // 写真撮影(リング+カメラ)のためのcontext
@@ -185,15 +186,31 @@ export default function ButtonArea(props: {
                 <IconButton
                     aria-label="switch-camera"
                     color="primary"
-                    disabled={!Boolean(cameraFacing)}
+                    // disabled={!enableBothCamera}
                     onClick={() => switchCameraFacing(enableOrbitControl)}
                 >
-                    <Cameraswitch
-                        style={{
-                            width: ICON_SIZE,
-                            height: ICON_SIZE
-                        }}
-                    />
+                    {(cameraFacing === "out") ? (
+                        <CameraFront
+                            style={{
+                                width: ICON_SIZE,
+                                height: ICON_SIZE
+                            }}
+                        />
+                    ): ((cameraFacing === "in") ? (
+                        <CameraRear
+                            style={{
+                                width: ICON_SIZE,
+                                height: ICON_SIZE
+                            }}
+                        />
+                    ): (
+                        <Cameraswitch
+                            style={{
+                                width: ICON_SIZE,
+                                height: ICON_SIZE
+                            }}
+                        />
+                    ))}
                 </IconButton>
             </div>
         </ThemeProvider>
