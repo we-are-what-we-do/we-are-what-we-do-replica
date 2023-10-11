@@ -5,6 +5,7 @@ import { CaptureContext } from "./../providers/CaptureProvider";
 import { CameraContext } from "./../providers/CameraProvider";
 import { RingContext } from "./../providers/RingProvider";
 import { IpContext } from "../providers/IpProvider";
+import { GpsContext } from "../providers/GpsProvider";
 import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
 import DoubleCircleIcon from "./DoubleCircleIcon";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -18,7 +19,7 @@ import Cameraswitch from '@mui/icons-material/Cameraswitch';
 /* 定数定義 */
 const ICON_SIZE: string = "5rem"; // ボタンの大きさ
 const ICON_COLOR: string = "#FFFFFF"; // ボタンの色
-const DISABLED_COLOR: string = "rgba(100, 100, 100, 0.26)"; // 無効なボタンの色
+const DISABLED_COLOR: string = "rgba(0, 0, 0, 0.24)"; // 無効なボタンの色
 
 
 // MUIのスタイルテーマ
@@ -57,10 +58,15 @@ export default function ButtonArea(props: {
         initializePositionZ
     } = props;
 
-    // GPSの状態を管理するcontext
+    // IPの状態を管理するcontext
     const {
         ipFlag
     } = useContext(IpContext);
+
+    // GPSの状態を管理するcontext
+    const {
+        gpsFlag
+    } = useContext(GpsContext);
 
     // リングのデータを追加するためのcontext
     const {
@@ -158,7 +164,7 @@ export default function ButtonArea(props: {
             >
                 <IconButton
                     aria-label="reset-view"
-                    color="secondary"
+                    color="primary"
                     onClick={() =>{
                         const width: number = window.innerWidth;
                         initializePositionZ(width);
@@ -176,6 +182,7 @@ export default function ButtonArea(props: {
                     aria-label="capture-display"
                     color="primary"
                     onClick={handleTakePhotoButton}
+                    disabled={!Boolean(gpsFlag)}
                 >
                     <DoubleCircleIcon
                         width={ICON_SIZE}
