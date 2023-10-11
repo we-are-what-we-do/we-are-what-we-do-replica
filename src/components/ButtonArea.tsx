@@ -9,7 +9,7 @@ import { GpsContext } from "../providers/GpsProvider";
 import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
 import DoubleCircleIcon from "./DoubleCircleIcon";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { useMediaQuery } from "@mui/material";
+import useMediaQuery from '@mui/material/useMediaQuery';
 import IconButton from '@mui/material/IconButton';
 import Refresh from '@mui/icons-material/Refresh';
 import CameraRear from '@mui/icons-material/CameraRear';
@@ -96,8 +96,12 @@ export default function ButtonArea(props: {
 
     /* useEffect等 */
     useEffect(() => {
-        const isMdUp: boolean= useMediaQuery(() => theme.breakpoints.up("md")); // md以上かどうか
-        // setIsMediumScreen(isMdUp);
+        try{
+            const isMdUp: boolean= useMediaQuery(() => theme.breakpoints.up("md")); // md以上かどうか
+            setIsMediumScreen(isMdUp);
+        }catch(error){
+            console.error(error);
+        }
     }, []);
 
 
