@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext } from "react";
 import { postNftImage, postRingData } from './../api/fetchDb';
 import { RingData } from "../redux/features/handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
@@ -8,44 +8,19 @@ import { IpContext } from "../providers/IpProvider";
 import { GpsContext } from "../providers/GpsProvider";
 import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
 import DoubleCircleIcon from "./DoubleCircleIcon";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import { Theme } from '@mui/material/styles';
+import { useMediaQuery } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Refresh from '@mui/icons-material/Refresh';
 import CameraRear from '@mui/icons-material/CameraRear';
 import CameraFront from '@mui/icons-material/CameraFront';
 import Cameraswitch from '@mui/icons-material/Cameraswitch';
-
-
-/* 定数定義 */
-const ICON_SIZE: string = "5rem"; // ボタンの大きさ
-const ICON_COLOR: string = "#FFFFFF"; // ボタンの色
-const DISABLED_COLOR: string = "rgba(0, 0, 0, 0.24)"; // 無効なボタンの色
-
-
-// MUIのスタイルテーマ
-const theme = createTheme({
-    palette: {
-        primary: {
-            main: ICON_COLOR // プライマリーカラー(ボタンの色)を設定
-        }
-    },
-    components: {
-        MuiIconButton: {
-            styleOverrides: {
-                root: {
-                    "&:disabled": {
-                        color: DISABLED_COLOR
-                    }
-                }
-            }
-        }
-    }
-});
+import { ICON_SIZE, ICON_COLOR, DISABLED_COLOR, BUTTON_MARGIN } from "./../App";
 
 
 // ボタン類のコンポーネント
 export default function ButtonArea(props: {
+    theme: Theme;
     enableOrbitControl: boolean;
     setEnableOrbitControl: React.Dispatch<React.SetStateAction<boolean>>;
     hasPostRing: React.MutableRefObject<boolean>;
@@ -53,6 +28,7 @@ export default function ButtonArea(props: {
 }) {
     /* useState等 */
     const {
+        theme,
         enableOrbitControl,
         setEnableOrbitControl,
         hasPostRing,
@@ -90,19 +66,8 @@ export default function ButtonArea(props: {
         saveImage
     } = useContext(CaptureContext);
 
-    // 画面幅がmd以上かどうかを管理するためのstate
-    const [isMediumScreen, setIsMediumScreen] = useState<boolean>(false);
-
-
-    /* useEffect等 */
-    useEffect(() => {
-        try{
-            const isMdUp: boolean= useMediaQuery(() => theme.breakpoints.up("md")); // md以上かどうか
-            setIsMediumScreen(isMdUp);
-        }catch(error){
-            console.error(error);
-        }
-    }, []);
+    // 画面幅がmd以上かどうか
+    const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上
 
 
     /* 関数定義 */
@@ -168,74 +133,81 @@ export default function ButtonArea(props: {
 
 
     return (
-        <ThemeProvider theme={theme}>
-            <div
+        <div
+            style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: isMdScreen ? "center" : "space-evenly",
+                position: "absolute",
+                bottom: "1rem",
+            }}
+        >
+            <IconButton
                 style={{
-                    width: "100%",
-                    display: isMediumScreen ? "block" : "flex",
-                    justifyContent: "space-evenly",
-                    position: "absolute",
-                    bottom: "1rem"
+                    margin: isMdScreen ?`0 ${BUTTON_MARGIN}` : "0"
+                }}
+                aria-label="reset-view"
+                color="primary"
+                onClick={() =>{
+                    const width: number = window.innerWidth;
+                    initializePositionZ(width);
                 }}
             >
-                <IconButton
-                    aria-label="reset-view"
-                    color="primary"
-                    onClick={() =>{
-                        const width: number = window.innerWidth;
-                        initializePositionZ(width);
+                <Refresh
+                    style={{
+                        width: ICON_SIZE,
+                        height: ICON_SIZE
                     }}
-                >
-                    <Refresh
+                    color="primary"
+                />
+            </IconButton>
+            <IconButton
+                style={{
+                    margin: isMdScreen ?`0 ${BUTTON_MARGIN}` : "0"
+                }}
+                aria-label="capture-display"
+                color="primary"
+                onClick={handleTakePhotoButton}
+                disabled={!Boolean(gpsFlag)}
+            >
+                <DoubleCircleIcon
+                    width={ICON_SIZE}
+                    height={ICON_SIZE}
+                    color={Boolean(gpsFlag) ? ICON_COLOR : DISABLED_COLOR}
+                />
+            </IconButton>
+            <IconButton
+                style={{
+                    margin: isMdScreen ?`0 ${BUTTON_MARGIN}` : "0"
+                }}
+                aria-label="switch-camera"
+                color="primary"
+                disabled={!/* enableBothCamera */true}
+                onClick={() => switchCameraFacing(enableOrbitControl)}
+            >
+                {(cameraFacing === "out") ? (
+                    <CameraFront
                         style={{
                             width: ICON_SIZE,
                             height: ICON_SIZE
                         }}
-                        color="primary"
                     />
-                </IconButton>
-                <IconButton
-                    aria-label="capture-display"
-                    color="primary"
-                    onClick={handleTakePhotoButton}
-                    disabled={!Boolean(gpsFlag)}
-                >
-                    <DoubleCircleIcon
-                        width={ICON_SIZE}
-                        height={ICON_SIZE}
-                        color={Boolean(gpsFlag) ? ICON_COLOR : DISABLED_COLOR}
+                ): ((cameraFacing === "in") ? (
+                    <CameraRear
+                        style={{
+                            width: ICON_SIZE,
+                            height: ICON_SIZE
+                        }}
                     />
-                </IconButton>
-                <IconButton
-                    aria-label="switch-camera"
-                    color="primary"
-                    disabled={!enableBothCamera}
-                    onClick={() => switchCameraFacing(enableOrbitControl)}
-                >
-                    {(cameraFacing === "out") ? (
-                        <CameraFront
-                            style={{
-                                width: ICON_SIZE,
-                                height: ICON_SIZE
-                            }}
-                        />
-                    ): ((cameraFacing === "in") ? (
-                        <CameraRear
-                            style={{
-                                width: ICON_SIZE,
-                                height: ICON_SIZE
-                            }}
-                        />
-                    ): (
-                        <Cameraswitch
-                            style={{
-                                width: ICON_SIZE,
-                                height: ICON_SIZE
-                            }}
-                        />
-                    ))}
-                </IconButton>
-            </div>
-        </ThemeProvider>
+                ): (
+                    <Cameraswitch
+                        style={{
+                            width: ICON_SIZE,
+                            height: ICON_SIZE
+                        }}
+                    />
+                ))}
+            </IconButton>
+        </div>
     );
 };

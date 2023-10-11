@@ -12,6 +12,35 @@ import { showInfoToast } from "./components/ToastHelpers"
 import { Vector3 } from "three";
 import ButtonArea from "./components/ButtonArea";
 import TestButtons from "./components/TestButtons";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+
+/* 定数定義 */
+export const ICON_SIZE: string = "5rem"; // ボタンの大きさ
+export const ICON_COLOR: string = "#FFFFFF"; // ボタンの色
+export const DISABLED_COLOR: string = "rgba(0, 0, 0, 0.24)"; // 無効なボタンの色
+export const BUTTON_MARGIN: string = "5rem"; // md以上におけるボタン間のmargin
+
+
+// MUIのスタイルテーマ
+const theme = createTheme({
+    palette: {
+        primary: {
+            main: ICON_COLOR // プライマリーカラー(ボタンの色)を設定
+        }
+    },
+    components: {
+        MuiIconButton: {
+            styleOverrides: {
+                root: {
+                    "&:disabled": {
+                        color: DISABLED_COLOR
+                    }
+                }
+            }
+        }
+    }
+});
 
 
 export default function App() {
@@ -100,15 +129,18 @@ export default function App() {
           </Canvas>
         </div>
       </div>
-      <TestButtons
-        hasPostRing={hasPostRing}
-      />
-      <ButtonArea
-        enableOrbitControl={enableOrbitControl}
-        setEnableOrbitControl={setEnableOrbitControl}
-        hasPostRing={hasPostRing}
-        initializePositionZ={initializePositionZ}
-      />
+      <ThemeProvider theme={theme}>
+        <TestButtons
+          hasPostRing={hasPostRing}
+        />
+        <ButtonArea
+          theme={theme}
+          enableOrbitControl={enableOrbitControl}
+          setEnableOrbitControl={setEnableOrbitControl}
+          hasPostRing={hasPostRing}
+          initializePositionZ={initializePositionZ}
+        />
+      </ThemeProvider>
       <ToastContainer />
     </LocationDataProvider>
   );
