@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { /* useEffect */ } from 'react';
 import { INFO_MESSAGES } from '../MessageMap';
 
 interface ConfirmToastProps {
