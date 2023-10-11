@@ -182,7 +182,7 @@ export default function ButtonArea(props: {
                 }}
                 aria-label="switch-camera"
                 color="primary"
-                disabled={!/* enableBothCamera */true}
+                disabled={!enableBothCamera}
                 onClick={() => switchCameraFacing(enableOrbitControl)}
             >
                 {(cameraFacing === "out") ? (
