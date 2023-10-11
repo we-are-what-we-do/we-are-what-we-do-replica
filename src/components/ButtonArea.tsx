@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { postNftImage, postRingData } from './../api/fetchDb';
 import { RingData } from "../redux/features/handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
@@ -9,6 +9,7 @@ import { GpsContext } from "../providers/GpsProvider";
 import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
 import DoubleCircleIcon from "./DoubleCircleIcon";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useMediaQuery } from "@mui/material";
 import IconButton from '@mui/material/IconButton';
 import Refresh from '@mui/icons-material/Refresh';
 import CameraRear from '@mui/icons-material/CameraRear';
@@ -60,8 +61,9 @@ export default function ButtonArea(props: {
 
     // IPの状態を管理するcontext
     const {
-        ipFlag
+        // ipFlag
     } = useContext(IpContext);
+    const ipFlag: boolean = true;// TODO 連続撮影機能(テスト)を削除する
 
     // GPSの状態を管理するcontext
     const {
@@ -87,6 +89,16 @@ export default function ButtonArea(props: {
         captureImage,
         saveImage
     } = useContext(CaptureContext);
+
+    // 画面幅がmd以上かどうかを管理するためのstate
+    const [isMediumScreen, setIsMediumScreen] = useState<boolean>(false);
+
+
+    /* useEffect等 */
+    useEffect(() => {
+        const isMdUp: boolean= useMediaQuery(() => theme.breakpoints.up("md")); // md以上かどうか
+        // setIsMediumScreen(isMdUp);
+    }, []);
 
 
     /* 関数定義 */
@@ -115,8 +127,7 @@ export default function ButtonArea(props: {
                 if(!newImage) throw new Error("写真を撮影できませんでした");
 
                 // リングデータを送信する
-                // if((hasPostRing.current) || (!Boolean(ipFlag))){
-                if(hasPostRing.current){ // TODO 条件を修正し、連続撮影を防ぐ
+                if((hasPostRing.current) || (!Boolean(ipFlag))){
                     // 連続撮影になる場合
                     // あるいは既にリングデータを送信済みの場合
                     // 写真ダウンロードのみ行う
@@ -157,7 +168,7 @@ export default function ButtonArea(props: {
             <div
                 style={{
                     width: "100%",
-                    display: "flex",
+                    display: isMediumScreen ? "block" : "flex",
                     justifyContent: "space-evenly",
                     position: "absolute",
                     bottom: "1rem"
