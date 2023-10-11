@@ -23,9 +23,10 @@ export default function App() {
 
   // GPSの状態を管理するcontext
   const {
-    gpsFlag,
+    // gpsFlag,
     errorMessage
   } = useContext(GpsContext);
+  const gpsFlag: boolean = true;// TODO どこでもリング表示機能(テスト)を削除する
 
   // 既にリングを追加したかどうかを管理するref
   const hasPostRing = useRef<boolean>(false);
@@ -87,8 +88,7 @@ export default function App() {
             camera={{ position: positionZ }}
             ref={canvasRef}
           >
-            {//Boolean(gpsFlag) && (
-            (Boolean(gpsFlag) || true) && ( // TODO どこでもリング表示機能(テスト)を削除する
+            {Boolean(gpsFlag) && (
               <TorusList/> // リングはピン設置箇所の近くでのみ表示される
             )}
             <ambientLight intensity={1} />

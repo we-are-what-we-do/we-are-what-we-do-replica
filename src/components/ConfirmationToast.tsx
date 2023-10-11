@@ -12,12 +12,12 @@ const messageI004y = INFO_MESSAGES.I004y;
 const messageI004n = INFO_MESSAGES.I004n;
 
 export const ConfirmToast: React.FC<ConfirmToastProps> = ({ onYes, onNo, onDismiss }) => {
-  useEffect(() => {
-    // アンマウントの直前にonDismissを呼び出す
-    return () => {
-      onDismiss();
-    };
-  })
+  // useEffect(() => {
+  //   // アンマウントの直前にonDismissを呼び出す
+  //   return () => {
+  //     onDismiss();
+  //   };
+  // })
 
   return(
     <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '50px', marginBottom: '30px' }}>

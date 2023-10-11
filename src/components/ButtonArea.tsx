@@ -65,8 +65,9 @@ export default function ButtonArea(props: {
 
     // GPSの状態を管理するcontext
     const {
-        gpsFlag
+        // gpsFlag
     } = useContext(GpsContext);
+    const gpsFlag: boolean = true;// TODO どこでもリング表示機能(テスト)を削除する
 
     // リングのデータを追加するためのcontext
     const {
@@ -187,7 +188,7 @@ export default function ButtonArea(props: {
                     <DoubleCircleIcon
                         width={ICON_SIZE}
                         height={ICON_SIZE}
-                        color={ICON_COLOR}
+                        color={Boolean(gpsFlag) ? ICON_COLOR : DISABLED_COLOR}
                     />
                 </IconButton>
                 <IconButton
