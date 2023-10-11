@@ -11,7 +11,7 @@ const messageI004 = INFO_MESSAGES.I004;
 const messageI004y = INFO_MESSAGES.I004y;
 const messageI004n = INFO_MESSAGES.I004n;
 
-export const ConfirmToast: React.FC<ConfirmToastProps> = ({ onYes, onNo, onDismiss }) => {
+export const ConfirmToast: React.FC<ConfirmToastProps> = ({ onYes, onNo, /* onDismiss */ }) => {
   // useEffect(() => {
   //   // アンマウントの直前にonDismissを呼び出す
   //   return () => {
