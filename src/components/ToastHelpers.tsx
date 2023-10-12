@@ -35,10 +35,10 @@ export const showConfirmToast = async () => {
       />,
       {
         autoClose: false, // トーストを自動的に閉じない
-        onClose: () => {
-          // Toastが閉じられたときに実行したい処理をここに記述
-          resolve(false);
-        }
+        // onClose: () => {
+        //   // Toastが閉じられたときに実行したい処理をここに記述
+        //   resolve(false);
+        // }
       }
     );
   });

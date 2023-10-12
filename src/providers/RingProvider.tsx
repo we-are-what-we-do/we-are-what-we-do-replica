@@ -188,13 +188,13 @@ export function RingProvider({children}: {children: ReactNode}){
 
     // サーバーに送信するためのリングデータを取得する関数
     function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus): RingData | null{
-        let result: RingData | null = null;
-
-        if(location === null) return result;
-        if(currentLatitude === null) return result;
-        if(currentLongitude === null) return result;
-        if(currentIp === null) return result;
-        if(newTorus === null) return result;
+        console.log(newTorus)
+        console.log({location, currentLatitude, currentLongitude, currentIp, newTorus})
+        if(location === null) return null;
+        if(currentLatitude === null) return null;
+        if(currentLongitude === null) return null;
+        if(currentIp === null) return null;
+        if(newTorus === null) return null;
 
         const newRingData: RingData = {
             location, // 撮影場所
@@ -205,9 +205,8 @@ export function RingProvider({children}: {children: ReactNode}){
             ring_hue: newTorus.ringHue, // リングの色調
             created_at:  `${new Date().getTime()}` // 撮影日時
         };
-        result = newRingData;
 
-        return result;
+        return newRingData;
     }
 
     return (

@@ -79,16 +79,15 @@ export default function TestButtons(props: {
     return (
         <div hidden={false}
             style={{
+                width: "100%",
                 position: "absolute",
-                top: "20%",
-                height: "2rem"
+                top: "20%"
             }}
         >
             <button
                 onClick={testAddRing}
                 style={{
-                    position: "relative",
-                    left: "50%"
+                    position: "relative"
                 }}
             >
                 リング追加(テスト用)
@@ -97,7 +96,6 @@ export default function TestButtons(props: {
                 onClick={testDeleteRing}
                 style={{
                     position: "relative",
-                    left: "70%"
                 }}
             >
                 リングデータ削除(テスト用)
@@ -105,8 +103,7 @@ export default function TestButtons(props: {
             <span
                 style={{
                     position: "relative",
-                    top: "20%",
-                    left: "0%"
+                    color: "white"
                 }}
             >
                     リング数: {usedOrbitIndexes.length}/{positionArray.length}

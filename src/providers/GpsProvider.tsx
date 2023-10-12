@@ -43,7 +43,6 @@ export function GpsProvider({children}: {children: ReactNode}){
     // リングデータをサーバーに送信する際に必要なGPS情報を管理するstate
     const geoJsonRef = useRef<FeatureCollection<Point> | null>(null); // GeoJSONデータ
     const [location, setLocation] = useState<string | null>(null); // 現在値
-    const [locationJp, setLocationJp] = useState<string | null>(null); // 現在地(和名)
     const [currentLatitude, setCurrentLatitude] = useState<number | null>(null); // 現在地の緯度
     const [currentLongitude, setCurrentLongitude] = useState<number | null>(null); // 現在地の経度
 
@@ -96,18 +95,17 @@ export function GpsProvider({children}: {children: ReactNode}){
             // 各ピンの位置と現在地との距離をチェック
             for (const feature of geoJSONData.features) {
                 // 2点間の距離を求める
-                const [longitude, latitude] = feature.geometry.coordinates;
+                const [latitude, longitude] = feature.geometry.coordinates;
                 const distance: number = haversineDistance(currentLat, currentLon, latitude, longitude); // 2点間の距離
-                
+
                 // 2点間の距離に応じて、gpsFlagを適切な値に設定する
                 if (distance <= RADIUS) {
                     result = 1; // 条件に合致した場合、resultを1に設定
-                    // console.log(`Feature is within ${RADIUS} meters of your current location.`);
 
                     // 現在地のlocationをstateに保存する
                     const locationId: string = String(feature.id) ?? "";
                     setLocation(locationId);
-                    console.log(`locationId is: ${locationId}`);
+                    console.log("Your location: ", getLocationJp(locationId));
 
                     break; // 1つでも条件に合致するピンが見つかった場合、ループを抜ける
                 } else {
@@ -127,17 +125,16 @@ export function GpsProvider({children}: {children: ReactNode}){
     }
 
     // locationIdからlocationJpを取得する関数
-    function getLocationJp(){
-        if(!geoJsonRef.current) return;
+    function getLocationJp(locationId: string): string | null{
+        if(!geoJsonRef.current) return null;
         const getJsonData = geoJsonRef.current;
 
         // locationIdが一致するfeatureのproperties.locationJpを取得する
-        if(!location) return;
-        const currentFeature = getJsonData.features.find((value) => value.id === location);
-        if(!currentFeature) return;
-        const newLocationJp: string | null = currentFeature.properties?.locationJp || null; 
+        const currentFeature = getJsonData.features.find((value) => value.id === locationId);
+        if(!currentFeature) return null;
+        const currentLocationJp: string | null = currentFeature.properties?.locationJp || null; 
 
-        setLocationJp(newLocationJp);
+        return currentLocationJp;
     }
 
     return (
