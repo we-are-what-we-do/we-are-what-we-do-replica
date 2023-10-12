@@ -99,13 +99,13 @@ export function GpsProvider({children}: {children: ReactNode}){
                 const distance: number = haversineDistance(currentLat, currentLon, latitude, longitude); // 2点間の距離
 
                 // 2点間の距離に応じて、gpsFlagを適切な値に設定する
-                if (distance <= RADIUS) {
+                const radius: number = feature.properties?.radius ?? RADIUS; // デフォルトの半径としてRADIUSを指定
+                if (distance <= radius) {
                     result = 1; // 条件に合致した場合、resultを1に設定
 
                     // 現在地のlocationをstateに保存する
                     const locationId: string = String(feature.id) ?? "";
                     setLocation(locationId);
-                    console.log("Your location: ", getLocationJp(locationId));
 
                     break; // 1つでも条件に合致するピンが見つかった場合、ループを抜ける
                 } else {
