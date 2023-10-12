@@ -91,44 +91,61 @@ export default function ButtonArea(props: {
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
         console.log("isPhotoOk: ", isPhotoOk);
 
+        // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
         if(isPhotoOk){
-            // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
-            try{
-                // 描画に追加したリングのデータを取得する
-                const addedRingData: RingData | null = getRingDataToAdd();
+            // 描画に追加したリングのデータを取得する
+            const addedRingData: RingData | null = getRingDataToAdd();
 
-                // エラーハンドリング
-                if(!addedRingData) throw new Error("追加したリングデータを取得できませんでした");
-                if(!newImage) throw new Error("写真を撮影できませんでした");
+            // エラーハンドリング
+            if(!addedRingData){
+                console.error("追加したリングデータを取得できませんでした");
+                return;
+            }; 
+            if(!newImage){
+                console.error("写真を撮影できませんでした");
+                return;
+            }
 
-                // リングデータを送信する
-                if((hasPostRing.current) || (!Boolean(ipFlag))){
-                    // 連続撮影になる場合
-                    // あるいは既にリングデータを送信済みの場合
-                    // 写真ダウンロードのみ行う
-                    if(hasPostRing.current) console.error("既にリングデータをサーバーに送信済みです");
-                    if(!Boolean(ipFlag)) console.error("連続撮影はできません");
-                    showInfoToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
+            // リングデータを送信する
+            if((!Boolean(ipFlag)) || (hasPostRing.current)){
+                // 連続撮影になる場合
+                // あるいは既にリングデータを送信済みの場合
+                // 写真ダウンロードのみ行う
+                if(!Boolean(ipFlag)){
+                    console.error("連続撮影はできません");
                 }else{
+                    console.error("既にリングデータをサーバーに送信済みです");
+                }
+                showInfoToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
+            }else{
+                try{
                     // リングデータをまだ送信していない場合、リングデータを送信する
-                    await postRingData(addedRingData); //サーバーにリングデータを送信する
+                    await postRingData(addedRingData); // サーバーにリングデータを送信する
                     await postNftImage(newImage); // base64形式の画像をサーバーに送信する
                     console.log("サーバーにデータを送信しました:\n", addedRingData);
 
-                    hasPostRing.current = true; // リングデータを送信済みとしてstateを更新する
+                    // リングデータを送信済みとしてrefを更新する
+                    hasPostRing.current = true;
 
                     // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
                     showInfoToast("I005");
+
+                    }catch(error){
+                        // サーバーにリングデータを送信できなかった際のエラーハンドリング
+                        console.error(
+                            "サーバーにデータを送信できませんでした", "\n",
+                            "以下の可能性があります", "\n",
+                            "- 送信しようとしたリングデータがコンフリクトを起こした", "\n",
+                            "- サーバーにアクセスできない", "\n",
+                            error
+                        );
+                        await initializeRingData();
+                        showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
+                    }
                 };
 
                 // 撮影した写真をダウンロードする
                 saveImage(newImage);
-            }catch(error){
-                // サーバーにリングデータを送信できなかった際のエラーハンドリング
-                console.error("サーバーにデータを送信できませんでした\n以下の可能性があります\n- 送信しようとしたリングデータがコンフリクトを起こした\n- サーバーにアクセスできない\n", error);
-                await initializeRingData();
-                showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
-            }
         }else{
             // 再撮影を望む場合、処理を止める
             // console.log("撮影やり直しのために処理を中断しました");
