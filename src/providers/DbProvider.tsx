@@ -50,6 +50,7 @@ export function DbProvider({children}: {children: ReactNode}){
         // リングデータを70個までに限定して切り出す(一応)
         const extractedRingData: RingsData = getLatestLap(newRingsData);
         const newLatestRing: RingData | null = getLatestRing(newRingsData);
+        console.log({newLatestRing});
         let newTori: TorusInfo[] = convertToTori(newRingsData);
         setRingsData(extractedRingData);
         setLatestRing(newLatestRing);

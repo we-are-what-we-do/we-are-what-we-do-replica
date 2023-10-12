@@ -1,6 +1,7 @@
 import { Ring, positionArray, torusScale } from "../../torusPosition";
 import { TorusInfo } from "./torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
+import * as moment from 'moment-timezone';
 
 
 /* 型定義 */
@@ -53,13 +54,20 @@ export function getRingColor(ringHue: number): string{
 
 // 全データの中から、直前に追加されたリングのデータを取得する関数
 export function getLatestRing(data: RingsData): RingData | null{
-    let latestRing: RingData | null = null;
-    Object.entries(data).forEach(([_key, value], _index) => {
-        if((latestRing === null) || (value.created_at > latestRing.created_at)){
-            latestRing = value;
+    return Object.values(data).reduce((latestRing: RingData | null, currentRing: RingData) => {
+        if(!latestRing){
+            return currentRing;
         }
-    });
-    return latestRing;
+
+        // 新しい日付時刻文字列が見つかった場合に更新
+        const latestDate: string = latestRing.created_at;
+        const currentDate: string = currentRing.created_at;
+        if(compareISO8601Dates(currentDate, latestDate)){
+            return currentRing;
+        }
+
+        return latestRing;
+    }, null);
 }
 
 // 指定した配列内に存在するindex以外の要素から、ランダムなindexを取得する関数
@@ -77,4 +85,32 @@ export function getAvailableIndex(excludedIndexes: number[]): number | null{
     const randomIndex = eligibleIndexes[Math.floor(Math.random() * eligibleIndexes.length)];
 
     return randomIndex;
+}
+
+
+/* ISO8601形式の文字列を取り扱う関数 */
+// 現在時刻をISO8601形式の文字列で取得する関数
+export function getIso8601DateTime(): string{
+    // タイムゾーンを日本標準時に設定
+    moment.tz.setDefault('Asia/Tokyo');
+
+    // 現在の日時を取得
+    const currentDateTime = moment();
+
+    // ISO 8601形式で出力
+    const iso8601DateTime = currentDateTime.toISOString();
+
+    return iso8601DateTime;
+}
+
+// ISO8601形式の日付時刻文字列同士を比較し、どちらが新しいのかを真偽値で取得する関数
+function compareISO8601Dates(dateStr1: string, dateStr2: string): boolean{
+    const date1 = new Date(dateStr1);
+    const date2 = new Date(dateStr2);
+
+    if (isNaN(date1.getTime()) || isNaN(date2.getTime())) {
+        throw new Error('無効な日付時刻文字列です。');
+    }
+
+    return date1 > date2;
 }
