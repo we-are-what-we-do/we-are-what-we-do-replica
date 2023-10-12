@@ -96,7 +96,7 @@ export default function App() {
 
 
   return(
-    <LocationDataProvider> 
+    <> 
       {errorMessage && (
         <div className="error-message-box">
           {errorMessage}
@@ -142,6 +142,6 @@ export default function App() {
         />
       </ThemeProvider>
       <ToastContainer />
-    </LocationDataProvider>
+    </>
   );
 }

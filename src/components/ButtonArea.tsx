@@ -6,6 +6,7 @@ import { CameraContext } from "./../providers/CameraProvider";
 import { RingContext } from "./../providers/RingProvider";
 import { IpContext } from "../providers/IpProvider";
 import { GpsContext } from "../providers/GpsProvider";
+import { DbContext } from "../providers/DbProvider";
 import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
 import DoubleCircleIcon from "./DoubleCircleIcon";
 import { Theme } from '@mui/material/styles';
@@ -34,6 +35,11 @@ export default function ButtonArea(props: {
         hasPostRing,
         initializePositionZ
     } = props;
+
+    // サーバーからリングデータを取得するためのcontext
+    const {
+        initializeRingData
+    } = useContext(DbContext);
 
     // IPの状態を管理するcontext
     const {
@@ -120,7 +126,8 @@ export default function ButtonArea(props: {
             }catch(error){
                 // サーバーにリングデータを送信できなかった際のエラーハンドリング
                 console.error("サーバーにデータを送信できませんでした\n以下の可能性があります\n- 送信しようとしたリングデータがコンフリクトを起こした\n- サーバーにアクセスできない\n", error);
-                showErrorToast("E099"); // 「しばらく待ってから再度お試しください。」というメッセージボックスを表示する
+                await initializeRingData();
+                showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
             }
         }else{
             // 再撮影を望む場合、処理を止める
@@ -148,7 +155,7 @@ export default function ButtonArea(props: {
                 }}
                 aria-label="reset-view"
                 color="primary"
-                onClick={() =>{
+                onClick={() => {
                     const width: number = window.innerWidth;
                     initializePositionZ(width);
                 }}

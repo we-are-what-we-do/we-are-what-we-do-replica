@@ -32,6 +32,7 @@ export function CaptureProvider({children}: {children: ReactNode}){
 
     /* useEffect等 */
     useEffect(() => {
+        // 初回マウント時、canvasRefからrendererインスタンスを作成する
         if (canvasRef.current) {
         const renderer: WebGLRenderer = new WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
         rendererRef.current = renderer;
