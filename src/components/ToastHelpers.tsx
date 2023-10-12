@@ -20,16 +20,16 @@ export const showConfirmToast = async () => {
       <ConfirmToast
         onYes={() => {
           toast.dismiss();
-          console.log("Yes was clicked");
+          // console.log("Yes was clicked");
           resolve(true);
         }}
         onNo={() => {
           toast.dismiss();
-          console.log("No was clicked");
+          // console.log("No was clicked");
           resolve(false);
         }}
         onDismiss={() => {
-          console.log("Nothing was clicked");
+          // console.log("Nothing was clicked");
           resolve(false);
         }}
       />,

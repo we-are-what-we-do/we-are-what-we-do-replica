@@ -6,15 +6,14 @@ import { v4 as uuidv4 } from 'uuid';
 /* 型定義 */
 // リングの型
 export type RingData = {
-    "location": string; // 撮影場所
-    "locationJp": string; // 撮影場所日本語
-    "latitude": number; // 撮影地点の緯度
-    "longitude": number; // 撮影地点の経度
-    "userIp": string; // IPアドレス
-    "ringCount": number; // リング数
-    "orbitIndex": number; // リング軌道内の順番(DEI中の何個目か、0~70)
-    "ringHue": number; // リングの色調(0～360)
-    "creationDate":  number // 撮影日時
+    "instance"?:   string;   // 周回中のインスタンスを表すID
+    "location":   string;   // ロケーションピンのUUID
+    "latitude":   number; // 撮影地点の緯度
+    "longitude":  number; // 撮影地点の経度
+    "address":    string; // IPアドレス
+    "indexed":    number; // リング軌道内の順番(DEI中の何個目か、0~69)
+    "ring_hue":    number; // リングの色調(0～360)
+    "created_at": string; // 撮影日時
 };
 export type RingsData = {
     [id: string]: RingData;
@@ -34,10 +33,10 @@ export function convertToTori(data: RingsData): TorusInfo[]{
 
 // RingData型をTorusInfo型に変換する関数
 export function convertToTorus(data: RingData): TorusInfo{
-    const newRingPosition: Ring = positionArray[data.orbitIndex]; // リングの軌道設定
+    const newRingPosition: Ring = positionArray[data.indexed]; // リングの軌道設定
     const newTorusInfo: TorusInfo = {
         id: uuidv4(),
-        color: getRingColor(data.ringHue),
+        color: getRingColor(data.ring_hue),
         rotateX: newRingPosition.rotateX,
         rotateY: newRingPosition.rotateY,
         positionX: newRingPosition.positionX,
@@ -56,7 +55,7 @@ export function getRingColor(ringHue: number): string{
 export function getLatestRing(data: RingsData): RingData | null{
     let latestRing: RingData | null = null;
     Object.entries(data).forEach(([_key, value], _index) => {
-        if((latestRing === null) || (value.ringCount > latestRing.ringCount)){
+        if((latestRing === null) || (value.created_at > latestRing.created_at)){
             latestRing = value;
         }
     });
