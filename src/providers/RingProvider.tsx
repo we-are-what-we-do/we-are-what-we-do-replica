@@ -188,8 +188,6 @@ export function RingProvider({children}: {children: ReactNode}){
 
     // サーバーに送信するためのリングデータを取得する関数
     function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus): RingData | null{
-        console.log(newTorus)
-        console.log({location, currentLatitude, currentLongitude, currentIp, newTorus})
         if(location === null) return null;
         if(currentLatitude === null) return null;
         if(currentLongitude === null) return null;
