@@ -43,7 +43,7 @@ export default function TestButtons(props: {
                 throw new Error("追加するリングデータを取得できませんでした");
             };
 
-            setUsedOrbitIndexes((prev) => [...prev, addedRingData!.orbitIndex]);
+            setUsedOrbitIndexes((prev) => [...prev, addedRingData!.indexed]);
         }else{
             // まだ初期追加のリングを送信していない場合
             // 既に描画に追加したリングのデータを取得する
@@ -77,14 +77,17 @@ export default function TestButtons(props: {
 
 
     return (
-        <div hidden={true}>
+        <div hidden={false}
+            style={{
+                width: "100%",
+                position: "absolute",
+                top: "20%"
+            }}
+        >
             <button
                 onClick={testAddRing}
                 style={{
-                position: "absolute",
-                top: "90%",
-                left: "50%",
-                height: "2rem"
+                    position: "relative"
                 }}
             >
                 リング追加(テスト用)
@@ -92,15 +95,19 @@ export default function TestButtons(props: {
             <button
                 onClick={testDeleteRing}
                 style={{
-                position: "absolute",
-                top: "90%",
-                left: "70%",
-                height: "2rem"
+                    position: "relative",
                 }}
             >
                 リングデータ削除(テスト用)
             </button>
-            <span style={{position: "absolute", top: "90%"}}>リング数: {usedOrbitIndexes.length}/{positionArray.length}</span>
+            <span
+                style={{
+                    position: "relative",
+                    color: "white"
+                }}
+            >
+                    リング数: {usedOrbitIndexes.length}/{positionArray.length}
+            </span>
         </div>
     );
 };

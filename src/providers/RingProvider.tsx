@@ -51,8 +51,7 @@ export function RingProvider({children}: {children: ReactNode}){
     /* useState, useContext等 */
     // サーバーから取得したリングデータを管理するcontext
     const {
-        ringsData,
-        latestRing
+        ringsData
     } = useContext(DbContext);
 
     // IPアドレスの状態を管理するcontext
@@ -63,7 +62,6 @@ export function RingProvider({children}: {children: ReactNode}){
     // GPSの状態を管理するcontext
     const {
         location,
-        locationJp,
         currentLatitude,
         currentLongitude
     } = useContext(GpsContext);
@@ -95,7 +93,7 @@ export function RingProvider({children}: {children: ReactNode}){
             const newTorus: TorusInfo = convertToTorus(value);
             dispatch(pushTorusInfo(newTorus)); //リング情報をオブジェクトに詰め込みstoreへ送る
 
-            newUsedOrbitIndexes.push(value.orbitIndex); // 使用済みの軌道indexとして保管する
+            newUsedOrbitIndexes.push(value.indexed); // 使用済みの軌道indexとして保管する
         });
 
         // リングを追加する
@@ -190,29 +188,25 @@ export function RingProvider({children}: {children: ReactNode}){
 
     // サーバーに送信するためのリングデータを取得する関数
     function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus): RingData | null{
-        let result: RingData | null = null;
-
-        if(location === null) return result;
-        if(locationJp === null) return result;
-        if(currentLatitude === null) return result;
-        if(currentLongitude === null) return result;
-        if(currentIp === null) return result;
-        if(newTorus === null) return result;
+        console.log(newTorus)
+        console.log({location, currentLatitude, currentLongitude, currentIp, newTorus})
+        if(location === null) return null;
+        if(currentLatitude === null) return null;
+        if(currentLongitude === null) return null;
+        if(currentIp === null) return null;
+        if(newTorus === null) return null;
 
         const newRingData: RingData = {
             location, // 撮影場所
-            locationJp, // 撮影場所日本語
             latitude: currentLatitude, // 撮影地点の緯度
             longitude: currentLongitude, // 撮影地点の経度
-            userIp: currentIp, // IPアドレス
-            ringCount: (latestRing?.ringCount ?? 0) + 1, // リング数
-            orbitIndex: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
-            ringHue: newTorus.ringHue, // リングの色調
-            creationDate:  new Date().getTime() // 撮影日時
+            address: currentIp, // IPアドレス
+            indexed: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
+            ring_hue: newTorus.ringHue, // リングの色調
+            created_at:  `${new Date().getTime()}` // 撮影日時
         };
-        result = newRingData;
 
-        return result;
+        return newRingData;
     }
 
     return (

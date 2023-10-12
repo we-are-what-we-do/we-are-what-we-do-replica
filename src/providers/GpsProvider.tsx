@@ -1,4 +1,4 @@
-import { createContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { FeatureCollection, Point } from 'geojson';
 import { getLocationConfig } from '../api/fetchDb';
 import { haversineDistance } from '../api/distanceCalculations';
@@ -17,7 +17,6 @@ const RADIUS = 1000;
 type Context = {
     gpsFlag: number;
     location: string | null;
-    locationJp: string | null;
     currentLatitude: number | null;
     currentLongitude: number | null;
     errorMessage: string | null;
@@ -28,7 +27,6 @@ type Context = {
 const initialData: Context = {
     gpsFlag: 0,
     location: null,
-    locationJp: null,
     currentLatitude: null,
     currentLongitude: null,
     errorMessage: null
@@ -42,9 +40,9 @@ export function GpsProvider({children}: {children: ReactNode}){
     const [gpsFlag, setGpsFlag] = useState<number>(0); // GPSが取得できているかどうかのフラグ
     const [errorMessage, setErrorMessage] = useState<string | null>(null); // errorMessage
 
-    // リングデータをサーバーに送信する際に必要なGPS情報を管理するstate.
+    // リングデータをサーバーに送信する際に必要なGPS情報を管理するstate
+    const geoJsonRef = useRef<FeatureCollection<Point> | null>(null); // GeoJSONデータ
     const [location, setLocation] = useState<string | null>(null); // 現在値
-    const [locationJp, setLocationJp] = useState<string | null>(null); // 現在地(和名)
     const [currentLatitude, setCurrentLatitude] = useState<number | null>(null); // 現在地の緯度
     const [currentLongitude, setCurrentLongitude] = useState<number | null>(null); // 現在地の経度
 
@@ -92,25 +90,23 @@ export function GpsProvider({children}: {children: ReactNode}){
 
             // ピンの位置情報を取得
             const geoJSONData: FeatureCollection<Point> = await getLocationConfig();
+            geoJsonRef.current = geoJSONData;
 
             // 各ピンの位置と現在地との距離をチェック
             for (const feature of geoJSONData.features) {
-                // 現在地のlocation名をstateに保存する
-                const currentLocation: string = feature.properties?.location ?? "";
-                const currentLocationJp: string = feature.properties?.locationJp ?? "";
-                // console.log(`Location is: ${currentLocation}`);
-                // console.log(`LocationJP is: ${currentLocationJp}`);
-                setLocation(currentLocation);
-                setLocationJp(currentLocationJp);
-
                 // 2点間の距離を求める
-                const [longitude, latitude] = feature.geometry.coordinates;
+                const [latitude, longitude] = feature.geometry.coordinates;
                 const distance: number = haversineDistance(currentLat, currentLon, latitude, longitude); // 2点間の距離
-                
+
                 // 2点間の距離に応じて、gpsFlagを適切な値に設定する
                 if (distance <= RADIUS) {
                     result = 1; // 条件に合致した場合、resultを1に設定
-                    // console.log(`Feature is within ${RADIUS} meters of your current location.`);
+
+                    // 現在地のlocationをstateに保存する
+                    const locationId: string = String(feature.id) ?? "";
+                    setLocation(locationId);
+                    console.log("Your location: ", getLocationJp(locationId));
+
                     break; // 1つでも条件に合致するピンが見つかった場合、ループを抜ける
                 } else {
                     // console.log(`Feature is ${distance} meters away from your current location.`);
@@ -128,13 +124,24 @@ export function GpsProvider({children}: {children: ReactNode}){
         return result;
     }
 
+    // locationIdからlocationJpを取得する関数
+    function getLocationJp(locationId: string): string | null{
+        if(!geoJsonRef.current) return null;
+        const getJsonData = geoJsonRef.current;
+
+        // locationIdが一致するfeatureのproperties.locationJpを取得する
+        const currentFeature = getJsonData.features.find((value) => value.id === locationId);
+        if(!currentFeature) return null;
+        const currentLocationJp: string | null = currentFeature.properties?.locationJp || null; 
+
+        return currentLocationJp;
+    }
 
     return (
         <GpsContext.Provider
             value={{
                 gpsFlag,
                 location,
-                locationJp,
                 currentLatitude,
                 currentLongitude,
                 errorMessage

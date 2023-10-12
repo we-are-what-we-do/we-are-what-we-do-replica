@@ -20,21 +20,22 @@ export const showConfirmToast = async () => {
       <ConfirmToast
         onYes={() => {
           toast.dismiss();
-          console.log("Yes was clicked");
+          // console.log("Yes was clicked");
           resolve(true);
         }}
         onNo={() => {
           toast.dismiss();
-          console.log("No was clicked");
+          // console.log("No was clicked");
           resolve(false);
         }}
       />,
       {
         autoClose: false, // トーストを自動的に閉じない
-        onClose: () => {
-          // Toastが閉じられたときに実行したい処理をここに記述
-          resolve(false);
-        }
+        // TODO 本番環境ではコメントアウトを解除する
+        // onClose: () => {
+        //   // Toastが閉じられたときに実行したい処理をここに記述
+        //   resolve(false);
+        // }
       }
     );
   });

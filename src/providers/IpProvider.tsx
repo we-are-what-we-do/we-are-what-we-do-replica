@@ -55,7 +55,7 @@ export function IpProvider({children}: {children: ReactNode}){
             // console.log(`Your current IP is: ${newCurrentIp}`);
 
             // 前回登録時のIPアドレスを取得
-            const lastIP: string | null = latestRing?.userIp ?? null;
+            const lastIP: string | null = latestRing?.address ?? null;
             // console.log(`LatestRing user IP is: ${lastIP}`);
             
             if (newCurrentIp !== lastIP) {
