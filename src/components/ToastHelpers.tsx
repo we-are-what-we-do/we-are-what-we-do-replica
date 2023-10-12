@@ -35,6 +35,7 @@ export const showConfirmToast = async () => {
       />,
       {
         autoClose: false, // トーストを自動的に閉じない
+        // TODO 本番環境ではコメントアウトを解除する
         // onClose: () => {
         //   // Toastが閉じられたときに実行したい処理をここに記述
         //   resolve(false);
