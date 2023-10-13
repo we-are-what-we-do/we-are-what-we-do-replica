@@ -75,7 +75,7 @@ function App() {
   function initializeRingDraw(): void{
     dispatch(resetHandle()); // 全3Dを消去する
 
-    const extractedRingData: RingsData = getLatestLap(ringsData); // リングデータを71個までに限定して切り出す(一応)
+    const extractedRingData: RingsData = getLatestLap(ringsData); // リングデータを70個までに限定して切り出す(一応)
 
     // 3Dオブジェクトの初期表示を行う
     Object.values(extractedRingData).forEach((value) => {

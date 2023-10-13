@@ -45,15 +45,13 @@ export default function ButtonArea(props: {
 
     // IPの状態を管理するcontext
     const {
-        // ipFlag
+        ipFlag
     } = useContext(IpContext);
-    const ipFlag: boolean = true;// TODO 連続撮影機能(テスト)を削除する
 
     // GPSの状態を管理するcontext
     const {
-        // gpsFlag
+        gpsFlag
     } = useContext(GpsContext);
-    const gpsFlag: boolean = true;// TODO どこでもリング表示機能(テスト)を削除する
 
     // リングのデータを追加するためのcontext
     const {

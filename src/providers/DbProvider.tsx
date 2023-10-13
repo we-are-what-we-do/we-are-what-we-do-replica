@@ -62,12 +62,6 @@ export function DbProvider({children}: {children: ReactNode}){
         setRingsData(extractedRingData);
         setLatestRing(newLatestRing);
         setTori(newTori);
-
-        // TODO セキュリティの観点から、後で消す
-        console.log(
-            "サーバーからデータを取得しました:\n", newRingsData,
-            "\nリング数:", Object.keys(newRingsData).length
-        );
     }
 
     // torusArrayに新しいtorusデータを一つ追加する関数
@@ -114,11 +108,11 @@ function getLastRings(obj: RingsData, lastAmount: number): RingsData{
 }
 
 // 過去周のDEI周を切り捨てる関数
-// TODO 仮定義なので、APIの方でリングデータが0～71個に限定されていることを確認次第、削除する
+// TODO 仮定義なので、APIの方でリングデータが0～70個に限定されていることを確認次第、削除する
 export function getLatestLap(data: RingsData): RingsData{
     const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
     const ringAmount: number = Object.keys(data).length; // リングデータの数
-    let result: RingsData = {}; // 0～71個のリングデータ
+    let result: RingsData = {}; // 0～70個のリングデータ
     if(ringAmount <= orbitLength){
         // リングが0～70個の場合
         result = Object.assign({}, data);

@@ -189,8 +189,7 @@ export function RingProvider({children}: {children: ReactNode}){
     // サーバーに送信するためのリングデータを取得する関数
     function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus): RingData | null{
         if(
-            // TODO location修正
-            // (location === null) ||
+            (location === null) ||
             (currentLatitude === null) ||
             (currentLongitude === null) ||
             (currentIp === null) ||
@@ -201,8 +200,7 @@ export function RingProvider({children}: {children: ReactNode}){
         }
 
         const newRingData: RingData = {
-            // location, // 撮影場所
-            location: location ?? "",
+            location, // 撮影場所
             latitude: currentLatitude, // 撮影地点の緯度
             longitude: currentLongitude, // 撮影地点の経度
             address: currentIp, // IPアドレス
