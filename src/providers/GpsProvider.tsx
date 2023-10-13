@@ -20,7 +20,6 @@ type Context = {
     currentLatitude: number | null;
     currentLongitude: number | null;
     errorMessage: string | null;
-    getLocationJp(locationId: string): string | null;
 };
 
 
@@ -30,8 +29,7 @@ const initialData: Context = {
     location: null,
     currentLatitude: null,
     currentLongitude: null,
-    errorMessage: null,
-    getLocationJp: () => null
+    errorMessage: null
 };
 
 export const GpsContext = createContext<Context>(initialData);
@@ -132,19 +130,6 @@ export function GpsProvider({children}: {children: ReactNode}){
         return result;
     }
 
-    // locationIdからlocationJpを取得する関数
-    function getLocationJp(locationId: string): string | null{
-        if(!geoJsonRef.current) return null;
-        const getJsonData = geoJsonRef.current;
-
-        // locationIdが一致するfeatureのproperties.locationJpを取得する
-        const currentFeature = getJsonData.features.find((value) => value.id === locationId);
-        if(!currentFeature) return null;
-        const currentLocationJp: string | null = currentFeature.properties?.locationJp || null; 
-
-        return currentLocationJp;
-    }
-
     return (
         <GpsContext.Provider
             value={{
@@ -152,8 +137,7 @@ export function GpsProvider({children}: {children: ReactNode}){
                 location,
                 currentLatitude,
                 currentLongitude,
-                errorMessage,
-                getLocationJp
+                errorMessage
             }}
         >
             {children}

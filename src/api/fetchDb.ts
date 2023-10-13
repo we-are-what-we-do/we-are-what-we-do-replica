@@ -103,3 +103,14 @@ export async function postNftImage(base64Data: string): Promise<Response>{
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }
+
+
+// locationIdからlocationJpを取得する関数
+export function getLocationJp(data: FeatureCollection<Point>, locationId: string): string | null{
+    // locationIdが一致するfeatureのproperties.locationJpを取得する
+    const currentFeature = data.features.find((value) => value.id === locationId);
+    if(!currentFeature) return null;
+    const currentLocationJp: string | null = currentFeature.properties?.locationJp || null; 
+
+    return currentLocationJp;
+}
