@@ -90,7 +90,7 @@ export default function ButtonArea(props: {
     // 撮影ボタンを押したときの処理
     async function handleTakePhotoButton(): Promise<void>{
         // 撮影する写真に確認を取る
-        if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
+        // if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
         videoRef.current?.pause(); // カメラを一時停止する
         setEnableOrbitControl(false); // 3Dの視点を固定する
 
@@ -99,7 +99,7 @@ export default function ButtonArea(props: {
 
         // 撮影した写真に確認を取る
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
-        console.log("isPhotoOk: ", isPhotoOk);
+        // console.log("isPhotoOk: ", isPhotoOk);
 
         // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
         if(isPhotoOk){
@@ -132,7 +132,7 @@ export default function ButtonArea(props: {
                     // リングデータをまだ送信していない場合、リングデータを送信する
                     await postRingData(addedRingData); // サーバーにリングデータを送信する
                     await postNftImage(newImage); // base64形式の画像をサーバーに送信する
-                    console.log("サーバーにデータを送信しました:\n", addedRingData);
+                    // console.log("サーバーにデータを送信しました:\n", addedRingData);
 
                     // リングデータを送信済みとしてrefを更新する
                     hasPostRing.current = true;

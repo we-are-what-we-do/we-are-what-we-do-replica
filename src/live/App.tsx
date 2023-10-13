@@ -66,7 +66,7 @@ function App() {
     const intervalTime: number = 1000 * 60 * 1; // 1分置きに更新する
     const intervalFunc = setInterval(() => {
         initializeRingData();
-        console.log("リングデータを更新しました")
+        // console.log("リングデータを更新しました")
     }, intervalTime);
     return () => clearInterval(intervalFunc);
 }, []);

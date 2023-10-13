@@ -58,7 +58,7 @@ export default function TestButtons(props: {
 
         //サーバーにリングデータを送信する
         await postRingData(addedRingData);
-        console.log("サーバーにデータを送信しました:\n", addedRingData);
+        // console.log("サーバーにデータを送信しました:\n", addedRingData);
 
         // テスト用のstate更新
         setLatestRing(addedRingData);

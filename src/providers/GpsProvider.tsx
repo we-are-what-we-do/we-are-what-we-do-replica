@@ -52,7 +52,7 @@ export function GpsProvider({children}: {children: ReactNode}){
     useEffect(() => {
         compareCurrentLocationWithPin().then(result => {
             setGpsFlag(result);
-            console.log(`gpsFlag : ${result}`);
+            // console.log(`gpsFlag : ${result}`);
         });
     }, []);
 
