@@ -1,5 +1,6 @@
 import "./App.css";
 import { useContext, useEffect, useRef, useState } from "react";
+import { DbContext } from "./providers/DbProvider";
 import { CaptureContext } from "./providers/CaptureProvider";
 import { GpsContext } from "./providers/GpsProvider";
 import { OrbitControls } from "@react-three/drei";
@@ -13,6 +14,7 @@ import { Vector3 } from "three";
 import ButtonArea from "./components/ButtonArea";
 import TestButtons from "./components/TestButtons";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { CircularProgress } from "@mui/material";
 
 
 /* 定数定義 */
@@ -45,6 +47,10 @@ const theme = createTheme({
 
 export default function App() {
   /* stateやcontext等 */
+  const {
+    isLoadedData
+  } = useContext(DbContext);
+
   // 写真撮影(リング+カメラ)のためのcontext
   const {
     canvasRef
@@ -107,32 +113,46 @@ export default function App() {
           <Camera/>
         </div>
         <div className='canvas'>
-          <Canvas
-            onCreated={({ gl }) => {
-              gl.setClearColor(0xFF0000, 0);
-              gl.autoClear = true;
-              gl.clearDepth()
-            }}
-            gl={{ antialias: true, alpha: true }}
-            camera={{ position: positionZ }}
-            ref={canvasRef}
-          >
-            {Boolean(gpsFlag) && (
-              <TorusList/> // リングはピン設置箇所の近くでのみ表示される
-            )}
-            <ambientLight intensity={1} />
-            <directionalLight intensity={1.5} position={[1,1,1]} />
-            <directionalLight intensity={1.5} position={[1,1,-1]} />
-            <pointLight intensity={1} position={[1,1,5]}/>
-            <pointLight intensity={1} position={[1,1,-5]}/>
-            <OrbitControls enabled={enableOrbitControl} maxDistance={50}/>
-          </Canvas>
+          {false ? (
+            <Canvas
+              onCreated={({ gl }) => {
+                gl.setClearColor(0xFF0000, 0);
+                gl.autoClear = true;
+                gl.clearDepth()
+              }}
+              gl={{ antialias: true, alpha: true }}
+              camera={{ position: positionZ }}
+              ref={canvasRef}
+            >
+              {Boolean(gpsFlag) && (
+                <TorusList/> // リングはピン設置箇所の近くでのみ表示される
+              )}
+              <ambientLight intensity={1} />
+              <directionalLight intensity={1.5} position={[1,1,1]} />
+              <directionalLight intensity={1.5} position={[1,1,-1]} />
+              <pointLight intensity={1} position={[1,1,5]}/>
+              <pointLight intensity={1} position={[1,1,-5]}/>
+              <OrbitControls enabled={enableOrbitControl} maxDistance={50}/>
+            </Canvas>
+          ) : (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                height: "100%"
+              }}
+            >
+              <CircularProgress/>
+            </div>
+          )}
         </div>
       </div>
       <ThemeProvider theme={theme}>
-        <TestButtons
+        {true && <TestButtons
           hasPostRing={hasPostRing}
-        />
+        />}
         <ButtonArea
           theme={theme}
           enableOrbitControl={enableOrbitControl}

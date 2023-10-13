@@ -77,7 +77,7 @@ export default function TestButtons(props: {
 
 
     return (
-        <div hidden={false}
+        <div
             style={{
                 width: "100%",
                 position: "absolute",

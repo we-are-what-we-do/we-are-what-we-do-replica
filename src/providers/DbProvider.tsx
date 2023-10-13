@@ -18,6 +18,7 @@ type DbContent = {
     initializeRingData: (location?: string) => Promise<void>;
     addTorusData: (newTorus: TorusInfo) => void;
     setLatestRing: React.Dispatch<React.SetStateAction<RingData | null>>;
+    isLoadedData: boolean;
 };
 
 
@@ -28,7 +29,8 @@ const initialData: DbContent = {
     toriData: [],
     initializeRingData: () => Promise.resolve(),
     addTorusData: () => {},
-    setLatestRing: () => null
+    setLatestRing: () => null,
+    isLoadedData: true
 };
 
 export const DbContext = createContext<DbContent>(initialData);
@@ -39,9 +41,14 @@ export function DbProvider({children}: {children: ReactNode}){
     const [latestRing, setLatestRing] = useState<RingData | null>(null); // 直前に追加されたリングデータ
     const [toriData, setTori] = useState<TorusInfo[]>([]); // Three.jsで使用するリングデータ
 
+    // データを取得済みかどうかを管理する
+    const [isLoadedData, setIsLoadedData] = useState<boolean>(false);
+
     // 初回レンダリング時、サーバーからデータを取得する
     useEffect(() => {
-        initializeRingData();
+        initializeRingData().then(() => {
+            setIsLoadedData(true);
+        });
     }, [])
 
     // リングのデータを、サーバーから取得したデータで初期化する関数
@@ -80,7 +87,8 @@ export function DbProvider({children}: {children: ReactNode}){
                 toriData,
                 initializeRingData,
                 addTorusData,
-                setLatestRing
+                setLatestRing,
+                isLoadedData
             }}
         >
             {children}
