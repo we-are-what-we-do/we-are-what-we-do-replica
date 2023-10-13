@@ -4,7 +4,7 @@ import { DbContext } from "./providers/DbProvider";
 import { CaptureContext } from "./providers/CaptureProvider";
 import { GpsContext } from "./providers/GpsProvider";
 import { OrbitControls } from "@react-three/drei";
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import TorusList from './components/TorusList';
 // import LocationDataProvider from "./providers/LocationDataProvider";
 import Camera from "./components/Camera";
