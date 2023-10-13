@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useEffect, useRef, useContext } from 'react';
+import { ReactNode, createContext, useRef, useContext } from 'react';
 import { WebGLRenderer } from "three";
 import { saveAs } from "file-saver";
 import { CameraContext } from './CameraProvider';
@@ -10,6 +10,7 @@ type CaptureContext = {
     captureImage: () => string | null;
     saveImage: (dataURL: string) => void;
     canvasRef: React.RefObject<HTMLCanvasElement>;
+    rendererRef: React.MutableRefObject<WebGLRenderer | null>;
 };
 
 
@@ -17,7 +18,8 @@ type CaptureContext = {
 const initialData: CaptureContext = {
     captureImage: () => null,
     saveImage: () => {},
-    canvasRef: {} as React.RefObject<HTMLCanvasElement>
+    canvasRef: {} as React.RefObject<HTMLCanvasElement>,
+    rendererRef: {} as React.MutableRefObject<WebGLRenderer | null>
 };
 
 export const CaptureContext = createContext<CaptureContext>(initialData);
@@ -28,16 +30,6 @@ export function CaptureProvider({children}: {children: ReactNode}){
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
     const { videoRef } = useContext(CameraContext);
-
-
-    /* useEffect等 */
-    useEffect(() => {
-        // 初回マウント時、canvasRefからrendererインスタンスを作成する
-        if (canvasRef.current) {
-        const renderer: WebGLRenderer = new WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
-        rendererRef.current = renderer;
-        }
-    }, []);
 
 
     /* 関数定義 */
@@ -166,7 +158,8 @@ export function CaptureProvider({children}: {children: ReactNode}){
             value={{
                 captureImage,
                 saveImage,
-                canvasRef
+                canvasRef,
+                rendererRef
             }}
         >
             {children}

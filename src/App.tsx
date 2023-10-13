@@ -10,7 +10,7 @@ import TorusList from './components/TorusList';
 import Camera from "./components/Camera";
 import { ToastContainer } from 'react-toastify';
 import { showInfoToast } from "./components/ToastHelpers"
-import { Vector3 } from "three";
+import { Vector3, WebGLRenderer } from "three";
 import ButtonArea from "./components/ButtonArea";
 import TestButtons from "./components/TestButtons";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -54,7 +54,8 @@ export default function App() {
 
   // 写真撮影(リング+カメラ)のためのcontext
   const {
-    canvasRef
+    canvasRef,
+    rendererRef
   } = useContext(CaptureContext);
   
   const [reset, setReset] = useState<boolean | null>(null); 
@@ -159,7 +160,13 @@ export default function App() {
               }}
               gl={{ antialias: true, alpha: true }}
               camera={{ position: positionZ }}
-              ref={canvasRef}
+              ref={(node) => {
+                if(node){
+                  const renderer: WebGLRenderer = new WebGLRenderer({ canvas: node, preserveDrawingBuffer: true });
+                  rendererRef.current = renderer;
+                }
+                return canvasRef
+              }}
             >
               <Perspection activation={reset} >
                 {Boolean(gpsFlag) && (
