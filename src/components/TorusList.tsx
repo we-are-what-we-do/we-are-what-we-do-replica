@@ -12,7 +12,7 @@ function TorusList() {
           rotation={[torus.rotateX, torus.rotateY, 0]}
           scale={torus.scale}
         >
-          <torusGeometry args={[5.5, 1.5, 8, 50]} />
+          <torusGeometry args={[5.5, 1.5, 40, 50]} />
           <meshStandardMaterial color={torus.color} roughness={0.0} />
         </mesh>
       ))}

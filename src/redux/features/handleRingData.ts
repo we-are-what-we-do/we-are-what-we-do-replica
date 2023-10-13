@@ -63,6 +63,7 @@ export function getLatestRing(data: RingsData): RingData | null{
     return latestRing;
 }
 
+
 // 指定した配列内に存在するindex以外の要素から、ランダムなindexを取得する関数
 export function getAvailableIndex(excludedIndexes: number[]): number | null{
     // indexをランダムに取得するための配列を生成する
