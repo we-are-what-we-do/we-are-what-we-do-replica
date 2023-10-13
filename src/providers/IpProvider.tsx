@@ -35,7 +35,7 @@ export function IpProvider({children}: {children: ReactNode}){
     useEffect(() => {
         compareCurrentIPWithLastIP().then(result => {
             setIpFlag(result);
-            console.log(`ipFlag : ${result}`);
+            // console.log(`ipFlag : ${result}`);
         });
     }, [latestRing]);
 
