@@ -188,15 +188,21 @@ export function RingProvider({children}: {children: ReactNode}){
 
     // サーバーに送信するためのリングデータを取得する関数
     function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus): RingData | null{
-        console.log({location, currentLatitude, currentLongitude, currentIp, newTorus})
-        if(location === null) return null;
-        if(currentLatitude === null) return null;
-        if(currentLongitude === null) return null;
-        if(currentIp === null) return null;
-        if(newTorus === null) return null;
+        if(
+            // TODO location修正
+            // (location === null) ||
+            (currentLatitude === null) ||
+            (currentLongitude === null) ||
+            (currentIp === null) ||
+            (newTorus === null)
+        ){
+            console.error({location, currentLatitude, currentLongitude, currentIp, newTorus});
+            return null;
+        }
 
         const newRingData: RingData = {
-            location, // 撮影場所
+            // location, // 撮影場所
+            location: location ?? "",
             latitude: currentLatitude, // 撮影地点の緯度
             longitude: currentLongitude, // 撮影地点の経度
             address: currentIp, // IPアドレス

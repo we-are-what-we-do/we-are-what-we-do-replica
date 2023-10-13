@@ -75,6 +75,9 @@ export function GpsProvider({children}: {children: ReactNode}){
                             setErrorMessage("アプリを使用するにはGPSを許可してください");
                         }
                         reject(error);
+                    },
+                    {
+                        enableHighAccuracy: true
                     }
                 );
             });
