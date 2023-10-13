@@ -25,10 +25,26 @@ async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promis
 
 // ピンの全設定データを取得する関数
 export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
-    // const apiEndpoint: string = "locations";
-    const apiEndpoint: string = "locations.json"; // 仮エンドポイント
-    const response: Response = await makeGetRequest(apiEndpoint);
-    const result: FeatureCollection<Point> = await response.json();
+    let result: FeatureCollection<Point> | null = null;
+    // キャッシュデータからのピン設定データ取得を試みる
+    const cashData: string | null = localStorage.getItem("locations");
+    // localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
+
+    if(cashData){
+        const locationData = JSON.parse(cashData) as FeatureCollection<Point>;
+        result = locationData;
+        // console.log("キャッシュからgeolocationデータを読み込みました", locationData);
+    }else{
+        // キャッシュデータがない場合、サーバーからデータを取得する
+        // const apiEndpoint: string = "locations";
+        const apiEndpoint: string = "locations.json"; // 仮エンドポイント
+        const response: Response = await makeGetRequest(apiEndpoint);
+        result = await response.json() as FeatureCollection<Point>;
+
+        // サーバーから取得したデータをキャッシュに保存する
+        localStorage.setItem("locations", JSON.stringify(result));
+        // console.log("キャッシュにgeolocationデータを保存しました", result);
+    }
     return result;
 }
 

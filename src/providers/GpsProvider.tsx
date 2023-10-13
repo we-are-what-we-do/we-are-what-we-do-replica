@@ -103,10 +103,11 @@ export function GpsProvider({children}: {children: ReactNode}){
 
                 // 2点間の距離に応じて、gpsFlagを適切な値に設定する
                 const radius: number = feature.properties?.radius ?? RADIUS; // デフォルトの半径としてRADIUSを指定
-                console.log(`${feature.properties?.locationJp}: ${distance} / ${radius}`, "\n", {currentLat, currentLon, latitude, longitude})
+                // console.log(`${feature.properties?.locationJp}: ${distance} / ${radius}`, "\n", {currentLat, currentLon, latitude, longitude});
+
                 if (distance <= radius) {
                     result = 1; // 条件に合致した場合、resultを1に設定
-                    console.log(`${feature.properties?.locationJp} is OK`)
+                    // console.log(`${feature.properties?.locationJp} is OK`);
 
                     // 現在地のlocationをstateに保存する
                     const locationId: string = String(feature.id) ?? "";
