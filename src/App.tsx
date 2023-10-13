@@ -4,7 +4,7 @@ import { DbContext } from "./providers/DbProvider";
 import { CaptureContext } from "./providers/CaptureProvider";
 import { GpsContext } from "./providers/GpsProvider";
 import { OrbitControls } from "@react-three/drei";
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import TorusList from './components/TorusList';
 // import LocationDataProvider from "./providers/LocationDataProvider";
 import Camera from "./components/Camera";
@@ -15,6 +15,7 @@ import ButtonArea from "./components/ButtonArea";
 import TestButtons from "./components/TestButtons";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CircularProgress } from "@mui/material";
+import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
 
 /* 定数定義 */
@@ -55,6 +56,8 @@ export default function App() {
   const {
     canvasRef
   } = useContext(CaptureContext);
+  
+  const [reset, setReset] = useState<boolean | null>(null); 
 
   // GPSの状態を管理するcontext
   const {
@@ -87,7 +90,8 @@ export default function App() {
     initializePositionZ(width);
   }, []);
 
-  // 3Dオブジェクトにおける視点を、レスポンシブな初期位置に設定する関数
+
+  // 3Dオブジェクトにおける視点を、レスポンシブな初期位置に設定する関数(初回表示のみ！！)
   function initializePositionZ(width: number){
     if (width >= 600 && width <= 960) {
       setPositionZ(new Vector3(0,0,10));
@@ -98,6 +102,39 @@ export default function App() {
     } else {
       setPositionZ(new Vector3(0,0,6));
     }
+  }
+
+
+  //画面幅に応じてのカメラリセット
+  function Perspection({ children, activation }: any) {
+  const { camera } = useThree();
+
+  function initializePositionZ(width: number) {
+    if (width >= 600 && width <= 960) {
+      camera.position.set(0,0,20);
+    } else if (width >= 450 && width <= 600) {
+      camera.position.set(0,0,15);
+    } else if (width <= 450) {
+      camera.position.set(0,0,20);
+    } else {
+      camera.position.set(0,0,6);
+    }
+  }
+
+  const width = window.innerWidth;
+  if (activation as boolean) {
+    initializePositionZ(width);
+  } else {
+    initializePositionZ(width);
+  }
+
+  return ( <>{children}</> );
+  }
+
+  //OrbitControlsの初期化
+  const orbitControlsRef = useRef<OrbitControlsImpl>(null!);
+  function orbitControlsReset() {
+    orbitControlsRef.current.reset();
   }
 
 
@@ -124,15 +161,17 @@ export default function App() {
               camera={{ position: positionZ }}
               ref={canvasRef}
             >
-              {Boolean(gpsFlag) && (
-                <TorusList/> // リングはピン設置箇所の近くでのみ表示される
-              )}
-              <ambientLight intensity={1} />
-              <directionalLight intensity={1.5} position={[1,1,1]} />
-              <directionalLight intensity={1.5} position={[1,1,-1]} />
-              <pointLight intensity={1} position={[1,1,5]}/>
-              <pointLight intensity={1} position={[1,1,-5]}/>
-              <OrbitControls enabled={enableOrbitControl} maxDistance={50}/>
+              <Perspection activation={reset} >
+                {Boolean(gpsFlag) && (
+                  <TorusList /> // リングはピン設置箇所の近くでのみ表示される
+                )}
+                <ambientLight intensity={1} />
+                <directionalLight intensity={1.5} position={[1,1,1]} />
+                <directionalLight intensity={1.5} position={[1,1,-1]} />
+                <pointLight intensity={1} position={[1,1,5]} />
+                <pointLight intensity={1} position={[1,1,-5]} />
+                <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef}/>
+              </Perspection>
             </Canvas>
           ) : (
             <div
@@ -158,7 +197,9 @@ export default function App() {
           enableOrbitControl={enableOrbitControl}
           setEnableOrbitControl={setEnableOrbitControl}
           hasPostRing={hasPostRing}
-          initializePositionZ={initializePositionZ}
+          initializePositionZ={() => initializePositionZ(window.innerWidth)}
+          onReset={() => setReset(state => !state)}
+          orbitControlsReset={orbitControlsReset}
         />
       </ThemeProvider>
       <ToastContainer />

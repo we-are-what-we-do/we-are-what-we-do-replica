@@ -25,7 +25,9 @@ export default function ButtonArea(props: {
     enableOrbitControl: boolean;
     setEnableOrbitControl: React.Dispatch<React.SetStateAction<boolean>>;
     hasPostRing: React.MutableRefObject<boolean>;
-    initializePositionZ(width: number): void;
+    initializePositionZ(): void;
+    onReset(): void;
+    orbitControlsReset(): void;
 }) {
     /* useState等 */
     const {
@@ -33,7 +35,9 @@ export default function ButtonArea(props: {
         enableOrbitControl,
         setEnableOrbitControl,
         hasPostRing,
-        initializePositionZ
+        initializePositionZ,
+        onReset,
+        orbitControlsReset
     } = props;
 
     // サーバーからリングデータを取得するためのcontext
@@ -75,6 +79,16 @@ export default function ButtonArea(props: {
     // 画面幅がmd以上かどうか
     const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上
 
+    //リング追加できなかったので作りました（trueにしたらリング追加できます）
+    const isDev = false;
+    const { addTorus, usedOrbitIndexes } = useContext(RingContext);
+    const buttonHandle = async () => {
+        if (isDev) {
+            addTorus(usedOrbitIndexes);
+        } else {
+            await handleTakePhotoButton();
+        }
+    }
 
     /* 関数定義 */
     // 撮影ボタンを押したときの処理
@@ -172,9 +186,10 @@ export default function ButtonArea(props: {
                 }}
                 aria-label="reset-view"
                 color="primary"
-                onClick={() => {
-                    const width: number = window.innerWidth;
-                    initializePositionZ(width);
+                onClick={() =>{
+                    onReset();
+                    orbitControlsReset();
+                    initializePositionZ();
                 }}
             >
                 <Refresh
@@ -191,7 +206,7 @@ export default function ButtonArea(props: {
                 }}
                 aria-label="capture-display"
                 color="primary"
-                onClick={handleTakePhotoButton}
+                onClick={buttonHandle}
                 disabled={!Boolean(gpsFlag)}
             >
                 <DoubleCircleIcon
