@@ -20,6 +20,7 @@ type Context = {
     currentLatitude: number | null;
     currentLongitude: number | null;
     errorMessage: string | null;
+    getLocationJp(locationId: string): string | null;
 };
 
 
@@ -29,7 +30,8 @@ const initialData: Context = {
     location: null,
     currentLatitude: null,
     currentLongitude: null,
-    errorMessage: null
+    errorMessage: null,
+    getLocationJp: () => null
 };
 
 export const GpsContext = createContext<Context>(initialData);
@@ -150,7 +152,8 @@ export function GpsProvider({children}: {children: ReactNode}){
                 location,
                 currentLatitude,
                 currentLongitude,
-                errorMessage
+                errorMessage,
+                getLocationJp
             }}
         >
             {children}

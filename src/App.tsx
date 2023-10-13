@@ -5,7 +5,7 @@ import { GpsContext } from "./providers/GpsProvider";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
 import TorusList from './components/TorusList';
-import LocationDataProvider from "./providers/LocationDataProvider";
+// import LocationDataProvider from "./providers/LocationDataProvider";
 import Camera from "./components/Camera";
 import { ToastContainer } from 'react-toastify';
 import { showInfoToast } from "./components/ToastHelpers"
