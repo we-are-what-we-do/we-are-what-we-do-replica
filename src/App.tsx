@@ -113,7 +113,7 @@ export default function App() {
           <Camera/>
         </div>
         <div className='canvas'>
-          {false ? (
+          {isLoadedData ? (
             <Canvas
               onCreated={({ gl }) => {
                 gl.setClearColor(0xFF0000, 0);
