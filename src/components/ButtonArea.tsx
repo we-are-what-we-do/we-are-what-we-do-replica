@@ -26,7 +26,6 @@ export default function ButtonArea(props: {
     setEnableOrbitControl: React.Dispatch<React.SetStateAction<boolean>>;
     hasPostRing: React.MutableRefObject<boolean>;
     initializePositionZ(): void;
-    onReset(): void;
     orbitControlsReset(): void;
 }) {
     /* useState等 */
@@ -36,7 +35,6 @@ export default function ButtonArea(props: {
         setEnableOrbitControl,
         hasPostRing,
         initializePositionZ,
-        onReset,
         orbitControlsReset
     } = props;
 
@@ -187,7 +185,6 @@ export default function ButtonArea(props: {
                 aria-label="reset-view"
                 color="primary"
                 onClick={() =>{
-                    onReset();
                     orbitControlsReset();
                     initializePositionZ();
                 }}

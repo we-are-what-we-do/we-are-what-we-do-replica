@@ -58,8 +58,6 @@ export default function App() {
     rendererRef
   } = useContext(CaptureContext);
   
-  const [reset, setReset] = useState<boolean | null>(null); 
-
   // GPSの状態を管理するcontext
   const {
     // gpsFlag,
@@ -106,32 +104,6 @@ export default function App() {
   }
 
 
-  //画面幅に応じてのカメラリセット
-  function Perspection({ children, activation }: any) {
-  const { camera } = useThree();
-
-  function initializePositionZ(width: number) {
-    if (width >= 600 && width <= 960) {
-      camera.position.set(0,0,20);
-    } else if (width >= 450 && width <= 600) {
-      camera.position.set(0,0,15);
-    } else if (width <= 450) {
-      camera.position.set(0,0,20);
-    } else {
-      camera.position.set(0,0,6);
-    }
-  }
-
-  const width = window.innerWidth;
-  if (activation as boolean) {
-    initializePositionZ(width);
-  } else {
-    initializePositionZ(width);
-  }
-
-  return ( <>{children}</> );
-  }
-
   //OrbitControlsの初期化
   const orbitControlsRef = useRef<OrbitControlsImpl>(null!);
   function orbitControlsReset() {
@@ -168,7 +140,6 @@ export default function App() {
                 return canvasRef
               }}
             >
-              <Perspection activation={reset} >
                 {Boolean(gpsFlag) && (
                   <TorusList /> // リングはピン設置箇所の近くでのみ表示される
                 )}
@@ -178,7 +149,6 @@ export default function App() {
                 <pointLight intensity={1} position={[1,1,5]} />
                 <pointLight intensity={1} position={[1,1,-5]} />
                 <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef}/>
-              </Perspection>
             </Canvas>
           ) : (
             <div
@@ -205,7 +175,6 @@ export default function App() {
           setEnableOrbitControl={setEnableOrbitControl}
           hasPostRing={hasPostRing}
           initializePositionZ={() => initializePositionZ(window.innerWidth)}
-          onReset={() => setReset(state => !state)}
           orbitControlsReset={orbitControlsReset}
         />
       </ThemeProvider>
