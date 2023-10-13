@@ -115,7 +115,7 @@ function getLastRings(obj: RingsData, lastAmount: number): RingsData{
 
 // 過去周のDEI周を切り捨てる関数
 // TODO 仮定義なので、APIの方でリングデータが0～71個に限定されていることを確認次第、削除する
-function getLatestLap(data: RingsData): RingsData{
+export function getLatestLap(data: RingsData): RingsData{
     const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
     const ringAmount: number = Object.keys(data).length; // リングデータの数
     let result: RingsData = {}; // 0～71個のリングデータ

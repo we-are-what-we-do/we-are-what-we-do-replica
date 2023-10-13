@@ -1,0 +1,242 @@
+* {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  user-select: none;
+}
+
+.canvas {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+.addBt {
+  position: absolute;
+  bottom: 0%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* --------------------------------------- */
+.top-container {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  color: white;
+}
+
+.top-container .camera-icon {
+  margin-left: 60px;
+}
+
+.top-container .camera-icon img {
+  padding: 0 40px;
+  width: 60px;
+  height: 60px;
+}
+
+.top-container .live-icon {
+  margin-right: 60px;
+  font-size: 2.5rem;
+  font-family: 'Roboto', sans-serif;
+  font-weight: bolder;
+  letter-spacing: 2px;
+  animation: 1.75s linear 0s infinite alternate recAnime;
+}
+
+.top-container .live-icon img {
+  margin-left: 10px;
+  width: 50px;
+  height: 50px;
+}
+
+@keyframes recAnime {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------- */
+.geo-info {
+  position: absolute;
+  bottom: 2.5%;
+  left: 5%;
+  padding: 15px 30px;
+  color: white;
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+
+.geo-info p:nth-of-type(1) {
+  text-align: center;
+  padding-bottom: 5px;
+  border-bottom: 1px solid white;
+}
+
+.geo-info p:nth-of-type(2) {
+  margin-top: 10px;
+}
+
+.time-info {
+  position: absolute;
+  bottom: 5%;
+  right: 5%;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.time-info .timer {
+  margin-bottom: 15px;
+}
+
+/* レスポンシブ------------------------------------------ */
+/* タブレット用 */
+
+@media screen and (max-width: 960px) {
+  * {
+    font-size: 1rem;
+  }
+
+  .top-container .camera-icon {
+    margin-left: 40px;
+  }
+  
+  .top-container .camera-icon img {
+    padding: 0 20px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .top-container .live-icon {
+    margin-right: 20px;
+    font-size: 1.75rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bolder;
+    letter-spacing: 2px;
+    animation: 1.75s linear 0s infinite alternate recAnime;
+  }
+  
+  .top-container .live-icon img {
+    margin-left: 5px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .geo-info {
+    position: absolute;
+    bottom: 2.5%;
+    left: 5%;
+    padding: 7.5px 15px;
+    color: white;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 10px;
+  }
+}
+
+/* スマホ用 */
+@media screen and (max-width: 600px) {
+  * {
+    font-size: 0.85rem;
+  }
+
+  .top-container .camera-icon {
+    margin-left: 20px;
+  }
+  
+  .top-container .camera-icon img {
+    padding: 0 10px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .top-container .live-icon {
+    margin-right: 20px;
+    font-size: 1.75rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bolder;
+    letter-spacing: 2px;
+    animation: 1.75s linear 0s infinite alternate recAnime;
+  }
+  
+  .top-container .live-icon img {
+    margin-left: 5px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .geo-info {
+    position: absolute;
+    bottom: 2.5%;
+    left: 5%;
+    padding: 7.5px 15px;
+    color: white;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 10px;
+  }
+}
+
+/* スマホ用 */
+@media screen and (max-width: 450px) {
+  * {
+    font-size: 0.85rem;
+  }
+
+  .top-container .camera-icon {
+    margin-left: 20px;
+  }
+  
+  .top-container .camera-icon img {
+    padding: 0 10px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .top-container .live-icon {
+    margin-right: 20px;
+    font-size: 1.75rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bolder;
+    letter-spacing: 2px;
+    animation: 1.75s linear 0s infinite alternate recAnime;
+  }
+  
+  .top-container .live-icon img {
+    margin-left: 5px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .geo-info {
+    position: absolute;
+    top: 15%;
+    left: 5%;
+    height: 65px;
+    padding: 7.5px 15px;
+    color: white;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 10px;
+  }
+
+  .time-info {
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    color: white;
+    font-size: 1.5rem;
+  }
+}
