@@ -165,9 +165,6 @@ export default function App() {
         </div>
       </div>
       <ThemeProvider theme={theme}>
-        {true && <TestButtons
-          hasPostRing={hasPostRing}
-        />}
         <ButtonArea
           theme={theme}
           enableOrbitControl={enableOrbitControl}
