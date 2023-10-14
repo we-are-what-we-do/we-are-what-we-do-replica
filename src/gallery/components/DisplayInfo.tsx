@@ -1,10 +1,17 @@
 import "../App.css";
 import { useAppSelector } from "../redux/store";
 
-function DisplayInfo(props: { ringCount: number, latestLocationJp: string | null}) {
+interface DisplayInfoProps {
+    ringCount: number;
+    latestLocationJp: string | null;
+    photoCount: number;  // photoCountをpropsに追加
+}
+
+function DisplayInfo(props: DisplayInfoProps) {
     const {
         ringCount,
-        latestLocationJp
+        latestLocationJp,
+        photoCount
     } = props;
 
     const updateTime  = useAppSelector((state) => state.updateTime.value);
@@ -13,7 +20,7 @@ function DisplayInfo(props: { ringCount: number, latestLocationJp: string | null
     return (
         <>
             <div className="time-info">
-                <div>撮影枚数: 40枚</div>
+                <div>撮影枚数: {photoCount}枚</div>
                 <div className="last-update">最終更新日時: {updateTime || "不明" }</div>
                 <div>最終更新場所: {latestLocationJp ?? "不明"}</div>
             </div>

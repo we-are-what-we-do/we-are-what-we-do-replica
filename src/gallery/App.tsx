@@ -21,6 +21,8 @@ function App() {
   } = useContext(DbContext);
 
   const dispatch = useDispatch<AppDispatch>();
+  
+  const [photoCount, setPhotCount] = useState<number>(0);
 
   // リングの表示を行う
   useEffect(() => {
@@ -101,8 +103,11 @@ function App() {
 
   return(
     <div className='canvas'>
-      <PicList />
-      <DisplayInfo ringCount={ringCount} latestLocationJp={latestLocationJp} />
+      <PicList updatePhotoCount={setPhotCount} />
+      <DisplayInfo 
+        ringCount={ringCount} 
+        latestLocationJp={latestLocationJp}
+        photoCount={photoCount} />
     </div>
   );
 }
