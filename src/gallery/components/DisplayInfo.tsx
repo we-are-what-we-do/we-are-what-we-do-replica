@@ -4,17 +4,14 @@ interface DisplayInfoProps {
     photoCount: number;
 }
 
-function DisplayInfo(props: DisplayInfoProps) {
+export default function DisplayInfo(props: DisplayInfoProps) {
     const {
         photoCount
     } = props;
     
     return (
-        <>
-            <div className="time-info">
-                <div>撮影枚数: {photoCount}枚</div>
-            </div>
-        </>
+        <div className="time-info">
+            <div>撮影枚数: {photoCount}枚</div>
+        </div>
     )
 }
-export default DisplayInfo;
