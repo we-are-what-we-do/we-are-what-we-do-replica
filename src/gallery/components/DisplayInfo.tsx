@@ -16,7 +16,6 @@ function DisplayInfo(props: DisplayInfoProps) {
 
     const updateTime  = useAppSelector((state) => state.updateTime.value);
     
-    //todo:k.ito 動的に撮影枚数を表示する処理を組み込む
     return (
         <>
             <div className="time-info">
