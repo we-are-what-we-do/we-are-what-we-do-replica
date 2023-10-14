@@ -18,13 +18,13 @@ function PicList() {
   const baseUrl = "https://we-are-what-we-do.s3.ap-northeast-1.amazonaws.com/";
   console.log(picPaths);
   return (
-    <div style={{ overflow: 'auto' }}>
+    <div className="picListContainer">
       {picPaths.map((picPath, index) => (
         <img 
           key={index} 
           src={`${baseUrl}${picPath}`} 
           alt={`pic-${index}`}
-          style={{ maxWidth: '400px', height: 'auto' }}/>
+          className="picListItem"/>
       ))}
     </div>
   );

@@ -101,7 +101,7 @@ function App() {
 
   return(
     <div className='canvas'>
-        <PicList />
+      <PicList />
       <DisplayInfo ringCount={ringCount} latestLocationJp={latestLocationJp} />
     </div>
   );

@@ -6,9 +6,22 @@
 
 .canvas {
   margin: 0;
-  padding: 0;;
+  padding: 0;
   user-select: none;
   background-color: #000000;
+}
+
+.picListContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  overflow: auto;
+}
+
+.picListItem {
+  max-width: 400px;
+  height: auto;
+  margin: 0 5px;
 }
 
 .addBt {
