@@ -146,13 +146,10 @@ export async function getPicPaths(): Promise<string[]>{
     const result:any = await response.json();
     const parsedBody:any = typeof result.body === "string" ? JSON.parse(result.body) : result.body;
     if (parsedBody && Array.isArray(parsedBody.file_paths) && parsedBody.file_paths.every(item => typeof item === 'string')) {
-        console.log("parsedBody")
-        console.log(parsedBody)
-
+        
         // 古い写真から順番に格納されているのが前提。逆順にすることで、最新画像を先頭にする
         const reversedPaths = [...parsedBody.file_paths].reverse();
-
-        // todo:k.ito 不適切な画像を排除するロジック追加
+        
         return reversedPaths;
     } else {
         throw new Error("Unexpected data structure");

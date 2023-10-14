@@ -1,32 +1,39 @@
 import { useEffect, useState } from "react";
 import { getPicPaths } from "../../api/fetchDb";
 
+interface PicListProps {
+  updatePhotoCount: (count: number) => void;
+}
 
-function PicList() {
+function PicList({updatePhotoCount}: PicListProps) {
   const [picPaths, setPics] = useState<string[]>([]);
 
   useEffect(() => {
-    getPicPaths().then((data) => {
-      
+    getPicPaths().then(async (data) => {
+
       // 下記２行は表示テスト用。４枚のサンプルデータを40枚に増やした
       const multipliedData = data.flatMap(pic => Array(10).fill(pic));
       setPics(multipliedData);
-      // setPics(data);
+      // setPics(validData); // 本番コード
+
+      updatePhotoCount(multipliedData.length);
+
+      //updatePhotoCount(validData.length); // 本番コード
     })
-  }, []);
+  }, [updatePhotoCount]);
 
   const baseUrl = "https://we-are-what-we-do.s3.ap-northeast-1.amazonaws.com/";
-  console.log(picPaths);
   return (
-    <div style={{ overflow: 'auto' }}>
+    <div className="picListContainer">
       {picPaths.map((picPath, index) => (
         <img 
           key={index} 
           src={`${baseUrl}${picPath}`} 
           alt={`pic-${index}`}
-          style={{ maxWidth: '400px', height: 'auto' }}/>
+          className="picListItem"/>
       ))}
     </div>
   );
 }
+
 export default PicList;
