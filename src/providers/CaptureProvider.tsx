@@ -122,6 +122,8 @@ export function CaptureProvider({children}: {children: ReactNode}){
 
     // リングのcanvas要素を取得する関数
     function captureRingImage(): HTMLCanvasElement | null{
+        if(!canvasRef.current) return null;
+        rendererRef.current = new WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true }); // TODO ここでカメラが停止してしまうのを解決
         if (rendererRef.current) {
             const renderer: WebGLRenderer = rendererRef.current;
             const canvasElement: HTMLCanvasElement = renderer.domElement;

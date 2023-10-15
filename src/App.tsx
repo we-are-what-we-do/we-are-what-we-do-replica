@@ -132,13 +132,7 @@ export default function App() {
               }}
               gl={{ antialias: true, alpha: true }}
               camera={{ position: positionZ }}
-              ref={(node) => {
-                if(node){
-                  const renderer: WebGLRenderer = new WebGLRenderer({ canvas: node, preserveDrawingBuffer: true });
-                  rendererRef.current = renderer;
-                }
-                return canvasRef
-              }}
+              ref={canvasRef}
             >
                 {Boolean(gpsFlag) && (
                   <TorusList /> // リングはピン設置箇所の近くでのみ表示される
