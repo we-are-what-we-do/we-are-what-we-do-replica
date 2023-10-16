@@ -120,7 +120,7 @@ export default function App() {
       )}
       <div id="app">
         <div className="camera">
-          <Camera/>
+          <Camera />
         </div>
         <div className='canvas'>
           {isLoadedData ? (
@@ -142,7 +142,7 @@ export default function App() {
                 <directionalLight intensity={1.5} position={[1,1,-1]} />
                 <pointLight intensity={1} position={[1,1,5]} />
                 <pointLight intensity={1} position={[1,1,-5]} />
-                <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef}/>
+                <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
             </Canvas>
           ) : (
             <div
@@ -154,7 +154,7 @@ export default function App() {
                 height: "100%"
               }}
             >
-              <CircularProgress/>
+              <CircularProgress />
             </div>
           )}
         </div>

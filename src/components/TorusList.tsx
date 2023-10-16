@@ -1,7 +1,10 @@
+import { Sparkles } from "@react-three/drei";
 import { useAppSelector } from "../redux/store";
 
 function TorusList() {
   const torusList = useAppSelector((state) => state.torusInfo.value);
+  const animeIndex = useAppSelector((state) => state.animeIndex.value);  
+
 
   return (
     <>
@@ -14,6 +17,7 @@ function TorusList() {
         >
           <torusGeometry args={[5.5, 1.5, 40, 50]} />
           <meshStandardMaterial color={torus.color} roughness={0.0} />
+          { animeIndex == torus.id ? <Sparkles scale={8} size={5} /> : <></> }
         </mesh>
       ))}
     </>
