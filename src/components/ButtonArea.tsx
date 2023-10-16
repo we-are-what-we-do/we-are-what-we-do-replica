@@ -77,17 +77,6 @@ export default function ButtonArea(props: {
     // 画面幅がmd以上かどうか
     const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上
 
-    //リング追加できなかったので作りました（trueにしたらリング追加できます）
-    // TODO 削除
-    const isDev = false;
-    const { addTorus, usedOrbitIndexes } = useContext(RingContext);
-    const buttonHandle = async () => {
-        if (isDev) {
-            addTorus(usedOrbitIndexes);
-        } else {
-            await handleTakePhotoButton();
-        }
-    }
 
     /* 関数定義 */
     // 撮影ボタンを押したときの処理
@@ -204,7 +193,7 @@ export default function ButtonArea(props: {
                 }}
                 aria-label="capture-display"
                 color="primary"
-                onClick={buttonHandle}
+                onClick={handleTakePhotoButton}
                 disabled={!Boolean(gpsFlag)}
             >
                 <DoubleCircleIcon
