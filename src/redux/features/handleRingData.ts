@@ -84,7 +84,7 @@ export function getAvailableIndex(excludedIndexes: number[]): number | null{
     }
 
     const randomIndex = eligibleIndexes[Math.floor(Math.random() * eligibleIndexes.length)];
-
+    
     return randomIndex;
 }
 

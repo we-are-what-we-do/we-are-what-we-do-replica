@@ -8,21 +8,21 @@ import { IpProvider } from "../providers/IpProvider";
 import { GpsProvider } from "../providers/GpsProvider";
 
 export function Providers({ children }: {children: React.ReactNode}) {
-    return (
-        <Provider store={store}>
-            <DbProvider>
-                <IpProvider>{/* DbProvider配下にIpProviderを設置 */}
-                    <GpsProvider>
-                        <RingProvider>{/* DbProvider, IpProvider, GpsProvider配下にRingProviderを設置 */}
-                            <CameraProvider>
-                                <CaptureProvider>{/* CameraProvider配下にCaptureProviderを設置 */}
-                                    {children}
-                                </CaptureProvider>
-                            </CameraProvider>
-                        </RingProvider>
-                    </GpsProvider>
-                </IpProvider>
-            </DbProvider>
-        </Provider>
-    )
+  return (
+    <Provider store={store}>
+      <DbProvider>
+        <IpProvider>{/* DbProvider配下にIpProviderを設置 */}
+          <GpsProvider>
+            <RingProvider>{/* DbProvider, IpProvider, GpsProvider配下にRingProviderを設置 */}
+              <CameraProvider>
+                <CaptureProvider>{/* CameraProvider配下にCaptureProviderを設置 */}
+                  {children}
+                </CaptureProvider>
+              </CameraProvider>
+            </RingProvider>
+          </GpsProvider>
+        </IpProvider>
+      </DbProvider>
+    </Provider>
+  )
 }

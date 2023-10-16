@@ -78,7 +78,7 @@ export default function ButtonArea(props: {
     const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上
 
     //リング追加できなかったので作りました（trueにしたらリング追加できます）
-    const isDev = false;
+    const isDev = true;
     const { addTorus, usedOrbitIndexes } = useContext(RingContext);
     const buttonHandle = async () => {
         if (isDev) {
