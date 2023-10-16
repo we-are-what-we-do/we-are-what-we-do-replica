@@ -17,6 +17,9 @@ import CameraRear from '@mui/icons-material/CameraRear';
 import CameraFront from '@mui/icons-material/CameraFront';
 import Cameraswitch from '@mui/icons-material/Cameraswitch';
 import { ICON_SIZE, ICON_COLOR, DISABLED_COLOR, BUTTON_MARGIN } from "./../App";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../redux/store";
+import { changeVisibility } from "../redux/features/animeVisible-slicec";
 
 
 // ボタン類のコンポーネント
@@ -78,7 +81,7 @@ export default function ButtonArea(props: {
     const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上
 
     //リング追加できなかったので作りました（trueにしたらリング追加できます）
-    const isDev = true;
+    const isDev = false;
     const { addTorus, usedOrbitIndexes } = useContext(RingContext);
     const buttonHandle = async () => {
         if (isDev) {
@@ -93,8 +96,9 @@ export default function ButtonArea(props: {
     async function handleTakePhotoButton(): Promise<void>{
         // 撮影する写真に確認を取る
         if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
-        videoRef.current?.pause(); // カメラを一時停止する
+        videoRef.current?.pause();    // カメラを一時停止する
         setEnableOrbitControl(false); // 3Dの視点を固定する
+        dispatch(changeVisibility()); //アニメ非表示
 
         // 写真(リング+カメラ)を撮影をして、base64形式で取得する
         const newImage: string | null = captureImage();
@@ -163,10 +167,12 @@ export default function ButtonArea(props: {
             // console.log("撮影やり直しのために処理を中断しました");
         }
 
-        videoRef.current?.play(); // カメラを再生する
-        setEnableOrbitControl(true); // 3Dの視点固定を解除する
+        videoRef.current?.play();      // カメラを再生する
+        setEnableOrbitControl(true);   // 3Dの視点固定を解除する
+        dispatch(changeVisibility());  //アニメ非表示
     }
 
+    const dispatch = useDispatch<AppDispatch>();
 
     return (
         <div
