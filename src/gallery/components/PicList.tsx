@@ -12,6 +12,7 @@ function PicList({updatePhotoCount}: PicListProps) {
     getPicPaths().then(async (data: string[]) => {
 
       // 下記２行は表示テスト用。４枚のサンプルデータを40枚に増やした
+      // TODO 本番コードに修正
       const multipliedData = data.flatMap((pic: string) => Array(10).fill(pic));
       setPics(multipliedData);
       // setPics(validData); // 本番コード
