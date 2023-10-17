@@ -92,6 +92,10 @@ export default function ButtonArea(props: {
 
         // 写真(リング+カメラ)を撮影をして、base64形式で取得する
         const newImage: string | null = captureImage();
+        if(!newImage){
+            console.error("写真を撮影できませんでした");
+            return;
+        }
 
         // 撮影した写真に確認を取る
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
@@ -106,11 +110,7 @@ export default function ButtonArea(props: {
             if(!addedRingData){
                 console.error("追加したリングデータを取得できませんでした");
                 return;
-            }; 
-            if(!newImage){
-                console.error("写真を撮影できませんでした");
-                return;
-            }
+            };
 
             // リングデータを送信する
             if((!Boolean(ipFlag)) || (hasPostRing.current)){
