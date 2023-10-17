@@ -9,7 +9,7 @@ import TorusList from './components/TorusList';
 import Camera from "./components/Camera";
 import { ToastContainer } from 'react-toastify';
 import { showInfoToast } from "./components/ToastHelpers"
-import { Vector3, WebGLRenderer } from "three";
+import { Vector3 } from "three";
 import ButtonArea from "./components/ButtonArea";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CircularProgress } from "@mui/material";
@@ -52,8 +52,7 @@ export default function App() {
 
   // 写真撮影(リング+カメラ)のためのcontext
   const {
-    canvasRef,
-    rendererRef
+    canvasRef
   } = useContext(CaptureContext);
   
   // GPSの状態を管理するcontext
@@ -96,7 +95,7 @@ export default function App() {
     } else if (width <= 450) {
       setPositionZ(new Vector3(0,0,20));
     } else {
-      setPositionZ(new Vector3(0,0,6));
+      setPositionZ(new Vector3(0,0,8));
     }
   }
 
@@ -117,37 +116,31 @@ export default function App() {
       )}
       <div id="app">
         <div className="camera">
-          <Camera/>
+          <Camera />
         </div>
         <div className='canvas'>
-          {isLoadedData ? (
-            <Canvas
-              onCreated={({ gl }) => {
-                gl.setClearColor(0xFF0000, 0);
-                gl.autoClear = true;
-                gl.clearDepth()
-              }}
-              gl={{ antialias: true, alpha: true }}
-              camera={{ position: positionZ }}
-              ref={(node) => {
-                if(node){
-                  const renderer: WebGLRenderer = new WebGLRenderer({ canvas: node, preserveDrawingBuffer: true });
-                  rendererRef.current = renderer;
-                }
-                return canvasRef
-              }}
-            >
-                {Boolean(gpsFlag) && (
-                  <TorusList /> // リングはピン設置箇所の近くでのみ表示される
-                )}
-                <ambientLight intensity={1} />
-                <directionalLight intensity={1.5} position={[1,1,1]} />
-                <directionalLight intensity={1.5} position={[1,1,-1]} />
-                <pointLight intensity={1} position={[1,1,5]} />
-                <pointLight intensity={1} position={[1,1,-5]} />
-                <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef}/>
-            </Canvas>
-          ) : (
+          <Canvas
+            hidden={!isLoadedData}
+            onCreated={({ gl }) => {
+              gl.setClearColor(0xFF0000, 0);
+              gl.autoClear = true;
+              gl.clearDepth()
+            }}
+            gl={{ antialias: true, alpha: true }}
+            camera={{ position: positionZ }}
+            ref={canvasRef}
+          >
+            {Boolean(gpsFlag) && (
+              <TorusList /> // リングはピン設置箇所の近くでのみ表示される
+            )}
+            <ambientLight intensity={1} />
+            <directionalLight intensity={1.5} position={[1,1,1]} />
+            <directionalLight intensity={1.5} position={[1,1,-1]} />
+            <pointLight intensity={1} position={[1,1,5]} />
+            <pointLight intensity={1} position={[1,1,-5]} />
+            <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
+          </Canvas>
+          {!isLoadedData && (
             <div
               style={{
                 display: "flex",
@@ -157,7 +150,7 @@ export default function App() {
                 height: "100%"
               }}
             >
-              <CircularProgress/>
+              <CircularProgress />
             </div>
           )}
         </div>

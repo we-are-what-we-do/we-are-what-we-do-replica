@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useRef, useContext } from 'react';
+import { ReactNode, createContext, useRef, useContext, useEffect } from 'react';
 import { WebGLRenderer } from "three";
 import { saveAs } from "file-saver";
 import { CameraContext } from './CameraProvider';
@@ -30,6 +30,16 @@ export function CaptureProvider({children}: {children: ReactNode}){
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
     const { videoRef } = useContext(CameraContext);
+
+
+    /* useEffect等 */
+    useEffect(() => {
+        // 初回マウント時、canvasRefからrendererインスタンスを作成する
+        if (canvasRef.current) {
+            const renderer: WebGLRenderer = new WebGLRenderer({ canvas: canvasRef.current, preserveDrawingBuffer: true });
+            rendererRef.current = renderer;
+        }
+    }, []);
 
 
     /* 関数定義 */
@@ -122,13 +132,9 @@ export function CaptureProvider({children}: {children: ReactNode}){
 
     // リングのcanvas要素を取得する関数
     function captureRingImage(): HTMLCanvasElement | null{
-        if (rendererRef.current) {
-            const renderer: WebGLRenderer = rendererRef.current;
-            const canvasElement: HTMLCanvasElement = renderer.domElement;
-            return canvasElement;
-        }else{
-            return null;
-        }
+        if(!rendererRef.current) return null;
+        const canvasElm: HTMLCanvasElement = rendererRef.current.domElement;
+        return canvasElm;
     };
 
     // base64形式の画像を画像ファイルとしてダウンロードする関数

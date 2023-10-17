@@ -102,7 +102,7 @@ function App() {
 
   return(
     <div className='canvas'>
-      <Canvas camera={{ position: [0,0,6] }} >
+      <Canvas camera={{ position: [0,0,8] }} >
         <color attach="background" args={[0xff000000]} /> {/*背景色*/}
           <ambientLight intensity={1} />
           <directionalLight intensity={1.5} position={[1,1,1]} />

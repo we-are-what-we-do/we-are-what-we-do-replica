@@ -22,7 +22,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(root, 'index.html'),
-        live: resolve(root, "live", 'index.html')
+        live: resolve(root, "live", 'index.html'),
+        gallery: resolve(root, "gallery", 'index.html'),
       }
     }
   }

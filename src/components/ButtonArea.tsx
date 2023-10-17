@@ -17,6 +17,9 @@ import CameraRear from '@mui/icons-material/CameraRear';
 import CameraFront from '@mui/icons-material/CameraFront';
 import Cameraswitch from '@mui/icons-material/Cameraswitch';
 import { ICON_SIZE, ICON_COLOR, DISABLED_COLOR, BUTTON_MARGIN } from "./../App";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../redux/store";
+import { changeVisibility } from "../redux/features/animeVisible-slicec";
 
 
 // ボタン類のコンポーネント
@@ -75,27 +78,22 @@ export default function ButtonArea(props: {
     // 画面幅がmd以上かどうか
     const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上
 
-    //リング追加できなかったので作りました（trueにしたらリング追加できます）
-    const isDev = false;
-    const { addTorus, usedOrbitIndexes } = useContext(RingContext);
-    const buttonHandle = async () => {
-        if (isDev) {
-            addTorus(usedOrbitIndexes);
-        } else {
-            await handleTakePhotoButton();
-        }
-    }
 
     /* 関数定義 */
     // 撮影ボタンを押したときの処理
     async function handleTakePhotoButton(): Promise<void>{
         // 撮影する写真に確認を取る
-        // if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
-        videoRef.current?.pause(); // カメラを一時停止する
+        if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
+        videoRef.current?.pause();    // カメラを一時停止する
         setEnableOrbitControl(false); // 3Dの視点を固定する
+        dispatch(changeVisibility()); //アニメ非表示
 
         // 写真(リング+カメラ)を撮影をして、base64形式で取得する
         const newImage: string | null = captureImage();
+        if(!newImage){
+            console.error("写真を撮影できませんでした");
+            return;
+        }
 
         // 撮影した写真に確認を取る
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
@@ -110,11 +108,7 @@ export default function ButtonArea(props: {
             if(!addedRingData){
                 console.error("追加したリングデータを取得できませんでした");
                 return;
-            }; 
-            if(!newImage){
-                console.error("写真を撮影できませんでした");
-                return;
-            }
+            };
 
             // リングデータを送信する
             if((!Boolean(ipFlag)) || (hasPostRing.current)){
@@ -161,10 +155,12 @@ export default function ButtonArea(props: {
             // console.log("撮影やり直しのために処理を中断しました");
         }
 
-        videoRef.current?.play(); // カメラを再生する
-        setEnableOrbitControl(true); // 3Dの視点固定を解除する
+        videoRef.current?.play();      // カメラを再生する
+        setEnableOrbitControl(true);   // 3Dの視点固定を解除する
+        dispatch(changeVisibility());  //アニメ非表示
     }
 
+    const dispatch = useDispatch<AppDispatch>();
 
     return (
         <div
@@ -201,7 +197,7 @@ export default function ButtonArea(props: {
                 }}
                 aria-label="capture-display"
                 color="primary"
-                onClick={buttonHandle}
+                onClick={handleTakePhotoButton}
                 disabled={!Boolean(gpsFlag)}
             >
                 <DoubleCircleIcon

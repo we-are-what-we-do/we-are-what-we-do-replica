@@ -8,6 +8,7 @@ import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusIn
 import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRingColor } from '../redux/features/handleRingData';
 import { Ring, positionArray, torusScale } from '../torusPosition';
 import { v4 as uuidv4 } from 'uuid';
+import { getRandIndex } from '../redux/features/randIndex-slice';
 
 
 /* 型定義 */
@@ -136,6 +137,7 @@ export function RingProvider({children}: {children: ReactNode}){
             scale: torusScale
         };
 
+
         const torusData: AddedTorusInfo = {
             orbitIndex: newOrbitIndex,
             ringHue
@@ -154,6 +156,9 @@ export function RingProvider({children}: {children: ReactNode}){
 
         // 追加するためのリングを生成する
         let newTorusData: TorusWithData | null = createTorus(orbitIndexes);
+
+        //storeへuuidを送る
+        dispatch(getRandIndex(newTorusData?.torus.id));
 
         // DEIが完成している場合、描画を初期化してから、リング生成をもう一度試みる
         if(!newTorusData){
