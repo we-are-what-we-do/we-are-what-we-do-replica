@@ -122,8 +122,7 @@ export default function App() {
           <Camera />
         </div>
         <div className='canvas'>
-          {isLoadedData ? (
-            <Canvas
+        <Canvas
               onCreated={({ gl }) => {
                 gl.setClearColor(0xFF0000, 0);
                 gl.autoClear = true;
@@ -133,17 +132,17 @@ export default function App() {
               camera={{ position: positionZ }}
               ref={canvasRef}
             >
-                {Boolean(gpsFlag) && (
-                  <TorusList /> // リングはピン設置箇所の近くでのみ表示される
-                )}
-                <ambientLight intensity={1} />
-                <directionalLight intensity={1.5} position={[1,1,1]} />
-                <directionalLight intensity={1.5} position={[1,1,-1]} />
-                <pointLight intensity={1} position={[1,1,5]} />
-                <pointLight intensity={1} position={[1,1,-5]} />
-                <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
-            </Canvas>
-          ) : (
+              {Boolean(gpsFlag) && (
+                <TorusList /> // リングはピン設置箇所の近くでのみ表示される
+              )}
+              <ambientLight intensity={1} />
+              <directionalLight intensity={1.5} position={[1,1,1]} />
+              <directionalLight intensity={1.5} position={[1,1,-1]} />
+              <pointLight intensity={1} position={[1,1,5]} />
+              <pointLight intensity={1} position={[1,1,-5]} />
+              <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
+          </Canvas>
+          {!isLoadedData && (
             <div
               style={{
                 display: "flex",
