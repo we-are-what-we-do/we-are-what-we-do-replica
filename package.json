@@ -23,7 +23,6 @@
     "@types/three": "^0.156.0",
     "file-saver": "^2.0.5",
     "file-server": "^2.2.1",
-    "moment-timezone": "^0.5.43",
     "path": "^0.12.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -1,7 +1,6 @@
 import { Ring, positionArray, torusScale } from "../../torusPosition";
 import { TorusInfo } from "./torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
-import * as moment from 'moment-timezone';
 
 
 /* 型定義 */
@@ -90,18 +89,11 @@ export function getAvailableIndex(excludedIndexes: number[]): number | null{
 
 
 /* ISO8601形式の文字列を取り扱う関数 */
-// 現在時刻をISO8601形式の文字列で取得する関数
+// 現在時刻'日本標準時)をISO8601形式の文字列で取得する関数
 export function getIso8601DateTime(): string{
-    // タイムゾーンを日本標準時に設定
-    moment.tz.setDefault('Asia/Tokyo');
-
-    // 現在の日時を取得
-    const currentDateTime = moment();
-
-    // ISO 8601形式で出力
-    const iso8601DateTime = currentDateTime.toISOString();
-
-    return iso8601DateTime;
+    // 取得できる値は必ず日本時間になる
+    const jstNow = new Date(Date.now() + ((new Date().getTimezoneOffset() + (9 * 60)) * 60 * 1000));
+    return new Date(jstNow).toISOString();
 }
 
 // ISO8601形式の日付時刻文字列同士を比較し、どちらが新しいのかを真偽値で取得する関数
