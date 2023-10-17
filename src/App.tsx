@@ -10,7 +10,7 @@ import TorusList from './components/TorusList';
 import Camera from "./components/Camera";
 import { ToastContainer } from 'react-toastify';
 import { showInfoToast } from "./components/ToastHelpers"
-import { Vector3, WebGLRenderer } from "three";
+import { Vector3 } from "three";
 import ButtonArea from "./components/ButtonArea";
 import TestButtons from "./components/TestButtons";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -54,8 +54,7 @@ export default function App() {
 
   // 写真撮影(リング+カメラ)のためのcontext
   const {
-    canvasRef,
-    rendererRef
+    canvasRef
   } = useContext(CaptureContext);
   
   // GPSの状態を管理するcontext
