@@ -99,7 +99,7 @@ export default function App() {
     } else if (width <= 450) {
       setPositionZ(new Vector3(0,0,20));
     } else {
-      setPositionZ(new Vector3(0,0,6));
+      setPositionZ(new Vector3(0,0,8));
     }
   }
 
