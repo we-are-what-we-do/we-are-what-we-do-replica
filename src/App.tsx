@@ -10,7 +10,7 @@ import TorusList from './components/TorusList';
 import Camera from "./components/Camera";
 import { ToastContainer } from 'react-toastify';
 import { showInfoToast } from "./components/ToastHelpers"
-import { Vector3, WebGLRenderer } from "three";
+import { Vector3 } from "three";
 import ButtonArea from "./components/ButtonArea";
 import TestButtons from "./components/TestButtons";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -54,8 +54,7 @@ export default function App() {
 
   // 写真撮影(リング+カメラ)のためのcontext
   const {
-    canvasRef,
-    rendererRef
+    canvasRef
   } = useContext(CaptureContext);
   
   // GPSの状態を管理するcontext
@@ -123,8 +122,7 @@ export default function App() {
           <Camera />
         </div>
         <div className='canvas'>
-          {isLoadedData ? (
-            <Canvas
+        <Canvas
               onCreated={({ gl }) => {
                 gl.setClearColor(0xFF0000, 0);
                 gl.autoClear = true;
@@ -132,25 +130,19 @@ export default function App() {
               }}
               gl={{ antialias: true, alpha: true }}
               camera={{ position: positionZ }}
-              ref={(node) => {
-                if(node){
-                  const renderer: WebGLRenderer = new WebGLRenderer({ canvas: node, preserveDrawingBuffer: true });
-                  rendererRef.current = renderer;
-                }
-                return canvasRef
-              }}
+              ref={canvasRef}
             >
-                {Boolean(gpsFlag) && (
-                  <TorusList /> // リングはピン設置箇所の近くでのみ表示される
-                )}
-                <ambientLight intensity={1} />
-                <directionalLight intensity={1.5} position={[1,1,1]} />
-                <directionalLight intensity={1.5} position={[1,1,-1]} />
-                <pointLight intensity={1} position={[1,1,5]} />
-                <pointLight intensity={1} position={[1,1,-5]} />
-                <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
-            </Canvas>
-          ) : (
+              {Boolean(gpsFlag) && (
+                <TorusList /> // リングはピン設置箇所の近くでのみ表示される
+              )}
+              <ambientLight intensity={1} />
+              <directionalLight intensity={1.5} position={[1,1,1]} />
+              <directionalLight intensity={1.5} position={[1,1,-1]} />
+              <pointLight intensity={1} position={[1,1,5]} />
+              <pointLight intensity={1} position={[1,1,-5]} />
+              <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
+          </Canvas>
+          {!isLoadedData && (
             <div
               style={{
                 display: "flex",
