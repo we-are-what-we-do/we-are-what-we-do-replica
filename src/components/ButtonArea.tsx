@@ -90,13 +90,6 @@ export default function ButtonArea(props: {
         setEnableOrbitControl(false); // 3Dの視点を固定する
         dispatch(changeVisibility()); //アニメ非表示
 
-        // 写真(リング+カメラ)を撮影をして、base64形式で取得する
-        const newImage: string | null = captureImage();
-        if(!newImage){
-            console.error("写真を撮影できませんでした");
-            return;
-        }
-
         // 撮影した写真に確認を取る
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
         console.log("isPhotoOk: ", isPhotoOk);
@@ -111,6 +104,13 @@ export default function ButtonArea(props: {
                 console.error("追加したリングデータを取得できませんでした");
                 return;
             };
+
+            // 写真(リング+カメラ)を撮影をして、base64形式で取得する
+            const newImage: string | null = captureImage();
+            if(!newImage){
+                console.error("写真を撮影できませんでした");
+                return;
+            }
 
             // リングデータを送信する
             if((!Boolean(ipFlag)) || (hasPostRing.current)){
@@ -136,22 +136,22 @@ export default function ButtonArea(props: {
                     // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
                     showInfoToast("I005");
 
-                    }catch(error){
-                        // サーバーにリングデータを送信できなかった際のエラーハンドリング
-                        console.error(
-                            "サーバーにデータを送信できませんでした", "\n",
-                            "以下の可能性があります", "\n",
-                            "- 送信しようとしたリングデータがコンフリクトを起こした", "\n",
-                            "- サーバーにアクセスできない", "\n",
-                            error
-                        );
-                        await initializeRingData();
-                        showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
-                    }
-                };
+                }catch(error){
+                    // サーバーにリングデータを送信できなかった際のエラーハンドリング
+                    console.error(
+                        "サーバーにデータを送信できませんでした", "\n",
+                        "以下の可能性があります", "\n",
+                        "- 送信しようとしたリングデータがコンフリクトを起こした", "\n",
+                        "- サーバーにアクセスできない", "\n",
+                        error
+                    );
+                    await initializeRingData();
+                    showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
+                }
+            };
 
-                // 撮影した写真をダウンロードする
-                saveImage(newImage);
+            // 撮影した写真をダウンロードする
+            saveImage(newImage);
         }else{
             // 再撮影を望む場合、処理を止める
             // console.log("撮影やり直しのために処理を中断しました");
