@@ -193,6 +193,7 @@ export default function ButtonArea(props: {
                 aria-label="reset-view"
                 color="primary"
                 onClick={() =>{
+                    if(isTakingPhotoRef.current) return; // 撮影ボタンの処理中なら、処理をやめる
                     orbitControlsReset();
                     initializePositionZ();
                 }}
@@ -227,7 +228,10 @@ export default function ButtonArea(props: {
                 aria-label="switch-camera"
                 color="primary"
                 disabled={!enableBothCamera}
-                onClick={() => switchCameraFacing(enableOrbitControl)}
+                onClick={() => {
+                    if(isTakingPhotoRef.current) return; // 撮影ボタンの処理中なら、処理をやめる
+                    switchCameraFacing(enableOrbitControl);
+                }}
             >
                 {(cameraFacing === "out") ? (
                     <CameraFront
