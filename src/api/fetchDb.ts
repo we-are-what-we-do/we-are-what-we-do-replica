@@ -37,8 +37,10 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
     }else{
         // キャッシュデータがない場合、サーバーからデータを取得する
         // const apiEndpoint: string = "locations";
-        const apiEndpoint: string = "locations.json"; // 仮エンドポイント
-        const response: Response = await makeGetRequest(apiEndpoint);
+        // const apiEndpoint: string = "locations.json"; // 仮エンドポイント
+        // const response: Response = await makeGetRequest(apiEndpoint);
+        const response: Response = await fetch('https://wawwd.net/test/wawwdtestdb-default-rtdb-locations-export.json'); // 仮取得
+        console.log(response);
         result = await response.json() as FeatureCollection<Point>;
 
         // サーバーから取得したデータをキャッシュに保存する
