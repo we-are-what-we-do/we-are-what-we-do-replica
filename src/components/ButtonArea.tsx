@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import { postNftImage, postRingData } from './../api/fetchDb';
 import { RingData } from "../redux/features/handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
@@ -80,10 +80,20 @@ export default function ButtonArea(props: {
     // 画面幅がmd以上かどうか
     const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上
 
+    // 撮影ボタンの処理中かどうか
+    const isTakingPhotoRef = useRef<boolean>(false);
+
 
     /* 関数定義 */
     // 撮影ボタンを押したときの処理
     async function handleTakePhotoButton(): Promise<void>{
+        // 既に撮影ボタンの処理が走っているなら、処理を中止する
+        if(isTakingPhotoRef.current){
+            console.error("既に撮影ボタンが押されています");
+            return;
+        };
+        isTakingPhotoRef.current = true; // 撮影ボタンの処理中であることを記録する
+
         // 撮影する写真に確認を取る
         if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
         videoRef.current?.pause();    // カメラを一時停止する
@@ -160,6 +170,8 @@ export default function ButtonArea(props: {
         videoRef.current?.play();      // カメラを再生する
         setEnableOrbitControl(true);   // 3Dの視点固定を解除する
         dispatch(changeVisibility());  //アニメ非表示
+
+        isTakingPhotoRef.current = false; // 撮影ボタンの処理が終わったことを記録する
     }
 
     const dispatch = useDispatch<AppDispatch>();
