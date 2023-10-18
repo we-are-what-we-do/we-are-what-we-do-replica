@@ -20,7 +20,7 @@ export const ConfirmToast: React.FC<ConfirmToastProps> = ({ onYes, onNo }) => {
       alignItems="center"
     >
       <Grid item xs={12}>
-        <div>{messageI004}</div>
+        <div className="message">{messageI004}</div>
       </Grid>
       <Grid item xs={12}>
         <Button
@@ -32,6 +32,7 @@ export const ConfirmToast: React.FC<ConfirmToastProps> = ({ onYes, onNo }) => {
         <Button
           variant="outlined"
           onClick={onNo}
+          style={{backgroundColor: "white"}}
         >
           {messageI004n}
         </Button>
