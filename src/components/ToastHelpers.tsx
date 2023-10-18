@@ -31,6 +31,9 @@ export const showConfirmToast = async () => {
       />,
       {
         autoClose: false, // トーストを自動的に閉じない
+        style: {
+          // backgroundColor: "rgba(255, 255, 255, 0.9)"
+        }
         // TODO 本番環境ではコメントアウトを解除する
         // onClose: () => {
         //   // Toastが閉じられたときに実行したい処理をここに記述
