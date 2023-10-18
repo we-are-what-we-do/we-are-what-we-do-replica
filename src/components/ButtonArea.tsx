@@ -136,22 +136,22 @@ export default function ButtonArea(props: {
                     // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
                     showInfoToast("I005");
 
-                    // 撮影した写真をダウンロードする
-                    saveImage(newImage);
+                    }catch(error){
+                        // サーバーにリングデータを送信できなかった際のエラーハンドリング
+                        console.error(
+                            "サーバーにデータを送信できませんでした", "\n",
+                            "以下の可能性があります", "\n",
+                            "- 送信しようとしたリングデータがコンフリクトを起こした", "\n",
+                            "- サーバーにアクセスできない", "\n",
+                            error
+                        );
+                        await initializeRingData();
+                        showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
+                    }
+                };
 
-                }catch(error){
-                    // サーバーにリングデータを送信できなかった際のエラーハンドリング
-                    console.error(
-                        "サーバーにデータを送信できませんでした", "\n",
-                        "以下の可能性があります", "\n",
-                        "- 送信しようとしたリングデータがコンフリクトを起こした", "\n",
-                        "- サーバーにアクセスできない", "\n",
-                        error
-                    );
-                    await initializeRingData();
-                    showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
-                }
-            }
+                // 撮影した写真をダウンロードする
+                saveImage(newImage);
         }else{
             // 再撮影を望む場合、処理を止める
             // console.log("撮影やり直しのために処理を中断しました");
