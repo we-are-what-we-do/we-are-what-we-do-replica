@@ -7,9 +7,9 @@ import { showInfoToast } from '../components/ToastHelpers';
 
 /* 定数定義 */
 // 環境変数(REACT_APP_RADIUS)から半径の値を取得 
-// 環境変数が数値でない、または設定されていない場合はデフォルト値として 1000m を使用
-// const RADIUS = process.env.REACT_APP_RADIUS ? parseInt(process.env.REACT_APP_RADIUS) : 1000;
-const RADIUS = 1000;
+// 環境変数が数値でない、または設定されていない場合はデフォルト値として 100m を使用
+// const RADIUS = process.env.REACT_APP_RADIUS ? parseInt(process.env.REACT_APP_RADIUS) : 100;
+const RADIUS = 100;
 
 
 /* 型定義 */
