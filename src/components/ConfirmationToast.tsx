@@ -15,7 +15,7 @@ const messageI004n = INFO_MESSAGES.I004n;
 export const ConfirmToast: React.FC<ConfirmToastProps> = ({ onYes, onNo }) => {
   return(
     <Grid container
-      spacing={5}
+      spacing={3}
       direction="column"
       alignItems="center"
     >
