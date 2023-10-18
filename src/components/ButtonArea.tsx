@@ -12,7 +12,7 @@ import DoubleCircleIcon from "./DoubleCircleIcon";
 import { Theme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import Refresh from '@mui/icons-material/Refresh';
+import CenterFocusWeak from '@mui/icons-material/CenterFocusWeak';
 import CameraRear from '@mui/icons-material/CameraRear';
 import CameraFront from '@mui/icons-material/CameraFront';
 import Cameraswitch from '@mui/icons-material/Cameraswitch';
@@ -185,7 +185,7 @@ export default function ButtonArea(props: {
                     initializePositionZ();
                 }}
             >
-                <Refresh
+                <CenterFocusWeak
                     style={{
                         width: ICON_SIZE,
                         height: ICON_SIZE
