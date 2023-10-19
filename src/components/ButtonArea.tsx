@@ -204,7 +204,6 @@ export default function ButtonArea(props: {
                         width: ICON_SIZE,
                         height: ICON_SIZE
                     }}
-                    color="primary"
                 />
             </IconButton>
             <IconButton
