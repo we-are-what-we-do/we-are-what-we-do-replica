@@ -27,8 +27,9 @@ async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promis
 export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
     let result: FeatureCollection<Point> | null = null;
     // キャッシュデータからのピン設定データ取得を試みる
-    const cashData: string | null = localStorage.getItem("locations");
-    // localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
+    // const cashData: string | null = localStorage.getItem("locations");
+    const cashData: string | null = null;
+    localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
 
     if(cashData){
         const locationData = JSON.parse(cashData) as FeatureCollection<Point>;
@@ -39,9 +40,9 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
         // const apiEndpoint: string = "locations";
         // const apiEndpoint: string = "locations.json"; // 仮エンドポイント
         // const response: Response = await makeGetRequest(apiEndpoint);
-        const response: Response = await fetch('https://wawwd.net/test/wawwdtestdb-default-rtdb-locations-export.json'); // 仮取得
-        console.log(response);
+        const response: Response = await fetch('https://wawwd.net/test/test_pin.json'); // 仮取得
         result = await response.json() as FeatureCollection<Point>;
+        console.log(result);
 
         // サーバーから取得したデータをキャッシュに保存する
         localStorage.setItem("locations", JSON.stringify(result));
