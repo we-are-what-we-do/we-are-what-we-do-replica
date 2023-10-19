@@ -14,6 +14,27 @@ export const showInfoToast = (infoCode: string) => {
   toast.info(message, {autoClose: false});
 };
 
+export const showTestToast = (messages: string[], isInPin: boolean) => {
+  const elm: JSX.Element = (
+    <div>
+      {messages.map(message => (
+        <>
+          {message}
+          <br/>
+        </>
+      ))}
+    </div>
+  );
+
+  const config: object = {autoClose: false};
+
+  if(isInPin){
+    toast.info(elm, config);
+  }else{
+    toast.error(elm, config);
+  }
+};
+
 export const showConfirmToast = async () => {
   return new Promise<boolean>((resolve) => {
     toast(
