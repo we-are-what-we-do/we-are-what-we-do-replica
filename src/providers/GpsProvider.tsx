@@ -107,7 +107,7 @@ export function GpsProvider({children}: {children: ReactNode}){
                 // console.log(`${feature.properties?.locationJp}: ${distance} / ${radius}`, "\n", {currentLat, currentLon, latitude, longitude});
                 const testMessages: string[] = [
                     "地名: " + feature.properties?.locationJp,
-                    "距離: " + `${distance} / ${radius}`,
+                    "距離: " + `${(Math.floor(distance * 10)) / 10} / ${radius}`,
                     "現在地: " + `${currentLat}, ${currentLon}`,
                     "場所: " + `${latitude}, ${longitude}`
                 ];
