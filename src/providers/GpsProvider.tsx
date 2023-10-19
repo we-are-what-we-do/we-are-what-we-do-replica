@@ -2,7 +2,7 @@ import { createContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { FeatureCollection, Point } from 'geojson';
 import { getLocationConfig } from '../api/fetchDb';
 import { haversineDistance } from '../api/distanceCalculations';
-import { showInfoToast, showTestToast } from '../components/ToastHelpers';
+import { showInfoToast, /* showTestToast */ } from '../components/ToastHelpers';
 
 
 /* 定数定義 */
