@@ -38,9 +38,9 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
     }else{
         // キャッシュデータがない場合、サーバーからデータを取得する
         // const apiEndpoint: string = "locations";
-        const apiEndpoint: string = "locations.json"; // 仮エンドポイント
-        const response: Response = await makeGetRequest(apiEndpoint);
-        // const response: Response = await fetch('https://wawwd.net/test/test_pin.json'); // 仮取得
+        // const apiEndpoint: string = "locations.json"; // 仮エンドポイント
+        // const response: Response = await makeGetRequest(apiEndpoint);
+        const response: Response = await fetch('https://wawwd.net/test/test_pin.json'); // 仮取得
         result = await response.json() as FeatureCollection<Point>;
         console.log(result);
 
