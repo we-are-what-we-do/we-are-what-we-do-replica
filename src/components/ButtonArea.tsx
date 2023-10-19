@@ -197,6 +197,7 @@ export default function ButtonArea(props: {
                     orbitControlsReset();
                     initializePositionZ();
                 }}
+                disabled={!Boolean(gpsFlag)}
             >
                 <CenterFocusWeak
                     style={{
