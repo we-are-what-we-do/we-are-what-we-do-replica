@@ -11,8 +11,7 @@ function PicList({updatePhotoCount}: PicListProps) {
   useEffect(() => {
     getPicPaths().then(async (data: string[]) => {
       setPics(data);
-      updatePhotoCount(data.length); 
-      console.log(data.length);
+      updatePhotoCount(data.length);
     })
   }, [updatePhotoCount]);
 
