@@ -1,14 +1,12 @@
 import { useContext, useRef } from "react";
-import { postNftImage, postRingData } from './../api/fetchDb';
-import { RingData } from "../handleRingData";
+import { postNftImage, postRingData } from './api/fetchDb';
+import { RingData } from "./features/handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
 import { CameraContext } from "./../providers/CameraProvider";
-import { RingContext } from "./../providers/RingProvider";
-import { IpContext } from "../providers/IpProvider";
-import { GpsContext } from "../providers/GpsProvider";
-import { DbContext } from "../providers/DbProvider";
-import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
-import DoubleCircleIcon from "./DoubleCircleIcon";
+import { RingContext } from "./providers/RingProvider";
+import { DbContext } from "./providers/DbProvider";
+import { showErrorToast, showInfoToast, showConfirmToast } from "./../components/ToastHelpers"
+import DoubleCircleIcon from "./../components/DoubleCircleIcon";
 import { Theme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
@@ -16,7 +14,7 @@ import CenterFocusWeak from '@mui/icons-material/CenterFocusWeak';
 import CameraRear from '@mui/icons-material/CameraRear';
 import CameraFront from '@mui/icons-material/CameraFront';
 import Cameraswitch from '@mui/icons-material/Cameraswitch';
-import { ICON_SIZE, ICON_COLOR, DISABLED_COLOR, BUTTON_MARGIN } from "./../App";
+import { ICON_SIZE, ICON_COLOR, BUTTON_MARGIN } from "./App";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../redux/store";
 import { changeVisibility } from "../redux/features/animeVisible-slicec";
@@ -27,7 +25,6 @@ export default function ButtonArea(props: {
     theme: Theme;
     enableOrbitControl: boolean;
     setEnableOrbitControl: React.Dispatch<React.SetStateAction<boolean>>;
-    hasPostRing: React.MutableRefObject<boolean>;
     initializePositionZ(): void;
     orbitControlsReset(): void;
 }) {
@@ -36,7 +33,6 @@ export default function ButtonArea(props: {
         theme,
         enableOrbitControl,
         setEnableOrbitControl,
-        hasPostRing,
         initializePositionZ,
         orbitControlsReset
     } = props;
@@ -45,18 +41,6 @@ export default function ButtonArea(props: {
     const {
         initializeRingData
     } = useContext(DbContext);
-
-    // IPの状態を管理するcontext
-    const {
-        // ipFlag
-    } = useContext(IpContext);
-    const ipFlag: boolean = true;// TODO 連続撮影機能(テスト)を削除する
-
-    // GPSの状態を管理するcontext
-    const {
-        // gpsFlag
-    } = useContext(GpsContext);
-    const gpsFlag: boolean = true;// TODO どこでもリング表示機能(テスト)を削除する
 
     // リングのデータを追加するためのcontext
     const {
@@ -95,7 +79,6 @@ export default function ButtonArea(props: {
         isTakingPhotoRef.current = true; // 撮影ボタンの処理中であることを記録する
 
         // 撮影する写真に確認を取る
-        if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
         videoRef.current?.pause();    // カメラを一時停止する
         setEnableOrbitControl(false); // 3Dの視点を固定する
         dispatch(changeVisibility()); //アニメ非表示
@@ -123,49 +106,33 @@ export default function ButtonArea(props: {
             }
 
             // リングデータを送信する
-            if((!Boolean(ipFlag)) || (hasPostRing.current)){
-                // 連続撮影になる場合
-                // あるいは既にリングデータを送信済みの場合
-                // 写真ダウンロードのみ行う
-                if(!Boolean(ipFlag)){
-                    console.error("連続撮影はできません");
-                }else{
-                    console.error("既にリングデータをサーバーに送信済みです");
-                }
-                showInfoToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
-            }else{
-                try{
-                    // リングデータをまだ送信していない場合、リングデータを送信する
-                    await postRingData(addedRingData); // サーバーにリングデータを送信する
-                    await postNftImage(newImage); // base64形式の画像をサーバーに送信する
-                    console.log("サーバーにデータを送信しました:\n", addedRingData);
+            try{
+                await postRingData(addedRingData); // サーバーにリングデータを送信する
+                await postNftImage(newImage); // base64形式の画像をサーバーに送信する
+                console.log("サーバーにデータを送信しました:\n", addedRingData);
 
-                    // リングデータを送信済みとしてrefを更新する
-                    hasPostRing.current = true;
+                // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
+                showInfoToast("I005");
+                await initializeRingData(); // データを更新する
 
-                    // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
-                    showInfoToast("I005");
-                    await initializeRingData(); // データを更新する
-
-                }catch(error){
-                    // サーバーにリングデータを送信できなかった際のエラーハンドリング
-                    console.error(
-                        "サーバーにデータを送信できませんでした", "\n",
-                        "以下の可能性があります", "\n",
-                        "- 送信しようとしたリングデータがコンフリクトを起こした", "\n",
-                        "- サーバーにアクセスできない", "\n",
-                        error
-                    );
-                    await initializeRingData();
-                    showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
-                }
-            };
+            }catch(error){
+                // サーバーにリングデータを送信できなかった際のエラーハンドリング
+                console.error(
+                    "サーバーにデータを送信できませんでした", "\n",
+                    "以下の可能性があります", "\n",
+                    "- 送信しようとしたリングデータがコンフリクトを起こした", "\n",
+                    "- サーバーにアクセスできない", "\n",
+                    error
+                );
+                await initializeRingData(); // データを更新する
+                showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
+            }
 
             // 撮影した写真をダウンロードする
             saveImage(newImage);
         }else{
             // 再撮影を望む場合、処理を止める
-            // console.log("撮影やり直しのために処理を中断しました");
+            console.log("撮影やり直しのために処理を中断しました");
         }
 
         videoRef.current?.play();      // カメラを再生する
@@ -214,12 +181,11 @@ export default function ButtonArea(props: {
                 aria-label="capture-display"
                 color="primary"
                 onClick={handleTakePhotoButton}
-                disabled={!Boolean(gpsFlag)}
             >
                 <DoubleCircleIcon
                     width={ICON_SIZE}
                     height={ICON_SIZE}
-                    color={Boolean(gpsFlag) ? ICON_COLOR : DISABLED_COLOR}
+                    color={ICON_COLOR}
                 />
             </IconButton>
             <IconButton

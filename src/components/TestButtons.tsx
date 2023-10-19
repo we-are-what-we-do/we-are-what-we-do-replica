@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { postRingData } from './../api/fetchDb';
 import { DbContext } from "../providers/DbProvider";
 import { RingContext } from "./../providers/RingProvider";
-import { RingData } from "../redux/features/handleRingData";
+import { RingData } from "../handleRingData";
 import { positionArray } from "./../torusPosition";
 
 export default function TestButtons(props: {

@@ -1,5 +1,5 @@
-import { Ring, positionArray, torusScale } from "../../torusPosition";
-import { TorusInfo } from "./torusInfo-slice";
+import { Ring, positionArray, torusScale } from "./torusPosition";
+import { TorusInfo } from "./redux/features/torusInfo-slice";
 import { v4 as uuidv4 } from 'uuid';
 
 

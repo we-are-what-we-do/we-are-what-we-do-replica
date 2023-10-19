@@ -7,7 +7,7 @@ import { TorusInfo, pushTorusInfo, resetHandle } from "./../redux/features/torus
 import { getUpdateTime } from "./redux/features/updateTime-slice";
 import TorusList from './components/TorusList';
 import DisplayInfo from "./components/DisplayInfo";
-import { RingsData, convertToTorus } from "./../redux/features/handleRingData";
+import { RingsData, convertToTorus } from "../handleRingData";
 import { DbContext, getLatestLap } from "./../providers/DbProvider";
 import { FeatureCollection, Point } from "geojson";
 import { getLocationConfig, getLocationJp, getRingData } from "../api/fetchDb";

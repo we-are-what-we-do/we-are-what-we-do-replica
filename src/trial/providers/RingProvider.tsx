@@ -3,12 +3,12 @@ import { DbContext } from './DbProvider';
 import { IpContext } from './IpProvider';
 import { GpsContext } from './GpsProvider';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../redux/store';
-import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusInfo-slice';
-import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRingColor } from '../handleRingData';
-import { Ring, positionArray, torusScale } from '../torusPosition';
+import { AppDispatch } from '../../redux/store';
+import { TorusInfo, pushTorusInfo, resetHandle } from '../../redux/features/torusInfo-slice';
+import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRingColor } from '../features/handleRingData';
+import { Ring, positionArray, torusScale } from '../../torusPosition';
 import { v4 as uuidv4 } from 'uuid';
-import { getRandIndex } from '../redux/features/randIndex-slice';
+import { getRandIndex } from '../../redux/features/randIndex-slice';
 
 
 /* 型定義 */
@@ -194,8 +194,7 @@ export function RingProvider({children}: {children: ReactNode}){
     // サーバーに送信するためのリングデータを取得する関数
     function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus): RingData | null{
         if(
-            // TODO location修正
-            // (location === null) ||
+            (location === null) ||
             (currentLatitude === null) ||
             (currentLongitude === null) ||
             (currentIp === null) ||
@@ -206,8 +205,7 @@ export function RingProvider({children}: {children: ReactNode}){
         }
 
         const newRingData: RingData = {
-            // location, // 撮影場所
-            location: location ?? "",
+            location, // 撮影場所
             latitude: currentLatitude, // 撮影地点の緯度
             longitude: currentLongitude, // 撮影地点の経度
             address: currentIp, // IPアドレス

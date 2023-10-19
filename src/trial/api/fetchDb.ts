@@ -1,10 +1,10 @@
 import { Point, FeatureCollection } from 'geojson';
-import { RingData, RingsData } from "../handleRingData";
+import { RingData, RingsData } from "../features/handleRingData";
 
 
 /* 関数定義 */
 // const apiDomain: string = "https://api.wawwd.net/"; // アプリケーションサーバーのドメイン
-const apiDomain: string = "https://wawwdtestdb-default-rtdb.firebaseio.com/"; // 仮DBサーバーのドメイン
+const apiDomain: string = "https://wawwdtestdb-default-rtdb.firebaseio.com/trial/"; // 仮DBサーバーのドメイン
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{

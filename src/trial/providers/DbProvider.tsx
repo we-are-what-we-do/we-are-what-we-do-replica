@@ -1,12 +1,12 @@
 import { createContext, useState, ReactNode, useEffect } from 'react';
-import { TorusInfo } from "./../redux/features/torusInfo-slice";
+import { TorusInfo } from "../../redux/features/torusInfo-slice";
 import {
     RingData,
     RingsData,
     convertToTori,
     getLatestRing
-} from "../handleRingData";
-import { getRingData } from "./../api/fetchDb";
+} from "../features/handleRingData";
+import { getRingData } from "../api/fetchDb";
 
 
 /* 型定義 */
@@ -98,7 +98,7 @@ export function DbProvider({children}: {children: ReactNode}){
 
 
 /* 仮定義関数 */
-import { positionArray } from '../torusPosition';
+import { positionArray } from '../../torusPosition';
 // オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
 // TODO サーバーサイドに最新リングのみを取得するapiを作った方がいいかも
 function getLastRings(obj: RingsData, lastAmount: number): RingsData{
