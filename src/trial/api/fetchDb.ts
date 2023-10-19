@@ -110,7 +110,7 @@ export function getLocationJp(data: FeatureCollection<Point>, locationId: string
     // locationIdが一致するfeatureのproperties.locationJpを取得する
     const currentFeature = data.features.find((value) => value.id === locationId);
     if(!currentFeature) return null;
-    const currentLocationJp: string | null = currentFeature.properties?.locationJp || null; 
+    const currentLocationJp: string | null = currentFeature.properties?.localize.jp || null; 
 
     return currentLocationJp;
 }

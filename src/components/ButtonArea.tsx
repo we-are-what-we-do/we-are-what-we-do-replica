@@ -145,7 +145,6 @@ export default function ButtonArea(props: {
 
                     // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
                     showInfoToast("I005");
-                    await initializeRingData(); // データを更新する
 
                 }catch(error){
                     // サーバーにリングデータを送信できなかった際のエラーハンドリング
@@ -156,7 +155,7 @@ export default function ButtonArea(props: {
                         "- サーバーにアクセスできない", "\n",
                         error
                     );
-                    await initializeRingData();
+                    await initializeRingData(); // データを更新する
                     showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
                 }
             };
