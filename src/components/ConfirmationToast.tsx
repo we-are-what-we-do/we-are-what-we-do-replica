@@ -1,5 +1,7 @@
 import React from 'react';
 import { INFO_MESSAGES } from '../MessageMap';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
 
 interface ConfirmToastProps {
   onYes: () => void;
@@ -12,11 +14,30 @@ const messageI004n = INFO_MESSAGES.I004n;
 
 export const ConfirmToast: React.FC<ConfirmToastProps> = ({ onYes, onNo }) => {
   return(
-    <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '50px', marginBottom: '30px' }}>
-      <p style={{ marginBottom: '30px' }}>{messageI004}</p>
-      <button style={{ marginBottom: '30px' }} onClick={onYes}>{messageI004y}</button>
-      <button onClick={onNo}>{messageI004n}</button>
-    </div>
+    <Grid container
+      spacing={3}
+      direction="column"
+      alignItems="center"
+    >
+      <Grid item xs={12}>
+        <div className="message">{messageI004}</div>
+      </Grid>
+      <Grid item xs={12}>
+        <Button
+          variant="contained"
+          onClick={onYes}
+        >{messageI004y}</Button>
+      </Grid>
+      <Grid item xs={12}>
+        <Button
+          variant="outlined"
+          onClick={onNo}
+          style={{backgroundColor: "white"}}
+        >
+          {messageI004n}
+        </Button>
+      </Grid>
+    </Grid>
   );
 };
 

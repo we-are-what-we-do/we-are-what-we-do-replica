@@ -1,12 +1,12 @@
 import { createContext, useState, ReactNode, useEffect } from 'react';
-import { TorusInfo } from "./../redux/features/torusInfo-slice";
+import { TorusInfo } from "../../redux/features/torusInfo-slice";
 import {
     RingData,
     RingsData,
     convertToTori,
     getLatestRing
-} from "../handleRingData";
-import { getRingData } from "./../api/fetchDb";
+} from "../features/handleRingData";
+import { getRingData } from "../api/fetchDb";
 
 
 /* 型定義 */
@@ -57,11 +57,17 @@ export function DbProvider({children}: {children: ReactNode}){
         // リングデータを70個までに限定して切り出す(一応)
         const extractedRingData: RingsData = getLatestLap(newRingsData);
         const newLatestRing: RingData | null = getLatestRing(newRingsData);
-        // console.log({newLatestRing});
+        console.log({newLatestRing});
         let newTori: TorusInfo[] = convertToTori(newRingsData);
         setRingsData(extractedRingData);
         setLatestRing(newLatestRing);
         setTori(newTori);
+
+        // TODO セキュリティの観点から、後で消す
+        console.log(
+            "サーバーからデータを取得しました:\n", newRingsData,
+            "\nリング数:", Object.keys(newRingsData).length
+        );
     }
 
     // torusArrayに新しいtorusデータを一つ追加する関数
@@ -92,7 +98,7 @@ export function DbProvider({children}: {children: ReactNode}){
 
 
 /* 仮定義関数 */
-import { positionArray } from '../torusPosition';
+import { positionArray } from '../../torusPosition';
 // オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
 // TODO サーバーサイドに最新リングのみを取得するapiを作った方がいいかも
 function getLastRings(obj: RingsData, lastAmount: number): RingsData{
@@ -108,11 +114,11 @@ function getLastRings(obj: RingsData, lastAmount: number): RingsData{
 }
 
 // 過去周のDEI周を切り捨てる関数
-// TODO 仮定義なので、APIの方でリングデータが0～70個に限定されていることを確認次第、削除する
+// TODO 仮定義なので、APIの方でリングデータが0～71個に限定されていることを確認次第、削除する
 export function getLatestLap(data: RingsData): RingsData{
     const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
     const ringAmount: number = Object.keys(data).length; // リングデータの数
-    let result: RingsData = {}; // 0～70個のリングデータ
+    let result: RingsData = {}; // 0～71個のリングデータ
     if(ringAmount <= orbitLength){
         // リングが0～70個の場合
         result = Object.assign({}, data);

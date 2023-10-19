@@ -1,10 +1,10 @@
 import { Point, FeatureCollection } from 'geojson';
-import { RingData, RingsData } from "../handleRingData";
+import { RingData, RingsData } from "../features/handleRingData";
 
 
 /* 関数定義 */
 // const apiDomain: string = "https://api.wawwd.net/"; // アプリケーションサーバーのドメイン
-const apiDomain: string = "https://wawwdtestdb-default-rtdb.firebaseio.com/"; // 仮DBサーバーのドメイン
+const apiDomain: string = "https://wawwdtestdb-default-rtdb.firebaseio.com/trial/"; // 仮DBサーバーのドメイン
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
@@ -28,7 +28,6 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
     let result: FeatureCollection<Point> | null = null;
     // キャッシュデータからのピン設定データ取得を試みる
     const cashData: string | null = localStorage.getItem("locations");
-    // const cashData: string | null = null;
     // localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
 
     if(cashData){
@@ -40,9 +39,7 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
         // const apiEndpoint: string = "locations";
         const apiEndpoint: string = "locations.json"; // 仮エンドポイント
         const response: Response = await makeGetRequest(apiEndpoint);
-        // const response: Response = await fetch('https://wawwd.net/test/test_pin.json'); // 仮取得
         result = await response.json() as FeatureCollection<Point>;
-        console.log(result);
 
         // サーバーから取得したデータをキャッシュに保存する
         localStorage.setItem("locations", JSON.stringify(result));
@@ -108,9 +105,9 @@ export async function postNftImage(base64Data: string): Promise<Response>{
 }
 
 
-// locationIdからlocalize.jpを取得する関数
+// locationIdからlocationJpを取得する関数
 export function getLocationJp(data: FeatureCollection<Point>, locationId: string): string | null{
-    // locationIdが一致するfeatureのproperties.localize.jpを取得する
+    // locationIdが一致するfeatureのproperties.locationJpを取得する
     const currentFeature = data.features.find((value) => value.id === locationId);
     if(!currentFeature) return null;
     const currentLocationJp: string | null = currentFeature.properties?.localize.jp || null; 

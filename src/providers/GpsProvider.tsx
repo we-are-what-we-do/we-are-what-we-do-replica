@@ -2,14 +2,14 @@ import { createContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { FeatureCollection, Point } from 'geojson';
 import { getLocationConfig } from '../api/fetchDb';
 import { haversineDistance } from '../api/distanceCalculations';
-import { showInfoToast } from '../components/ToastHelpers';
+import { showInfoToast, showTestToast } from '../components/ToastHelpers';
 
 
 /* 定数定義 */
 // 環境変数(REACT_APP_RADIUS)から半径の値を取得 
-// 環境変数が数値でない、または設定されていない場合はデフォルト値として 1000m を使用
-// const RADIUS = process.env.REACT_APP_RADIUS ? parseInt(process.env.REACT_APP_RADIUS) : 1000;
-const RADIUS = 1000;
+// 環境変数が数値でない、または設定されていない場合はデフォルト値として 100m を使用
+// const RADIUS = process.env.REACT_APP_RADIUS ? parseInt(process.env.REACT_APP_RADIUS) : 100;
+const RADIUS = 100;
 
 
 /* 型定義 */
@@ -103,11 +103,19 @@ export function GpsProvider({children}: {children: ReactNode}){
 
                 // 2点間の距離に応じて、gpsFlagを適切な値に設定する
                 const radius: number = feature.properties?.radius ?? RADIUS; // デフォルトの半径としてRADIUSを指定
-                // console.log(`${feature.properties?.locationJp}: ${distance} / ${radius}`, "\n", {currentLat, currentLon, latitude, longitude});
+
+                // console.log(`${feature.properties?.localize.jp}: ${distance} / ${radius}`, "\n", {currentLat, currentLon, latitude, longitude});
+/*                 const testMessages: string[] = [
+                    "地名: " + feature.properties?.localize.jp,
+                    "距離: " + `${(Math.floor(distance * 10)) / 10} / ${radius}`,
+                    "現在地: " + `${currentLat}, ${currentLon}`,
+                    "場所: " + `${latitude}, ${longitude}`
+                ];
+                showTestToast(testMessages, (distance <= radius)); */
 
                 if (distance <= radius) {
                     result = 1; // 条件に合致した場合、resultを1に設定
-                    // console.log(`${feature.properties?.locationJp} is OK`);
+                    // console.log(`${feature.properties?.localize.jp} is OK`);
 
                     // 現在地のlocationをstateに保存する
                     const locationId: string = String(feature.id) ?? "";

@@ -14,6 +14,27 @@ export const showInfoToast = (infoCode: string) => {
   toast.info(message, {autoClose: false});
 };
 
+export const showTestToast = (messages: string[], isInPin: boolean) => {
+  const elm: JSX.Element = (
+    <div>
+      {messages.map(message => (
+        <>
+          {message}
+          <br/>
+        </>
+      ))}
+    </div>
+  );
+
+  const config: object = {autoClose: false};
+
+  if(isInPin){
+    toast.info(elm, config);
+  }else{
+    toast.error(elm, config);
+  }
+};
+
 export const showConfirmToast = async () => {
   return new Promise<boolean>((resolve) => {
     toast(
@@ -31,6 +52,7 @@ export const showConfirmToast = async () => {
       />,
       {
         autoClose: false, // トーストを自動的に閉じない
+        className: "custom-confirm",
         onClose: () => {
           // Toastが閉じられたときに実行したい処理をここに記述
           resolve(false);

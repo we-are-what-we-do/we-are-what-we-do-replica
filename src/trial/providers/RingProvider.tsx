@@ -3,12 +3,12 @@ import { DbContext } from './DbProvider';
 import { IpContext } from './IpProvider';
 import { GpsContext } from './GpsProvider';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../redux/store';
-import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusInfo-slice';
-import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRingColor } from '../handleRingData';
-import { Ring, positionArray, torusScale } from '../torusPosition';
+import { AppDispatch } from '../../redux/store';
+import { TorusInfo, pushTorusInfo, resetHandle } from '../../redux/features/torusInfo-slice';
+import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRingColor } from '../features/handleRingData';
+import { Ring, positionArray, torusScale } from '../../torusPosition';
 import { v4 as uuidv4 } from 'uuid';
-import { getRandIndex } from '../redux/features/randIndex-slice';
+import { getRandIndex } from '../../redux/features/randIndex-slice';
 
 
 /* 型定義 */
