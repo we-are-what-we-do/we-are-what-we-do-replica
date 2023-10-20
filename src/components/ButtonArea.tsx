@@ -126,7 +126,7 @@ export default function ButtonArea(props: {
                 setEnableOrbitControl(true);   // 3Dの視点固定を解除する
                 dispatch(changeVisibility());  //アニメ非表示
                 isTakingPhotoRef.current = false; // 撮影ボタンの処理が終わったことを記録する
-                showErrorToast("E099"); // 「システムエラー」というメッセージを表示する
+                showErrorToast("E004"); // 「"撮影画像のアップロードに失敗しました。」というメッセージを表示する
                 return;
             }
 
