@@ -1,12 +1,12 @@
 import { useContext, useRef } from "react";
-import { postNftImage, postRingData } from './api/fetchDb';
-import { RingData } from "./features/handleRingData";
-import { CaptureContext } from "./../providers/CaptureProvider";
-import { CameraContext } from "./../providers/CameraProvider";
-import { RingContext } from "./providers/RingProvider";
-import { DbContext } from "./providers/DbProvider";
-import { showErrorToast, showInfoToast, showConfirmToast } from "./../components/ToastHelpers"
-import DoubleCircleIcon from "./../components/DoubleCircleIcon";
+import { postNftImage, postRingData } from '../api/fetchDb';
+import { RingData } from "../features/handleRingData";
+import { CaptureContext } from "../../providers/CaptureProvider";
+import { CameraContext } from "../../providers/CameraProvider";
+import { RingContext } from "../providers/RingProvider";
+import { DbContext } from "../providers/DbProvider";
+import { showErrorToast, showInfoToast, showConfirmToast } from "../../components/ToastHelpers"
+import DoubleCircleIcon from "../../components/DoubleCircleIcon";
 import { Theme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
@@ -14,10 +14,10 @@ import CenterFocusWeak from '@mui/icons-material/CenterFocusWeak';
 import CameraRear from '@mui/icons-material/CameraRear';
 import CameraFront from '@mui/icons-material/CameraFront';
 import Cameraswitch from '@mui/icons-material/Cameraswitch';
-import { ICON_SIZE, ICON_COLOR, BUTTON_MARGIN } from "./App";
+import { ICON_SIZE, ICON_COLOR, BUTTON_MARGIN } from "../App";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
-import { changeVisibility } from "../redux/features/animeVisible-slicec";
+import { AppDispatch } from "../../redux/store";
+import { changeVisibility } from "../../redux/features/animeVisible-slicec";
 
 
 // ボタン類のコンポーネント

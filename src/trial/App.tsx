@@ -10,7 +10,7 @@ import Camera from "./../components/Camera";
 import { ToastContainer } from 'react-toastify';
 import { showInfoToast } from "./../components/ToastHelpers"
 import { Vector3 } from "three";
-import ButtonArea from "./ButtonArea";
+import ButtonArea from "./components/ButtonArea";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CircularProgress } from "@mui/material";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
