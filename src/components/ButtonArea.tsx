@@ -7,7 +7,7 @@ import { RingContext } from "./../providers/RingProvider";
 import { IpContext } from "../providers/IpProvider";
 import { GpsContext } from "../providers/GpsProvider";
 import { DbContext } from "../providers/DbProvider";
-import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
+import { showErrorToast, showConfirmToast, showWarnToast, showSuccessToast } from "./ToastHelpers"
 import DoubleCircleIcon from "./DoubleCircleIcon";
 import { Theme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
@@ -96,7 +96,7 @@ export default function ButtonArea(props: {
         if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
         videoRef.current?.pause();    // カメラを一時停止する
         setEnableOrbitControl(false); // 3Dの視点を固定する
-        dispatch(changeVisibility()); //アニメ非表示
+        dispatch(changeVisibility()); // アニメ非表示
 
         // 撮影した写真に確認を取る
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
@@ -107,16 +107,24 @@ export default function ButtonArea(props: {
             // 描画に追加したリングのデータを取得する
             const addedRingData: RingData | null = getRingDataToAdd();
 
-            // エラーハンドリング
-            if(!addedRingData){
-                console.error("追加したリングデータを取得できませんでした");
-                return;
-            };
-
             // 写真(リング+カメラ)を撮影をして、base64形式で取得する
             const newImage: string | null = captureImage();
-            if(!newImage){
-                console.error("写真を撮影できませんでした");
+
+            // エラーハンドリング
+            try{
+                if(!addedRingData){
+                    throw new Error("追加したリングデータを取得できませんでした");
+                };
+                if(!newImage){
+                    throw new Error("写真を撮影できませんでした");
+                }
+            }catch(error){
+                console.error(error);
+                videoRef.current?.play();      // カメラを再生する
+                setEnableOrbitControl(true);   // 3Dの視点固定を解除する
+                dispatch(changeVisibility());  //アニメ非表示
+                isTakingPhotoRef.current = false; // 撮影ボタンの処理が終わったことを記録する
+                showErrorToast("E099"); // 「システムエラー」というメッセージを表示する
                 return;
             }
 
@@ -130,7 +138,7 @@ export default function ButtonArea(props: {
                 }else{
                     console.error("既にリングデータをサーバーに送信済みです");
                 }
-                showInfoToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
+                showWarnToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
             }else{
                 try{
                     // リングデータをまだ送信していない場合、リングデータを送信する
@@ -142,7 +150,7 @@ export default function ButtonArea(props: {
                     hasPostRing.current = true;
 
                     // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
-                    showInfoToast("I005");
+                    showSuccessToast("I005");
 
                 }catch(error){
                     // サーバーにリングデータを送信できなかった際のエラーハンドリング
@@ -167,12 +175,12 @@ export default function ButtonArea(props: {
 
         videoRef.current?.play();      // カメラを再生する
         setEnableOrbitControl(true);   // 3Dの視点固定を解除する
-        dispatch(changeVisibility());  //アニメ非表示
+        dispatch(changeVisibility());  // アニメ非表示
 
         isTakingPhotoRef.current = false; // 撮影ボタンの処理が終わったことを記録する
     }
 
-    const dispatch = useDispatch<AppDispatch>();
+    const dispatch     = useDispatch<AppDispatch>();
 
     return (
         <div

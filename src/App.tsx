@@ -86,7 +86,13 @@ export default function App() {
   }, []);
 
 
-  // 3Dオブジェクトにおける視点を、レスポンシブな初期位置に設定する関数(初回表示のみ！！)
+  /**
+   * リロード時に3Dオブジェクトをレスポンシブに配置する関数です。
+   * 
+   * @param width window.innerWidthを渡します
+   * 
+   * @type void
+   */
   function initializePositionZ(width: number){
     if (width >= 600 && width <= 960) {
       setPositionZ(new Vector3(0,0,10));
@@ -100,8 +106,12 @@ export default function App() {
   }
 
 
-  //OrbitControlsの初期化
   const orbitControlsRef = useRef<OrbitControlsImpl>(null!);
+  /**
+   * OrbitControlsのカメラ位置を初期値に戻す関数です。
+   *
+   * @type void
+   */
   function orbitControlsReset() {
     orbitControlsRef.current.reset();
   }

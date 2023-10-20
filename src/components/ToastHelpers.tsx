@@ -3,39 +3,28 @@ import { ERROR_MESSAGES, INFO_MESSAGES } from '../MessageMap';
 // import { ConfirmationToast } from './ConfirmationToast';
 import { ConfirmToast } from './ConfirmationToast'
 
-
 export const showErrorToast = (errorCode: string) => {
   const message = ERROR_MESSAGES[errorCode];
-  toast.error(message, {autoClose: false});
+  toast.error(message, {autoClose: false, theme: "colored"});
+};
+
+export const showWarnToast = (infoCode: string) => {
+  const message = INFO_MESSAGES[infoCode];
+  toast.warn(message, {autoClose: false, theme: "colored"});
 };
 
 export const showInfoToast = (infoCode: string) => {
   const message = INFO_MESSAGES[infoCode];
-  toast.info(message, {autoClose: false});
+  toast.info(message, {autoClose: false, theme: "colored"});
 };
 
-export const showTestToast = (messages: string[], isInPin: boolean) => {
-  const elm: JSX.Element = (
-    <div>
-      {messages.map(message => (
-        <>
-          {message}
-          <br/>
-        </>
-      ))}
-    </div>
-  );
-
-  const config: object = {autoClose: false};
-
-  if(isInPin){
-    toast.info(elm, config);
-  }else{
-    toast.error(elm, config);
-  }
+export const showSuccessToast = (infoCode: string) => {
+  const message = INFO_MESSAGES[infoCode];
+  toast.success(message, {autoClose: false, theme: "colored"});
 };
 
 export const showConfirmToast = async () => {
+  // const dispatch = useDispatch<AppDispatch>();
   return new Promise<boolean>((resolve) => {
     toast(
       <ConfirmToast
@@ -60,4 +49,25 @@ export const showConfirmToast = async () => {
       }
     );
   });
+};
+
+export const showTestToast = (messages: string[], isInPin: boolean) => {
+  const elm: JSX.Element = (
+    <div>
+      {messages.map(message => (
+        <>
+          {message}
+          <br/>
+        </>
+      ))}
+    </div>
+  );
+
+  const config: object = {autoClose: false};
+
+  if(isInPin){
+    toast.info(elm, config);
+  }else{
+    toast.error(elm, config);
+  }
 };

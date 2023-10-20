@@ -6,9 +6,9 @@ import animeVisibleSlicec from "./features/animeVisible-slicec";
 
 export const store = configureStore({
     reducer: {
-        torusInfo : torusInfoSlice,
-        animeIndex: randIndexSlice,
-        anime     : animeVisibleSlicec, 
+        torusInfo      : torusInfoSlice,
+        animeIndex     : randIndexSlice,
+        anime          : animeVisibleSlicec
     },
 });
 

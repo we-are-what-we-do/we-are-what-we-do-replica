@@ -2,7 +2,7 @@ import { createContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { FeatureCollection, Point } from 'geojson';
 import { getLocationConfig } from '../api/fetchDb';
 import { haversineDistance } from '../api/distanceCalculations';
-import { showInfoToast, /* showTestToast */ } from '../components/ToastHelpers';
+import { showWarnToast } from '../components/ToastHelpers';
 
 
 /* 定数定義 */
@@ -132,7 +132,7 @@ export function GpsProvider({children}: {children: ReactNode}){
 
         // GPSがピンの範囲外の場合、「ARリングはピン設置箇所の近くでのみ表示されます。」というメッセージボックスを表示する
         if(!Boolean(result)){
-            showInfoToast("I001");
+            showWarnToast("I001");
         };
 
         return result;
