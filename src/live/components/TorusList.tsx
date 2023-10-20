@@ -5,7 +5,6 @@ import { useAppSelector } from "../redux/store";
 function TorusList() {
   const torusList = useAppSelector((state) => state.torusInfo);
 
-  //カメラのアップデート & レスポンシブサイズ
   useFrame((state) => {
     const elapsedTime = state.clock.getElapsedTime();
     const deviceWidth = window.innerWidth;

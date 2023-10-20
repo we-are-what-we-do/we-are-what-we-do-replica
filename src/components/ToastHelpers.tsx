@@ -3,7 +3,6 @@ import { ERROR_MESSAGES, INFO_MESSAGES } from '../MessageMap';
 // import { ConfirmationToast } from './ConfirmationToast';
 import { ConfirmToast } from './ConfirmationToast'
 
-
 export const showErrorToast = (errorCode: string) => {
   const message = ERROR_MESSAGES[errorCode];
   toast.error(message, {autoClose: false});
@@ -36,6 +35,7 @@ export const showTestToast = (messages: string[], isInPin: boolean) => {
 };
 
 export const showConfirmToast = async () => {
+  // const dispatch = useDispatch<AppDispatch>();
   return new Promise<boolean>((resolve) => {
     toast(
       <ConfirmToast

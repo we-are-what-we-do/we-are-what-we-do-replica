@@ -10,7 +10,7 @@ export type TorusInfo = {
     scale:     number,
 }
 
-const torusStore: TorusInfo[] = [];//オブジェクト形式で受け取ったリング情報を格納していく
+const torusStore: TorusInfo[] = [];
 
 export const torusInfo = createSlice({
     name: "torusDetails",
