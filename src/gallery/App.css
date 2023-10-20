@@ -13,16 +13,19 @@
 }
 
 .picListContainer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  justify-items: center;
   overflow: auto;
+  margin: 0 auto;
 }
 
 .picListItem {
-  max-width: 400px;
-  height: auto;
-  margin: 0 5px;
+  width: auto;
+  max-width: 200px;
+  margin: 5px 5px;
+  object-fit: cover;
 }
 
 .addBt {
