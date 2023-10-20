@@ -6,7 +6,7 @@ export const upTime = createSlice({
     name: "uptime",
     initialState: { value: initUptime },
     reducers: {
-        getUpdateTime: ((state, action) => {state.value = action.payload}),
+        getUpdateTime: ((state, action) => { state.value = action.payload }),
     }
 });
 

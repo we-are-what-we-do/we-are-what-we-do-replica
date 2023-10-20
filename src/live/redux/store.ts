@@ -1,13 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import torusInfoSlice from "./../../redux/features/torusInfo-slice";
-import timerSlice from "./features/currentTime-slice";
 import updateTimeSlice from "./features/updateTime-slice";
 
 export const store = configureStore({
     reducer: {
         torusInfo : torusInfoSlice,
-        time      : timerSlice,
         updateTime: updateTimeSlice,
     },
 });

@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react";
+import { useContext, useRef, useState } from "react";
 import { postNftImage, postRingData } from './../api/fetchDb';
 import { RingData } from "../redux/features/handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
@@ -18,8 +18,9 @@ import CameraFront from '@mui/icons-material/CameraFront';
 import Cameraswitch from '@mui/icons-material/Cameraswitch';
 import { ICON_SIZE, ICON_COLOR, DISABLED_COLOR, BUTTON_MARGIN } from "./../App";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
+import { AppDispatch, useAppSelector } from "../redux/store";
 import { changeVisibility } from "../redux/features/animeVisible-slicec";
+import { changeDisabled } from "../redux/features/resetButton-Disabled-slice";
 
 
 // ボタン類のコンポーネント
@@ -98,7 +99,8 @@ export default function ButtonArea(props: {
         if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
         videoRef.current?.pause();    // カメラを一時停止する
         setEnableOrbitControl(false); // 3Dの視点を固定する
-        dispatch(changeVisibility()); //アニメ非表示
+        dispatch(changeVisibility()); //　アニメ非表示
+        dispatch(changeDisabled());   //　リセットカメラ固定
 
         // 撮影した写真に確認を取る
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
@@ -169,12 +171,15 @@ export default function ButtonArea(props: {
 
         videoRef.current?.play();      // カメラを再生する
         setEnableOrbitControl(true);   // 3Dの視点固定を解除する
-        dispatch(changeVisibility());  //アニメ非表示
+        dispatch(changeVisibility());  // アニメ非表示
+        dispatch(changeDisabled());    // リセットカメラ解除
 
         isTakingPhotoRef.current = false; // 撮影ボタンの処理が終わったことを記録する
     }
 
-    const dispatch = useDispatch<AppDispatch>();
+    const dispatch     = useDispatch<AppDispatch>();
+    const fixedResetBt = useAppSelector((state) => state.enableChangeBt.value);
+
 
     return (
         <div
@@ -192,7 +197,8 @@ export default function ButtonArea(props: {
                 }}
                 aria-label="reset-view"
                 color="primary"
-                onClick={() =>{
+                disabled={fixedResetBt}
+                onClick={() => {
                     orbitControlsReset();
                     initializePositionZ();
                 }}

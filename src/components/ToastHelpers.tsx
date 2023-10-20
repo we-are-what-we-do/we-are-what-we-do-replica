@@ -2,6 +2,10 @@ import { toast } from 'react-toastify';
 import { ERROR_MESSAGES, INFO_MESSAGES } from '../MessageMap';
 // import { ConfirmationToast } from './ConfirmationToast';
 import { ConfirmToast } from './ConfirmationToast'
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../redux/store';
+import { changeDisabled } from '../redux/features/resetButton-Disabled-slice';
+import { changeVisibility } from '../redux/features/animeVisible-slicec';
 
 
 export const showErrorToast = (errorCode: string) => {
@@ -15,6 +19,7 @@ export const showInfoToast = (infoCode: string) => {
 };
 
 export const showConfirmToast = async () => {
+  // const dispatch = useDispatch<AppDispatch>();
   return new Promise<boolean>((resolve) => {
     toast(
       <ConfirmToast
@@ -36,6 +41,8 @@ export const showConfirmToast = async () => {
         // onClose: () => {
         //   // Toastが閉じられたときに実行したい処理をここに記述
         //   resolve(false);
+        //   dispatch(changeVisibility());
+        //   dispatch(changeDisabled());
         // }
       }
     );
