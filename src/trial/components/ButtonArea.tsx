@@ -5,7 +5,7 @@ import { CaptureContext } from "../../providers/CaptureProvider";
 import { CameraContext } from "../../providers/CameraProvider";
 import { RingContext } from "../providers/RingProvider";
 import { DbContext } from "../providers/DbProvider";
-import { showErrorToast, showInfoToast, showConfirmToast } from "../../components/ToastHelpers"
+import { showErrorToast, showInfoToast, showConfirmToast, showSuccessToast } from "../../components/ToastHelpers"
 import DoubleCircleIcon from "../../components/DoubleCircleIcon";
 import { Theme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
@@ -120,7 +120,7 @@ export default function ButtonArea(props: {
                 console.log("サーバーにデータを送信しました:\n", addedRingData);
 
                 // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
-                showInfoToast("I005");
+                showSuccessToast("I005");
                 await initializeRingData(); // データを更新する
 
             }catch(error){
