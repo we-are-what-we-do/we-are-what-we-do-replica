@@ -6,22 +6,22 @@ import { ConfirmToast } from './ConfirmationToast'
 
 export const showErrorToast = (errorCode: string) => {
   const message = ERROR_MESSAGES[errorCode];
-  toast.error(message, {autoClose: false});
+  toast.error(message, {autoClose: false, theme: "colored"});
 };
 
 export const showWarnToast = (infoCode: string) => {
   const message = INFO_MESSAGES[infoCode];
-  toast.warn(message, {autoClose: false});
+  toast.warn(message, {autoClose: false, theme: "colored"});
 };
 
 export const showInfoToast = (infoCode: string) => {
   const message = INFO_MESSAGES[infoCode];
-  toast.info(message, {autoClose: false});
+  toast.info(message, {autoClose: false, theme: "colored"});
 };
 
 export const showSuccessToast = (infoCode: string) => {
   const message = INFO_MESSAGES[infoCode];
-  toast.success(message, {autoClose: false});
+  toast.success(message, {autoClose: false, theme: "colored"});
 };
 
 export const showConfirmToast = async () => {
