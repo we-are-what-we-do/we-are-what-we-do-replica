@@ -9,30 +9,19 @@ export const showErrorToast = (errorCode: string) => {
   toast.error(message, {autoClose: false});
 };
 
+export const showWarnToast = (infoCode: string) => {
+  const message = INFO_MESSAGES[infoCode];
+  toast.warn(message, {autoClose: false});
+};
+
 export const showInfoToast = (infoCode: string) => {
   const message = INFO_MESSAGES[infoCode];
   toast.info(message, {autoClose: false});
 };
 
-export const showTestToast = (messages: string[], isInPin: boolean) => {
-  const elm: JSX.Element = (
-    <div>
-      {messages.map(message => (
-        <>
-          {message}
-          <br/>
-        </>
-      ))}
-    </div>
-  );
-
-  const config: object = {autoClose: false};
-
-  if(isInPin){
-    toast.info(elm, config);
-  }else{
-    toast.error(elm, config);
-  }
+export const showSuccessToast = (infoCode: string) => {
+  const message = INFO_MESSAGES[infoCode];
+  toast.success(message, {autoClose: false});
 };
 
 export const showConfirmToast = async () => {
@@ -61,4 +50,25 @@ export const showConfirmToast = async () => {
       }
     );
   });
+};
+
+export const showTestToast = (messages: string[], isInPin: boolean) => {
+  const elm: JSX.Element = (
+    <div>
+      {messages.map(message => (
+        <>
+          {message}
+          <br/>
+        </>
+      ))}
+    </div>
+  );
+
+  const config: object = {autoClose: false};
+
+  if(isInPin){
+    toast.info(elm, config);
+  }else{
+    toast.error(elm, config);
+  }
 };

@@ -7,7 +7,7 @@ import { RingContext } from "./../providers/RingProvider";
 import { IpContext } from "../providers/IpProvider";
 import { GpsContext } from "../providers/GpsProvider";
 import { DbContext } from "../providers/DbProvider";
-import { showErrorToast, showInfoToast, showConfirmToast } from "./ToastHelpers"
+import { showErrorToast, showConfirmToast, showWarnToast, showSuccessToast } from "./ToastHelpers"
 import DoubleCircleIcon from "./DoubleCircleIcon";
 import { Theme } from '@mui/material/styles';
 import { useMediaQuery } from '@mui/material';
@@ -132,7 +132,7 @@ export default function ButtonArea(props: {
                 }else{
                     console.error("既にリングデータをサーバーに送信済みです");
                 }
-                showInfoToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
+                showWarnToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
             }else{
                 try{
                     // リングデータをまだ送信していない場合、リングデータを送信する
@@ -144,7 +144,7 @@ export default function ButtonArea(props: {
                     hasPostRing.current = true;
 
                     // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
-                    showInfoToast("I005");
+                    showSuccessToast("I005");
 
                 }catch(error){
                     // サーバーにリングデータを送信できなかった際のエラーハンドリング
