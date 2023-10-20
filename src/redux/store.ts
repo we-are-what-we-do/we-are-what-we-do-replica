@@ -3,14 +3,12 @@ import { TypedUseSelectorHook, useSelector } from "react-redux";
 import torusInfoSlice from "./features/torusInfo-slice";
 import randIndexSlice from "./features/randIndex-slice";
 import animeVisibleSlicec from "./features/animeVisible-slicec";
-import resetButtonDisabledSlice from "./features/resetButton-Disabled-slice";
 
 export const store = configureStore({
     reducer: {
         torusInfo      : torusInfoSlice,
         animeIndex     : randIndexSlice,
-        anime          : animeVisibleSlicec, 
-        enableChangeBt : resetButtonDisabledSlice, 
+        anime          : animeVisibleSlicec
     },
 });
 
