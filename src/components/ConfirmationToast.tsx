@@ -26,13 +26,16 @@ export const ConfirmToast: React.FC<ConfirmToastProps> = ({ onYes, onNo }) => {
         <Button
           variant="contained"
           onClick={onYes}
-        >{messageI004y}</Button>
+          style={{width: "10rem"}}
+        >
+          {messageI004y}
+        </Button>
       </Grid>
       <Grid item xs={12}>
         <Button
           variant="outlined"
           onClick={onNo}
-          style={{backgroundColor: "white"}}
+          style={{width: "10rem", backgroundColor: "white"}}
         >
           {messageI004n}
         </Button>
