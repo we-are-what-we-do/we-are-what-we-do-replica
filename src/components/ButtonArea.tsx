@@ -109,16 +109,24 @@ export default function ButtonArea(props: {
             // 描画に追加したリングのデータを取得する
             const addedRingData: RingData | null = getRingDataToAdd();
 
-            // エラーハンドリング
-            if(!addedRingData){
-                console.error("追加したリングデータを取得できませんでした");
-                return;
-            };
-
             // 写真(リング+カメラ)を撮影をして、base64形式で取得する
             const newImage: string | null = captureImage();
-            if(!newImage){
-                console.error("写真を撮影できませんでした");
+
+            // エラーハンドリング
+            try{
+                if(!addedRingData){
+                    throw new Error("追加したリングデータを取得できませんでした");
+                };
+                if(!newImage){
+                    throw new Error("写真を撮影できませんでした");
+                }
+            }catch(error){
+                console.error(error);
+                videoRef.current?.play();      // カメラを再生する
+                setEnableOrbitControl(true);   // 3Dの視点固定を解除する
+                dispatch(changeVisibility());  //アニメ非表示
+                isTakingPhotoRef.current = false; // 撮影ボタンの処理が終わったことを記録する
+                showErrorToast("E099"); // 「システムエラー」というメッセージを表示する
                 return;
             }
 
