@@ -81,7 +81,6 @@ export default function ButtonArea(props: {
 
         // 撮影した写真に確認を取る
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
-        console.log("isPhotoOk: ", isPhotoOk);
 
         // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
         if(isPhotoOk){
