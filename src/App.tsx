@@ -74,14 +74,6 @@ export default function App() {
   const [enableOrbitControl, setEnableOrbitControl] = useState<boolean>(true);
 
 
-  /* useEffect等 */
-  // 初回レンダリング時、案内を送信する
-  useEffect(() => {
-    // 「ARリングを増やしましょう。」というメッセージボックスを表示する
-    showInfoToast("I003");
-  }, []);
-
-
   /* DEIの初期表示をレスポンシブに行う */
   // position-zをuseStateで管理する
   const [positionZ, setPositionZ] = useState<Vector3>(new Vector3(0,0,10));

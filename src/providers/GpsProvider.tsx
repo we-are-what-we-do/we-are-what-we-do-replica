@@ -2,7 +2,7 @@ import { createContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { FeatureCollection, Point } from 'geojson';
 import { getLocationConfig } from '../api/fetchDb';
 import { haversineDistance } from '../api/distanceCalculations';
-import { showInfoToast, showTestToast, showWarnToast } from '../components/ToastHelpers';
+import { showInfoToast, /* showTestToast, */ showWarnToast } from '../components/ToastHelpers';
 
 
 /* 定数定義 */
@@ -130,10 +130,13 @@ export function GpsProvider({children}: {children: ReactNode}){
             console.error("Error fetching GeoJSON Point data or getting current location:", error);
         }
 
-        // GPSがピンの範囲外の場合、「ARリングはピン設置箇所の近くでのみ表示されます。」というメッセージボックスを表示する
         if(!Boolean(result)){
+            // GPSがピンの範囲外の場合、「ARリングはピン設置箇所の近くでのみ表示されます。」というメッセージボックスを表示する
             showWarnToast("I001");
-        };
+        }else{
+            // GPSがピンの範囲内の場合、「ARリングを増やしましょう。」というメッセージボックスを表示する
+            showInfoToast("I003");
+        }
 
         return result;
     }
