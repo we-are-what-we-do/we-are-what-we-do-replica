@@ -27,9 +27,10 @@ async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promis
 export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
     let result: FeatureCollection<Point> | null = null;
     // キャッシュデータからのピン設定データ取得を試みる
-    const cashData: string | null = localStorage.getItem("locations");
-    // const cashData: string | null = null;
-    // localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
+    // TODO geojsonデータの取得方法(仮)の修正
+    // const cashData: string | null = localStorage.getItem("locations");
+    const cashData: string | null = null;
+    localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
 
     if(cashData){
         const locationData = JSON.parse(cashData) as FeatureCollection<Point>;
@@ -38,9 +39,8 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
     }else{
         // キャッシュデータがない場合、サーバーからデータを取得する
         // const apiEndpoint: string = "locations";
-        const apiEndpoint: string = "locations.json"; // 仮エンドポイント
-        const response: Response = await makeGetRequest(apiEndpoint);
-        // const response: Response = await fetch('https://wawwd.net/test/test_pin.json'); // 仮取得
+        // const response: Response = await makeGetRequest(apiEndpoint);
+        const response: Response = await fetch('https://wawwd.net/test/test_pin.json'); // 仮取得
         result = await response.json() as FeatureCollection<Point>;
         console.log(result);
 
