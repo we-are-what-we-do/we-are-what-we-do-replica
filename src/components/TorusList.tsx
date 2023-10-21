@@ -7,8 +7,6 @@ const TRANSPARENCY: number = 0.5; // 半透明リングの透明度
 
 function TorusList({hasPostRing, isTakingPhoto}: {hasPostRing: React.MutableRefObject<boolean>, isTakingPhoto: React.MutableRefObject<boolean>}) {
   const torusList    = useAppSelector((state) => state.torusInfo.value);
-  // const animeIndex   = useAppSelector((state) => state.animeIndex.value);
-  // const animeVisible = useAppSelector((state) => state.anime.value);
 
   const {
     addedTorus
