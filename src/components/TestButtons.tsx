@@ -34,7 +34,7 @@ export default function TestButtons(props: {
         if(hasPostRing.current){
             // 初期追加のリングを送信済みの場合
             // リングを追加して描画する
-            const newTorus = addTorus(usedOrbitIndexes);
+            const newTorus = addTorus(usedOrbitIndexes).torusData;
 
             // 描画に追加したリングのデータを取得する
             addedRingData = getRingDataToAdd(newTorus);

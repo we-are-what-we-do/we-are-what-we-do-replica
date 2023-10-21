@@ -1,11 +1,11 @@
 import { Sparkles } from "@react-three/drei";
-import { useAppSelector } from "../redux/store";
-import { RingContext } from "../providers/RingProvider";
+import { useAppSelector } from "./../../redux/store";
+import { RingContext } from "./../providers/RingProvider";
 import { useContext } from "react";
 
 const TRANSPARENCY: number = 0.5; // 半透明リングの透明度
 
-function TorusList({hasPostRing, isTakingPhoto}: {hasPostRing: React.MutableRefObject<boolean>, isTakingPhoto: React.MutableRefObject<boolean>}) {
+function TorusList({isTakingPhoto}: {isTakingPhoto: React.MutableRefObject<boolean>}) {
   const torusList    = useAppSelector((state) => state.torusInfo.value);
 
   const {
@@ -14,10 +14,7 @@ function TorusList({hasPostRing, isTakingPhoto}: {hasPostRing: React.MutableRefO
 
   // リングの透明度を取得する関数
   function getTransparency(torusId: string): number{
-    if(hasPostRing.current){
-      // リング送信後は、不透明
-      return 1;
-    }else if(isTakingPhoto.current){
+    if(isTakingPhoto.current){
       // 撮影確認中は、不透明
       return 11;
     }else if(torusId === addedTorus?.torus.id){
@@ -47,7 +44,7 @@ function TorusList({hasPostRing, isTakingPhoto}: {hasPostRing: React.MutableRefO
                   opacity={getTransparency(torus.id)}
               />
           {((torus.id === addedTorus?.torus.id)) && (
-            <Sparkles scale={8} size={5} visible={!isTakingPhoto.current} opacity={(hasPostRing.current) ? 1 : TRANSPARENCY} />
+            <Sparkles scale={8} size={5} visible={!isTakingPhoto.current} opacity={TRANSPARENCY} />
           )}
         </mesh>
       ))}
