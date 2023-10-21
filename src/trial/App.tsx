@@ -4,7 +4,7 @@ import { DbContext } from "./providers/DbProvider";
 import { CaptureContext } from "./../providers/CaptureProvider";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas, } from '@react-three/fiber';
-import TorusList from './../components/TorusList';
+import TorusList from './components/TorusList';
 // import LocationDataProvider from "./providers/LocationDataProvider";
 import Camera from "./../components/Camera";
 import { ToastContainer } from 'react-toastify';
@@ -57,6 +57,9 @@ export default function App() {
 
   // 3Dの視点移動(OrbitControl)が有効かどうかを管理するstate
   const [enableOrbitControl, setEnableOrbitControl] = useState<boolean>(true);
+
+  // 撮影ボタンの処理中かどうか
+  const isTakingPhoto = useRef<boolean>(false);
 
 
   /* useEffect等 */
@@ -116,7 +119,7 @@ export default function App() {
             camera={{ position: positionZ }}
             ref={canvasRef}
           >
-            <TorusList />
+            <TorusList isTakingPhoto={isTakingPhoto}/>
             <ambientLight intensity={1} />
             <directionalLight intensity={1.5} position={[1,1,1]} />
             <directionalLight intensity={1.5} position={[1,1,-1]} />
@@ -144,6 +147,7 @@ export default function App() {
           theme={theme}
           enableOrbitControl={enableOrbitControl}
           setEnableOrbitControl={setEnableOrbitControl}
+          isTakingPhoto={isTakingPhoto}
           initializePositionZ={() => initializePositionZ(window.innerWidth)}
           orbitControlsReset={orbitControlsReset}
         />
