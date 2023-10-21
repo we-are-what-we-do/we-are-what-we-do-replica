@@ -15,7 +15,7 @@ import { getRandIndex } from '../redux/features/randIndex-slice';
 // contextに渡すデータの型
 type RingContent = {
     getRingDataToAdd: (newTorus?: AddedTorusInfo | null) => RingData | null;
-    addTorus: (usedOrbitIndexes: number[]) => AddedTorusInfo;
+    addTorus: (usedOrbitIndexes: number[]) => TorusWithData;
     usedOrbitIndexes: number[];
     setUsedOrbitIndexes: React.Dispatch<React.SetStateAction<number[]>>
 };
@@ -40,7 +40,7 @@ const orbitLength: number = positionArray.length; // DEI一周に必要なリン
 /* Provider */
 const initialData: RingContent = {
     getRingDataToAdd: () => null,
-    addTorus: () => ({} as AddedTorusInfo),
+    addTorus: () => ({} as TorusWithData),
     usedOrbitIndexes: [],
     setUsedOrbitIndexes: () => {}
 };
@@ -98,7 +98,7 @@ export function RingProvider({children}: {children: ReactNode}){
         });
 
         // リングを追加する
-        const newTorus: AddedTorusInfo = addTorus(newUsedOrbitIndexes);
+        const newTorus: AddedTorusInfo = addTorus(newUsedOrbitIndexes).torusData;
         const newOrbitIndex: number = newTorus.orbitIndex;
         if(newUsedOrbitIndexes.length >= orbitLength) newUsedOrbitIndexes = [];
         newUsedOrbitIndexes.push(newOrbitIndex);
@@ -151,7 +151,7 @@ export function RingProvider({children}: {children: ReactNode}){
 
     // リングの3Dオブジェクトを追加して描画する関数
     // 追加したリングの軌道indexを返す
-    function addTorus(orbitIndexes: number[]): AddedTorusInfo{
+    function addTorus(orbitIndexes: number[]): TorusWithData{
         let needDrawClear: boolean = false; // リング追加の描画時に、canvasの初期化が必要かどうか
 
         // 追加するためのリングを生成する
@@ -184,11 +184,7 @@ export function RingProvider({children}: {children: ReactNode}){
         dispatch(pushTorusInfo(newTorus));
 
         // 描画として追加したリングの軌道indexを返す
-        const result: AddedTorusInfo = {
-            orbitIndex: newTorusData.torusData.orbitIndex,
-            ringHue: newTorusData.torusData.ringHue
-        };
-        return result;
+        return newTorusData;
     };
 
     // サーバーに送信するためのリングデータを取得する関数
