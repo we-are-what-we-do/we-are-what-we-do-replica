@@ -67,6 +67,9 @@ export default function App() {
   // 既にリングを追加したかどうかを管理するref
   const hasPostRing = useRef<boolean>(false);
 
+  // 撮影ボタンの処理中かどうか
+  const isTakingPhoto = useRef<boolean>(false);
+
   // 3Dの視点移動(OrbitControl)が有効かどうかを管理するstate
   const [enableOrbitControl, setEnableOrbitControl] = useState<boolean>(true);
 
@@ -143,8 +146,11 @@ export default function App() {
             camera={{ position: positionZ }}
             ref={canvasRef}
           >
-            {Boolean(gpsFlag) && (
-              <TorusList /> // リングはピン設置箇所の近くでのみ表示される
+            {Boolean(gpsFlag) && ( // リングはピン設置箇所の近くでのみ表示される
+              <TorusList
+                hasPostRing={hasPostRing}
+                isTakingPhoto={isTakingPhoto}
+              />
             )}
             <ambientLight intensity={1} />
             <directionalLight intensity={1.5} position={[1,1,1]} />
@@ -177,6 +183,7 @@ export default function App() {
           enableOrbitControl={enableOrbitControl}
           setEnableOrbitControl={setEnableOrbitControl}
           hasPostRing={hasPostRing}
+          isTakingPhoto={isTakingPhoto}
           initializePositionZ={() => initializePositionZ(window.innerWidth)}
           orbitControlsReset={orbitControlsReset}
         />

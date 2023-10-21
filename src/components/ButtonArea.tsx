@@ -28,6 +28,7 @@ export default function ButtonArea(props: {
     enableOrbitControl: boolean;
     setEnableOrbitControl: React.Dispatch<React.SetStateAction<boolean>>;
     hasPostRing: React.MutableRefObject<boolean>;
+    isTakingPhoto: React.MutableRefObject<boolean>;
     initializePositionZ(): void;
     orbitControlsReset(): void;
 }) {
@@ -37,6 +38,7 @@ export default function ButtonArea(props: {
         enableOrbitControl,
         setEnableOrbitControl,
         hasPostRing,
+        isTakingPhoto,
         initializePositionZ,
         orbitControlsReset
     } = props;
@@ -80,19 +82,16 @@ export default function ButtonArea(props: {
     // 画面幅がmd以上かどうか
     const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上
 
-    // 撮影ボタンの処理中かどうか
-    const isTakingPhotoRef = useRef<boolean>(false);
-
 
     /* 関数定義 */
     // 撮影ボタンを押したときの処理
     async function handleTakePhotoButton(): Promise<void>{
         // 既に撮影ボタンの処理が走っているなら、処理を中止する
-        if(isTakingPhotoRef.current){
+        if(isTakingPhoto.current){
             console.error("既に撮影ボタンが押されています");
             return;
         };
-        isTakingPhotoRef.current = true; // 撮影ボタンの処理中であることを記録する
+        isTakingPhoto.current = true; // 撮影ボタンの処理中であることを記録する
 
         // 撮影する写真に確認を取る
         if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
@@ -125,7 +124,7 @@ export default function ButtonArea(props: {
                 videoRef.current?.play();      // カメラを再生する
                 setEnableOrbitControl(true);   // 3Dの視点固定を解除する
                 dispatch(changeVisibility());  //アニメ非表示
-                isTakingPhotoRef.current = false; // 撮影ボタンの処理が終わったことを記録する
+                isTakingPhoto.current = false; // 撮影ボタンの処理が終わったことを記録する
                 showErrorToast("E004"); // 「"撮影画像のアップロードに失敗しました。」というメッセージを表示する
                 return;
             }
@@ -179,7 +178,7 @@ export default function ButtonArea(props: {
         setEnableOrbitControl(true);   // 3Dの視点固定を解除する
         dispatch(changeVisibility());  // アニメ非表示
 
-        isTakingPhotoRef.current = false; // 撮影ボタンの処理が終わったことを記録する
+        isTakingPhoto.current = false; // 撮影ボタンの処理が終わったことを記録する
     }
 
     const dispatch     = useDispatch<AppDispatch>();
@@ -201,7 +200,7 @@ export default function ButtonArea(props: {
                 aria-label="reset-view"
                 color="primary"
                 onClick={() =>{
-                    if(isTakingPhotoRef.current) return; // 撮影ボタンの処理中なら、処理をやめる
+                    if(isTakingPhoto.current) return; // 撮影ボタンの処理中なら、処理をやめる
                     orbitControlsReset();
                     initializePositionZ();
                 }}
@@ -237,7 +236,7 @@ export default function ButtonArea(props: {
                 color="primary"
                 disabled={!enableBothCamera}
                 onClick={() => {
-                    if(isTakingPhotoRef.current) return; // 撮影ボタンの処理中なら、処理をやめる
+                    if(isTakingPhoto.current) return; // 撮影ボタンの処理中なら、処理をやめる
                     switchCameraFacing(enableOrbitControl);
                 }}
             >

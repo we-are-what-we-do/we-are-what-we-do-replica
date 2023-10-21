@@ -17,7 +17,8 @@ type RingContent = {
     getRingDataToAdd: (newTorus?: AddedTorusInfo | null) => RingData | null;
     addTorus: (usedOrbitIndexes: number[]) => TorusWithData;
     usedOrbitIndexes: number[];
-    setUsedOrbitIndexes: React.Dispatch<React.SetStateAction<number[]>>
+    setUsedOrbitIndexes: React.Dispatch<React.SetStateAction<number[]>>;
+    addedTorus: TorusWithData |null;
 };
 
 // 追加したリング(TorusInfo)のデータ
@@ -42,7 +43,8 @@ const initialData: RingContent = {
     getRingDataToAdd: () => null,
     addTorus: () => ({} as TorusWithData),
     usedOrbitIndexes: [],
-    setUsedOrbitIndexes: () => {}
+    setUsedOrbitIndexes: () => {},
+    addedTorus: null
 };
 
 export const RingContext = createContext<RingContent>(initialData);
@@ -68,7 +70,7 @@ export function RingProvider({children}: {children: ReactNode}){
     } = useContext(GpsContext);
 
     // リングデータを管理するstate
-    const [addedTorus, setAddedTorus] = useState<AddedTorusInfo |null>(null); // 追加したリング(AddedTorusInfo)のデータ
+    const [addedTorus, setAddedTorus] = useState<TorusWithData |null>(null); // 追加したリング(AddedTorusInfo)のデータ
     const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
 
     // dispatch
@@ -98,8 +100,9 @@ export function RingProvider({children}: {children: ReactNode}){
         });
 
         // リングを追加する
-        const newTorus: AddedTorusInfo = addTorus(newUsedOrbitIndexes).torusData;
-        const newOrbitIndex: number = newTorus.orbitIndex;
+        const newTorus: TorusWithData = addTorus(newUsedOrbitIndexes);
+        const newTorusData: AddedTorusInfo = newTorus.torusData;
+        const newOrbitIndex: number = newTorusData.orbitIndex;
         if(newUsedOrbitIndexes.length >= orbitLength) newUsedOrbitIndexes = [];
         newUsedOrbitIndexes.push(newOrbitIndex);
 
@@ -188,7 +191,7 @@ export function RingProvider({children}: {children: ReactNode}){
     };
 
     // サーバーに送信するためのリングデータを取得する関数
-    function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus): RingData | null{
+    function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus?.torusData ?? null): RingData | null{
         if(
             // TODO location修正
             // (location === null) ||
@@ -221,7 +224,8 @@ export function RingProvider({children}: {children: ReactNode}){
                 getRingDataToAdd,
                 addTorus,
                 usedOrbitIndexes,
-                setUsedOrbitIndexes
+                setUsedOrbitIndexes,
+                addedTorus
             }}
         >
             {children}
