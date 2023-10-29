@@ -17,13 +17,13 @@ import CameraRear from '@mui/icons-material/CameraRear';
 import CameraFront from '@mui/icons-material/CameraFront';
 import Cameraswitch from '@mui/icons-material/Cameraswitch';
 import { ICON_SIZE, ICON_COLOR, DISABLED_COLOR, BUTTON_MARGIN } from "./../App";
-
+import { useDispatch } from "react-redux";
+import { AppDispatch, useAppSelector } from "../redux/store";
+import { changeButtonState } from "../redux/features/buttonState-slice";
 
 // ボタン類のコンポーネント
 export default function ButtonArea(props: {
     theme: Theme;
-    enableOrbitControl: boolean;
-    setEnableOrbitControl: React.Dispatch<React.SetStateAction<boolean>>;
     hasPostRing: React.MutableRefObject<boolean>;
     isTakingPhoto: React.MutableRefObject<boolean>;
     initializePositionZ(): void;
@@ -32,8 +32,6 @@ export default function ButtonArea(props: {
     /* useState等 */
     const {
         theme,
-        enableOrbitControl,
-        setEnableOrbitControl,
         hasPostRing,
         isTakingPhoto,
         initializePositionZ,
@@ -77,6 +75,10 @@ export default function ButtonArea(props: {
     // 画面幅がmd以上かどうか
     const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上
 
+    // redux
+    const dispatch = useDispatch<AppDispatch>();
+    const buttonState = useAppSelector((state) => state.buttonState.value);
+
 
     /* 関数定義 */
     // 撮影ボタンを押したときの処理
@@ -89,13 +91,16 @@ export default function ButtonArea(props: {
 
         isTakingPhoto.current = true; // 撮影ボタンの処理中であることを記録する
 
-        if((!Boolean(ipFlag)) || (hasPostRing.current)){
+        if(!Boolean(gpsFlag)){
+            // 現在地がピンの範囲外なら、処理をやめる
+            showWarnToast("I001"); // 「ARリングはピン設置箇所の近くでのみ表示されます。」というメッセージボックスを表示する
+        }else if((!Boolean(ipFlag)) || (hasPostRing.current)){
             // 連続撮影orリングを送信済みなら、処理を止める
             showWarnToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
         }else{
             // リングが未送信状態なら、写真撮影の処理を開始する
-            videoRef.current?.pause();    // カメラを一時停止する
-            setEnableOrbitControl(false); // 3Dの視点を固定する
+            videoRef.current?.pause(); // カメラを一時停止する
+            dispatch(changeButtonState()); // 3Dの視点を固定する
 
             // 撮影した写真に確認を取る
             const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
@@ -119,8 +124,8 @@ export default function ButtonArea(props: {
                     }
                 }catch(error){
                     console.error(error);
-                    videoRef.current?.play();      // カメラを再生する
-                    setEnableOrbitControl(true);   // 3Dの視点固定を解除する
+                    videoRef.current?.play(); // カメラを再生する
+                    dispatch(changeButtonState()); // 3Dの視点固定を解除する
                     isTakingPhoto.current = false; // 撮影ボタンの処理が終わったことを記録する
                     showErrorToast("E004"); // 「"撮影画像のアップロードに失敗しました。」というメッセージを表示する
                     return;
@@ -161,8 +166,8 @@ export default function ButtonArea(props: {
                 // console.log("撮影やり直しのために処理を中断しました");
             }
 
-            videoRef.current?.play();      // カメラを再生する
-            setEnableOrbitControl(true);   // 3Dの視点固定を解除する
+            videoRef.current?.play(); // カメラを再生する
+            dispatch(changeButtonState()); // 3Dの視点固定を解除する
         }
 
         isTakingPhoto.current = false; // 撮影ボタンの処理が終わったことを記録する
@@ -206,7 +211,6 @@ export default function ButtonArea(props: {
                 aria-label="capture-display"
                 color="primary"
                 onClick={handleTakePhotoButton}
-                disabled={!Boolean(gpsFlag)}
             >
                 <DoubleCircleIcon
                     width={ICON_SIZE}
@@ -223,7 +227,7 @@ export default function ButtonArea(props: {
                 disabled={!enableBothCamera}
                 onClick={() => {
                     if(isTakingPhoto.current) return; // 撮影ボタンの処理中なら、処理をやめる
-                    switchCameraFacing(enableOrbitControl);
+                    switchCameraFacing(!buttonState)
                 }}
             >
                 {(cameraFacing === "out") ? (

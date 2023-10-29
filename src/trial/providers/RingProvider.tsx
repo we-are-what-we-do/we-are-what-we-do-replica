@@ -1,7 +1,5 @@
 import { createContext, useState, ReactNode, useEffect, useContext } from 'react';
 import { DbContext } from './DbProvider';
-import { IpContext } from './IpProvider';
-import { GpsContext } from './GpsProvider';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../redux/store';
 import { TorusInfo, pushTorusInfo, resetHandle } from '../../redux/features/torusInfo-slice';
@@ -55,18 +53,6 @@ export function RingProvider({children}: {children: ReactNode}){
     const {
         ringsData
     } = useContext(DbContext);
-
-    // IPアドレスの状態を管理するcontext
-    const {
-        currentIp
-    } = useContext(IpContext);
-
-    // GPSの状態を管理するcontext
-    const {
-        location,
-        currentLatitude,
-        currentLongitude
-    } = useContext(GpsContext);
 
     // リングデータを管理するstate
     const [addedTorus, setAddedTorus] = useState<TorusWithData |null>(null); // 追加したリング(AddedTorusInfo)のデータ
@@ -188,24 +174,16 @@ export function RingProvider({children}: {children: ReactNode}){
 
     // サーバーに送信するためのリングデータを取得する関数
     function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus?.torusData ?? null): RingData | null{
-        if(
-            // TODO location修正
-            // (location === null) ||
-            (currentLatitude === null) ||
-            (currentLongitude === null) ||
-            (currentIp === null) ||
-            (newTorus === null)
-        ){
-            console.error({location, currentLatitude, currentLongitude, currentIp, newTorus});
+        if(newTorus === null){
+            console.error({newTorus});
             return null;
         }
 
         const newRingData: RingData = {
-            // location, // 撮影場所
-            location: location ?? "",
-            latitude: currentLatitude, // 撮影地点の緯度
-            longitude: currentLongitude, // 撮影地点の経度
-            address: currentIp, // IPアドレス
+            location: "unknown", // 撮影場所
+            latitude: 0, // 撮影地点の緯度
+            longitude: 0, // 撮影地点の経度
+            address: "unknown", // IPアドレス
             indexed: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
             ring_hue: newTorus.ringHue, // リングの色調
             created_at: getIso8601DateTime() // 撮影日時

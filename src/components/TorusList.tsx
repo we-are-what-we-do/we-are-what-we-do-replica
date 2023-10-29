@@ -29,7 +29,6 @@ function TorusList({hasPostRing, isTakingPhoto}: {hasPostRing: React.MutableRefO
     }
   }
 
-
   return (
     <>
       {torusList.map((torus) => (
@@ -41,11 +40,11 @@ function TorusList({hasPostRing, isTakingPhoto}: {hasPostRing: React.MutableRefO
         >
           <torusGeometry args={[5.5, 1.5, 40, 50]} />
           <meshStandardMaterial
-                  color={torus.color}
-                  roughness={0.0}
-                  transparent={true}
-                  opacity={getTransparency(torus.id)}
-              />
+            color={torus.color}
+            roughness={0.0}
+            transparent={true}
+            opacity={getTransparency(torus.id)}
+          />
           {((torus.id === addedTorus?.torus.id)) && (
             <Sparkles scale={8} size={5} visible={!isTakingPhoto.current} opacity={(hasPostRing.current) ? 1 : TRANSPARENCY} />
           )}
