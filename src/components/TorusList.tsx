@@ -29,7 +29,6 @@ function TorusList({hasPostRing, isTakingPhoto}: {hasPostRing: React.MutableRefO
     }
   }
 
-
   return (
     <>
       {torusList.map((torus) => (

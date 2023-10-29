@@ -1,10 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import torusInfoSlice from "./features/torusInfo-slice";
+import randIndexSlice from "./features/randIndex-slice";
+import buttonStateSlice from "./features/buttonState-slice";
 
 export const store = configureStore({
     reducer: {
-        torusInfo      : torusInfoSlice,
+        torusInfo : torusInfoSlice,
+        animeIndex: randIndexSlice,
+        buttonState: buttonStateSlice,
     },
 });
 

@@ -9,13 +9,13 @@ import TorusList from './components/TorusList';
 // import LocationDataProvider from "./providers/LocationDataProvider";
 import Camera from "./components/Camera";
 import { ToastContainer } from 'react-toastify';
-import { showInfoToast } from "./components/ToastHelpers"
 import { Vector3 } from "three";
 import ButtonArea from "./components/ButtonArea";
 import TestButtons from "./components/TestButtons";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CircularProgress } from "@mui/material";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { useAppSelector } from "./redux/store";
 
 
 /* 定数定義 */
@@ -45,7 +45,6 @@ const theme = createTheme({
     }
 });
 
-
 export default function App() {
   /* stateやcontext等 */
   const {
@@ -71,8 +70,7 @@ export default function App() {
   const isTakingPhoto = useRef<boolean>(false);
 
   // 3Dの視点移動(OrbitControl)が有効かどうかを管理するstate
-  const [enableOrbitControl, setEnableOrbitControl] = useState<boolean>(true);
-
+  const enableOrbitControl = useAppSelector((state) => state.buttonState.value);
 
   /* DEIの初期表示をレスポンシブに行う */
   // position-zをuseStateで管理する
@@ -103,7 +101,7 @@ export default function App() {
     }
   }
 
-
+  //OrbitControlsの初期化
   const orbitControlsRef = useRef<OrbitControlsImpl>(null!);
   /**
    * OrbitControlsのカメラ位置を初期値に戻す関数です。
@@ -113,7 +111,6 @@ export default function App() {
   function orbitControlsReset() {
     orbitControlsRef.current.reset();
   }
-
 
   return(
     <> 
@@ -149,7 +146,7 @@ export default function App() {
             <directionalLight intensity={1.5} position={[1,1,-1]} />
             <pointLight intensity={1} position={[1,1,5]} />
             <pointLight intensity={1} position={[1,1,-5]} />
-            <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
+            <OrbitControls enabled={!enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
           </Canvas>
           {!isLoadedData && (
             <div
@@ -172,8 +169,6 @@ export default function App() {
         />}
         <ButtonArea
           theme={theme}
-          enableOrbitControl={enableOrbitControl}
-          setEnableOrbitControl={setEnableOrbitControl}
           hasPostRing={hasPostRing}
           isTakingPhoto={isTakingPhoto}
           initializePositionZ={() => initializePositionZ(window.innerWidth)}
