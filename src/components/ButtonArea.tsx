@@ -18,15 +18,12 @@ import CameraFront from '@mui/icons-material/CameraFront';
 import Cameraswitch from '@mui/icons-material/Cameraswitch';
 import { ICON_SIZE, ICON_COLOR, DISABLED_COLOR, BUTTON_MARGIN } from "./../App";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "../redux/store";
-import { changeVisibility } from "../redux/features/animeVisible-slicec";
-
+import { AppDispatch, useAppSelector } from "../redux/store";
+import { changeButtonState } from "../redux/features/buttonState-slice";
 
 // ボタン類のコンポーネント
 export default function ButtonArea(props: {
     theme: Theme;
-    enableOrbitControl: boolean;
-    setEnableOrbitControl: React.Dispatch<React.SetStateAction<boolean>>;
     hasPostRing: React.MutableRefObject<boolean>;
     initializePositionZ(): void;
     orbitControlsReset(): void;
@@ -34,8 +31,6 @@ export default function ButtonArea(props: {
     /* useState等 */
     const {
         theme,
-        enableOrbitControl,
-        setEnableOrbitControl,
         hasPostRing,
         initializePositionZ,
         orbitControlsReset
@@ -83,7 +78,6 @@ export default function ButtonArea(props: {
     // 撮影ボタンの処理中かどうか
     const isTakingPhotoRef = useRef<boolean>(false);
 
-
     /* 関数定義 */
     // 撮影ボタンを押したときの処理
     async function handleTakePhotoButton(): Promise<void>{
@@ -97,8 +91,7 @@ export default function ButtonArea(props: {
         // 撮影する写真に確認を取る
         if(hasPostRing.current) console.log("2回目以降の撮影を行います\n(リングデータの送信は行いません)");
         videoRef.current?.pause();    // カメラを一時停止する
-        setEnableOrbitControl(false); // 3Dの視点を固定する
-        dispatch(changeVisibility()); //アニメ非表示
+        dispatch(changeButtonState());
 
         // 撮影した写真に確認を取る
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
@@ -168,13 +161,13 @@ export default function ButtonArea(props: {
         }
 
         videoRef.current?.play();      // カメラを再生する
-        setEnableOrbitControl(true);   // 3Dの視点固定を解除する
-        dispatch(changeVisibility());  //アニメ非表示
+        dispatch(changeButtonState());
 
         isTakingPhotoRef.current = false; // 撮影ボタンの処理が終わったことを記録する
     }
 
     const dispatch = useDispatch<AppDispatch>();
+    const buttonState = useAppSelector((state) => state.buttonState.value);
 
     return (
         <div
@@ -192,6 +185,7 @@ export default function ButtonArea(props: {
                 }}
                 aria-label="reset-view"
                 color="primary"
+                disabled={buttonState}
                 onClick={() =>{
                     orbitControlsReset();
                     initializePositionZ();
@@ -212,7 +206,7 @@ export default function ButtonArea(props: {
                 aria-label="capture-display"
                 color="primary"
                 onClick={handleTakePhotoButton}
-                disabled={!Boolean(gpsFlag)}
+                disabled={buttonState}
             >
                 <DoubleCircleIcon
                     width={ICON_SIZE}
@@ -227,7 +221,7 @@ export default function ButtonArea(props: {
                 aria-label="switch-camera"
                 color="primary"
                 disabled={!enableBothCamera}
-                onClick={() => switchCameraFacing(enableOrbitControl)}
+                onClick={() => switchCameraFacing(!buttonState)}
             >
                 {(cameraFacing === "out") ? (
                     <CameraFront

@@ -16,6 +16,7 @@ import TestButtons from "./components/TestButtons";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CircularProgress } from "@mui/material";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { useAppSelector } from "./redux/store";
 
 
 /* 定数定義 */
@@ -67,8 +68,7 @@ export default function App() {
   const hasPostRing = useRef<boolean>(false);
 
   // 3Dの視点移動(OrbitControl)が有効かどうかを管理するstate
-  const [enableOrbitControl, setEnableOrbitControl] = useState<boolean>(true);
-
+  const enableOrbitControl = useAppSelector((state) => state.buttonState.value);
 
   /* useEffect等 */
   // 初回レンダリング時、案内を送信する
@@ -101,13 +101,11 @@ export default function App() {
     }
   }
 
-
   //OrbitControlsの初期化
   const orbitControlsRef = useRef<OrbitControlsImpl>(null!);
   function orbitControlsReset() {
     orbitControlsRef.current.reset();
   }
-
 
   return(
     <> 
@@ -140,7 +138,7 @@ export default function App() {
             <directionalLight intensity={1.5} position={[1,1,-1]} />
             <pointLight intensity={1} position={[1,1,5]} />
             <pointLight intensity={1} position={[1,1,-5]} />
-            <OrbitControls enabled={enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
+            <OrbitControls enabled={!enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
           </Canvas>
           {!isLoadedData && (
             <div
@@ -163,8 +161,6 @@ export default function App() {
         />}
         <ButtonArea
           theme={theme}
-          enableOrbitControl={enableOrbitControl}
-          setEnableOrbitControl={setEnableOrbitControl}
           hasPostRing={hasPostRing}
           initializePositionZ={() => initializePositionZ(window.innerWidth)}
           orbitControlsReset={orbitControlsReset}
