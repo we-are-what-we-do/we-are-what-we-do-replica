@@ -192,7 +192,6 @@ export default function ButtonArea(props: {
                 }}
                 aria-label="reset-view"
                 color="primary"
-                disabled={buttonState}
                 onClick={() =>{
                     if(isTakingPhoto.current) return; // 撮影ボタンの処理中なら、処理をやめる
                     orbitControlsReset();
@@ -214,7 +213,6 @@ export default function ButtonArea(props: {
                 aria-label="capture-display"
                 color="primary"
                 onClick={handleTakePhotoButton}
-                disabled={buttonState}
             >
                 <DoubleCircleIcon
                     width={ICON_SIZE}

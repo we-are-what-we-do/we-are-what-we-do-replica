@@ -129,6 +129,7 @@ function App() {
         <directionalLight intensity={1.5} position={[1,1,-1]} />
         <pointLight intensity={1} position={[1,1,5]} />
         <pointLight intensity={1} position={[1,1,-5]} />
+        <TorusList />
       </Canvas>
       <DisplayInfo ringCount={ ringCount } latestLocationJp={ latestLocationJp } />
     </div>
