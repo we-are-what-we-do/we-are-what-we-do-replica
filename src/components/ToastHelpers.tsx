@@ -23,6 +23,7 @@ export const showConfirmToast = async () => {
           // console.log("Yes was clicked");
           resolve(true);
         }}
+
         onNo={() => {
           toast.dismiss();
           // console.log("No was clicked");
@@ -30,13 +31,11 @@ export const showConfirmToast = async () => {
         }}
       />,
       {
-        autoClose: false, // トーストを自動的に閉じない
-        className: "custom-confirm"
-        // TODO 本番環境ではコメントアウトを解除する
-        // onClose: () => {
-        //   // Toastが閉じられたときに実行したい処理をここに記述
-        //   resolve(false);
-        // }
+        closeOnClick: false,
+        closeButton:  false,
+        draggable:    false,
+        autoClose:    false, 
+        className:    "custom-confirm"
       }
     );
   });

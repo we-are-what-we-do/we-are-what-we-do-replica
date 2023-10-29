@@ -45,7 +45,6 @@ const theme = createTheme({
     }
 });
 
-
 export default function App() {
   /* stateやcontext等 */
   const {
