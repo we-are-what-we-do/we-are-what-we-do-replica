@@ -16,7 +16,7 @@ function TorusList() {
           rotation={[torus.rotateX, torus.rotateY, 0]}
           scale={torus.scale}
         >
-          <torusGeometry args={[5.5, 1.5, 30, 50]} />
+          <torusGeometry args={[5.5, 1.5, 40, 50]} />
           <meshStandardMaterial color={torus.color} roughness={0.0} />
           { animeIndex == torus.id ? <Sparkles scale={8} size={5} visible={!animeVisible} /> : <></> }
         </mesh>
