@@ -42,7 +42,7 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
         // const response: Response = await makeGetRequest(apiEndpoint);
         const response: Response = await fetch('https://wawwd.net/test/test_pin.json'); // 仮取得
         result = await response.json() as FeatureCollection<Point>;
-        console.log(result);
+        console.log("location: ",result);
 
         // サーバーから取得したデータをキャッシュに保存する
         localStorage.setItem("locations", JSON.stringify(result));

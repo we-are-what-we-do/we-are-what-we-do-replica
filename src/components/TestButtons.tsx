@@ -2,17 +2,13 @@ import { useContext } from "react";
 import { postRingData } from './../api/fetchDb';
 import { DbContext } from "../providers/DbProvider";
 import { RingContext } from "./../providers/RingProvider";
+import { SocketContext } from "../providers/SocketProvider";
 import { RingData } from "../handleRingData";
 import { positionArray } from "./../torusPosition";
+import { GpsContext } from "../providers/GpsProvider";
 
-export default function TestButtons(props: {
-    hasPostRing: React.MutableRefObject<boolean>;
-}) {
+export default function TestButtons() {
     /* useState等 */
-    const {
-        hasPostRing
-    } = props;
-
     // サーバーから取得したリングデータを管理するcontext
     const {
         setLatestRing
@@ -26,6 +22,16 @@ export default function TestButtons(props: {
         setUsedOrbitIndexes
     } = useContext(RingContext);
 
+    // websocketを管理するcontext
+    const {
+        hasPostRing
+    } = useContext(SocketContext);
+
+    // GPSの状態を管理するcontext
+    const {
+        currentLatitude,
+        currentLongitude
+    } = useContext(GpsContext);
 
     /* 関数定義 */
     // サーバーにリングを追加する処理(テスト用)
@@ -81,7 +87,8 @@ export default function TestButtons(props: {
             style={{
                 width: "100%",
                 position: "absolute",
-                top: "20%"
+                top: "5%",
+                left: "3%"
             }}
         >
             <button
@@ -100,6 +107,7 @@ export default function TestButtons(props: {
             >
                 リングデータ削除(テスト用)
             </button>
+            <br/>
             <span
                 style={{
                     position: "relative",
@@ -107,6 +115,15 @@ export default function TestButtons(props: {
                 }}
             >
                     リング数: {usedOrbitIndexes.length}/{positionArray.length}
+            </span>
+            <br/>
+            <span
+                style={{
+                    position: "relative",
+                    color: "white"
+                }}
+            >
+                    現在地: {currentLatitude}, {currentLongitude}
             </span>
         </div>
     );

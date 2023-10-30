@@ -4,9 +4,10 @@ import { RingData } from "../handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
 import { CameraContext } from "./../providers/CameraProvider";
 import { RingContext } from "./../providers/RingProvider";
-import { IpContext } from "../providers/IpProvider";
+import { UserContext } from "../providers/UserProvider";
 import { GpsContext } from "../providers/GpsProvider";
 import { DbContext } from "../providers/DbProvider";
+import { SocketContext } from "../providers/SocketProvider";
 import { showErrorToast, showConfirmToast, showWarnToast, showSuccessToast } from "./ToastHelpers"
 import DoubleCircleIcon from "./DoubleCircleIcon";
 import { Theme } from '@mui/material/styles';
@@ -24,7 +25,6 @@ import { changeButtonState } from "../redux/features/buttonState-slice";
 // ボタン類のコンポーネント
 export default function ButtonArea(props: {
     theme: Theme;
-    hasPostRing: React.MutableRefObject<boolean>;
     isTakingPhoto: React.MutableRefObject<boolean>;
     initializePositionZ(): void;
     orbitControlsReset(): void;
@@ -32,7 +32,6 @@ export default function ButtonArea(props: {
     /* useState等 */
     const {
         theme,
-        hasPostRing,
         isTakingPhoto,
         initializePositionZ,
         orbitControlsReset
@@ -40,13 +39,14 @@ export default function ButtonArea(props: {
 
     // サーバーからリングデータを取得するためのcontext
     const {
-        initializeRingData
+        initializeRingData,
+        setLatestRing
     } = useContext(DbContext);
 
     // IPの状態を管理するcontext
     const {
-        ipFlag
-    } = useContext(IpContext);
+        userFlag
+    } = useContext(UserContext);
 
     // GPSの状態を管理するcontext
     const {
@@ -72,6 +72,11 @@ export default function ButtonArea(props: {
         saveImage
     } = useContext(CaptureContext);
 
+    // websocketを管理するcontext
+    const {
+        hasPostRing
+    } = useContext(SocketContext);
+
     // 画面幅がmd以上かどうか
     const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上
 
@@ -94,7 +99,7 @@ export default function ButtonArea(props: {
         if(!Boolean(gpsFlag)){
             // 現在地がピンの範囲外なら、処理をやめる
             showWarnToast("I001"); // 「ARリングはピン設置箇所の近くでのみ表示されます。」というメッセージボックスを表示する
-        }else if((!Boolean(ipFlag)) || (hasPostRing.current)){
+        }else if((!userFlag) || (hasPostRing.current)){
             // 連続撮影orリングを送信済みなら、処理を止める
             showWarnToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
         }else{
@@ -136,6 +141,9 @@ export default function ButtonArea(props: {
                     await postRingData(addedRingData); // サーバーにリングデータを送信する
                     await postNftImage(newImage); // base64形式の画像をサーバーに送信する
                     // console.log("サーバーにデータを送信しました:\n", addedRingData);
+
+                    // latestRingを更新する
+                    setLatestRing(addedRingData);
 
                     // リングデータを送信済みとしてrefを更新する
                     hasPostRing.current = true;

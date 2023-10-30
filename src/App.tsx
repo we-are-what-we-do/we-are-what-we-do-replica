@@ -60,9 +60,6 @@ export default function App() {
     errorMessage
   } = useContext(GpsContext);
 
-  // 既にリングを追加したかどうかを管理するref
-  const hasPostRing = useRef<boolean>(false);
-
   // 撮影ボタンの処理中かどうか
   const isTakingPhoto = useRef<boolean>(false);
 
@@ -133,10 +130,7 @@ export default function App() {
             ref={canvasRef}
           >
             {Boolean(gpsFlag) && ( // リングはピン設置箇所の近くでのみ表示される
-              <TorusList
-                hasPostRing={hasPostRing}
-                isTakingPhoto={isTakingPhoto}
-              />
+              <TorusList isTakingPhoto={isTakingPhoto}/>
             )}
             <ambientLight intensity={1} />
             <directionalLight intensity={1.5} position={[1,1,1]} />
@@ -163,7 +157,6 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <ButtonArea
           theme={theme}
-          hasPostRing={hasPostRing}
           isTakingPhoto={isTakingPhoto}
           initializePositionZ={() => initializePositionZ(window.innerWidth)}
           orbitControlsReset={orbitControlsReset}

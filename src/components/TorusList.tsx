@@ -1,16 +1,21 @@
 import { Sparkles } from "@react-three/drei";
 import { useAppSelector } from "../redux/store";
 import { RingContext } from "../providers/RingProvider";
+import { SocketContext } from "../providers/SocketProvider";
 import { useContext } from "react";
 
 const TRANSPARENCY: number = 0.5; // 半透明リングの透明度
 
-function TorusList({hasPostRing, isTakingPhoto}: {hasPostRing: React.MutableRefObject<boolean>, isTakingPhoto: React.MutableRefObject<boolean>}) {
+function TorusList({isTakingPhoto}: {isTakingPhoto: React.MutableRefObject<boolean>}) {
   const torusList    = useAppSelector((state) => state.torusInfo.value);
 
   const {
     addedTorus
-} = useContext(RingContext);
+  } = useContext(RingContext);
+
+  const {
+    hasPostRing
+  } = useContext(SocketContext);
 
   // リングの透明度を取得する関数
   function getTransparency(torusId: string): number{
