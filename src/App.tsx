@@ -56,8 +56,7 @@ export default function App() {
   
   // GPSの状態を管理するcontext
   const {
-    gpsFlag,
-    errorMessage
+    gpsFlag
   } = useContext(GpsContext);
 
   // 撮影ボタンの処理中かどうか
@@ -108,11 +107,6 @@ export default function App() {
 
   return(
     <> 
-      {errorMessage && (
-        <div className="error-message-box">
-          {errorMessage}
-        </div>
-      )}
       <div id="app">
         <div className="camera">
           <Camera />
