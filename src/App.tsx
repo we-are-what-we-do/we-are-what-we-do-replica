@@ -57,8 +57,7 @@ export default function App() {
   
   // GPSの状態を管理するcontext
   const {
-    // gpsFlag,
-    errorMessage
+    // gpsFlag
   } = useContext(GpsContext);
   const gpsFlag: boolean = true;// TODO どこでもリング表示機能(テスト)を削除する
 
@@ -110,11 +109,6 @@ export default function App() {
 
   return(
     <> 
-      {errorMessage && (
-        <div className="error-message-box">
-          {errorMessage}
-        </div>
-      )}
       <div id="app">
         <div className="camera">
           <Camera />
