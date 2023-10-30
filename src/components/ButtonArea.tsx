@@ -39,7 +39,8 @@ export default function ButtonArea(props: {
 
     // サーバーからリングデータを取得するためのcontext
     const {
-        initializeRingData
+        initializeRingData,
+        setLatestRing
     } = useContext(DbContext);
 
     // IPの状態を管理するcontext
@@ -142,6 +143,9 @@ export default function ButtonArea(props: {
                     await postRingData(addedRingData); // サーバーにリングデータを送信する
                     await postNftImage(newImage); // base64形式の画像をサーバーに送信する
                     console.log("サーバーにデータを送信しました:\n", addedRingData);
+
+                    // latestRingを更新する
+                    setLatestRing(addedRingData);
 
                     // リングデータを送信済みとしてrefを更新する
                     hasPostRing.current = true;
