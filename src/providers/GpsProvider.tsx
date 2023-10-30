@@ -19,6 +19,7 @@ type Context = {
     location: string | null;
     currentLatitude: number | null;
     currentLongitude: number | null;
+    isLoadedGps: boolean;
 };
 
 
@@ -28,6 +29,7 @@ const initialData: Context = {
     location: null,
     currentLatitude: null,
     currentLongitude: null,
+    isLoadedGps: false
 };
 
 export const GpsContext = createContext<Context>(initialData);
@@ -43,6 +45,8 @@ export function GpsProvider({children}: {children: ReactNode}){
     const [currentLatitude, setCurrentLatitude] = useState<number | null>(null); // 現在地の緯度
     const [currentLongitude, setCurrentLongitude] = useState<number | null>(null); // 現在地の経度
 
+    // データを取得済みかどうかを管理する
+    const [isLoadedGps, setIsLoadedGps] = useState<boolean>(false);
 
     /* useEffect等 */
     // 初回レンダリング時、GeoJSON Pointデータを取得し、現在地がピンの範囲内かどうかを調べる
@@ -54,7 +58,9 @@ export function GpsProvider({children}: {children: ReactNode}){
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         // 位置情報が変更されたときに呼び出されるコールバック
-                        handleChangePosition(position, data, true)
+                        handleChangePosition(position, data, true).then(() => {
+                            setIsLoadedGps(true);
+                        });
                     },
                     (error) => {
                         if(error.code === error.PERMISSION_DENIED){
@@ -212,7 +218,8 @@ console.log("do", isDo)
                 gpsFlag,
                 location,
                 currentLatitude,
-                currentLongitude
+                currentLongitude,
+                isLoadedGps
             }}
         >
             {children}

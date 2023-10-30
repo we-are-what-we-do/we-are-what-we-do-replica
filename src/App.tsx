@@ -58,6 +58,7 @@ export default function App() {
   // GPSの状態を管理するcontext
   const {
     // gpsFlag
+    isLoadedGps
   } = useContext(GpsContext);
   const gpsFlag: boolean = true;// TODO どこでもリング表示機能(テスト)を削除する
 
@@ -115,7 +116,7 @@ export default function App() {
         </div>
         <div className='canvas'>
           <Canvas
-            hidden={!isLoadedData}
+            hidden={!(isLoadedData && isLoadedGps)}
             onCreated={({ gl }) => {
               gl.setClearColor(0xFF0000, 0);
               gl.autoClear = true;
@@ -135,7 +136,7 @@ export default function App() {
             <pointLight intensity={1} position={[1,1,-5]} />
             <OrbitControls enabled={!enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
           </Canvas>
-          {!isLoadedData && (
+          {!(isLoadedData && isLoadedGps) && (
             <div
               style={{
                 display: "flex",
