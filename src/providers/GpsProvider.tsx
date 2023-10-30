@@ -123,7 +123,7 @@ export function GpsProvider({children}: {children: ReactNode}){
 
         // 現在地の緯度・経度を取得する
         const currentLat: number = position.coords.latitude;
-        const currentLon: number = position.coords.latitude;
+        const currentLon: number = position.coords.longitude;
 
         // 各ピンの位置と現在地との距離をチェック
         for (const feature of geoJsonData.features) {
