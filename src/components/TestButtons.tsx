@@ -87,8 +87,7 @@ export default function TestButtons() {
             style={{
                 width: "100%",
                 position: "absolute",
-                top: "5%",
-                left: "3%"
+                top: "10%"
             }}
         >
             <button
@@ -114,16 +113,9 @@ export default function TestButtons() {
                     color: "white"
                 }}
             >
-                    リング数: {usedOrbitIndexes.length}/{positionArray.length}
-            </span>
-            <br/>
-            <span
-                style={{
-                    position: "relative",
-                    color: "white"
-                }}
-            >
-                    現在地: {currentLatitude}, {currentLongitude}
+                リング数: {usedOrbitIndexes.length}/{positionArray.length}
+                <br/>
+                現在地: {currentLatitude}, {currentLongitude}
             </span>
         </div>
     );

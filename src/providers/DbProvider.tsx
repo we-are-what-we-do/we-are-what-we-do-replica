@@ -30,7 +30,7 @@ const initialData: DbContent = {
     initializeRingData: () => Promise.resolve(),
     addTorusData: () => {},
     setLatestRing: () => null,
-    isLoadedData: true
+    isLoadedData: false
 };
 
 export const DbContext = createContext<DbContent>(initialData);

@@ -56,7 +56,8 @@ export default function App() {
   
   // GPSの状態を管理するcontext
   const {
-    gpsFlag
+    gpsFlag,
+    isLoadedGps
   } = useContext(GpsContext);
 
   // 撮影ボタンの処理中かどうか
@@ -113,7 +114,7 @@ export default function App() {
         </div>
         <div className='canvas'>
           <Canvas
-            hidden={!isLoadedData}
+            hidden={!(isLoadedData && isLoadedGps)}
             onCreated={({ gl }) => {
               gl.setClearColor(0xFF0000, 0);
               gl.autoClear = true;
@@ -123,7 +124,7 @@ export default function App() {
             camera={{ position: positionZ }}
             ref={canvasRef}
           >
-            {Boolean(gpsFlag) && ( // リングはピン設置箇所の近くでのみ表示される
+            {gpsFlag && ( // リングはピン設置箇所の近くでのみ表示される
               <TorusList isTakingPhoto={isTakingPhoto}/>
             )}
             <ambientLight intensity={1} />
@@ -133,7 +134,7 @@ export default function App() {
             <pointLight intensity={1} position={[1,1,-5]} />
             <OrbitControls enabled={!enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
           </Canvas>
-          {!isLoadedData && (
+          {!(isLoadedData && isLoadedGps) && (
             <div
               style={{
                 display: "flex",

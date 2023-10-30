@@ -96,7 +96,7 @@ export default function ButtonArea(props: {
 
         isTakingPhoto.current = true; // 撮影ボタンの処理中であることを記録する
 
-        if(!Boolean(gpsFlag)){
+        if(!gpsFlag){
             // 現在地がピンの範囲外なら、処理をやめる
             showWarnToast("I001"); // 「ARリングはピン設置箇所の近くでのみ表示されます。」というメッセージボックスを表示する
         }else if((!userFlag) || (hasPostRing.current)){
@@ -203,7 +203,7 @@ export default function ButtonArea(props: {
                     orbitControlsReset();
                     initializePositionZ();
                 }}
-                disabled={!Boolean(gpsFlag)}
+                disabled={!gpsFlag}
             >
                 <CenterFocusWeak
                     style={{
@@ -223,7 +223,7 @@ export default function ButtonArea(props: {
                 <DoubleCircleIcon
                     width={ICON_SIZE}
                     height={ICON_SIZE}
-                    color={Boolean(gpsFlag) ? ICON_COLOR : DISABLED_COLOR}
+                    color={gpsFlag ? ICON_COLOR : DISABLED_COLOR}
                 />
             </IconButton>
             <IconButton

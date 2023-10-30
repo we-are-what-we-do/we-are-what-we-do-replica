@@ -19,6 +19,7 @@ type Context = {
     location: string | null;
     currentLatitude: number | null;
     currentLongitude: number | null;
+    isLoadedGps: boolean;
 };
 
 
@@ -28,6 +29,7 @@ const initialData: Context = {
     location: null,
     currentLatitude: null,
     currentLongitude: null,
+    isLoadedGps: false
 };
 
 export const GpsContext = createContext<Context>(initialData);
@@ -43,6 +45,8 @@ export function GpsProvider({children}: {children: ReactNode}){
     const [currentLatitude, setCurrentLatitude] = useState<number | null>(null); // 現在地の緯度
     const [currentLongitude, setCurrentLongitude] = useState<number | null>(null); // 現在地の経度
 
+    // データを取得済みかどうかを管理する
+    const [isLoadedGps, setIsLoadedGps] = useState<boolean>(false);
 
     /* useEffect等 */
     // 初回レンダリング時、GeoJSON Pointデータを取得し、現在地がピンの範囲内かどうかを調べる
@@ -54,7 +58,9 @@ export function GpsProvider({children}: {children: ReactNode}){
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         // 位置情報が変更されたときに呼び出されるコールバック
-                        handleChangePosition(position, data, true)
+                        handleChangePosition(position, data, true).then(() => {
+                            setIsLoadedGps(true);
+                        });
                     },
                     (error) => {
                         if(error.code === error.PERMISSION_DENIED){
@@ -92,11 +98,11 @@ export function GpsProvider({children}: {children: ReactNode}){
     /* 関数定義 */
     // ユーザーの現在地が変更された際に実行される関数
     async function handleChangePosition(position: GeolocationPosition, geoJsonData: FeatureCollection<Point> | null, isFirstDone: boolean): Promise<void>{
-        // 現在地の緯度・経度をstateに保存する
-        setCurrentPositions(position);
-
         // ピン設定データを取得できていない場合、ピン範囲判別処理を行わない
         if(!geoJsonData) return;
+
+        // 現在地の緯度・経度をstateに保存する
+        setCurrentPositions(position);
 
         // 現在地の取得とピンの位置を比較する
         const locationId: string | null = compareCurrentLocationWithPin(position, geoJsonData, isFirstDone);
@@ -123,12 +129,12 @@ export function GpsProvider({children}: {children: ReactNode}){
 
         // 現在地の緯度・経度を取得する
         const currentLat: number = position.coords.latitude;
-        const currentLon: number = position.coords.latitude;
+        const currentLon: number = position.coords.longitude;
 
         // 各ピンの位置と現在地との距離をチェック
         for (const feature of geoJsonData.features) {
             // 2点間の距離を求める
-            const [latitude, longitude] = feature.geometry.coordinates; // ピンの経度・緯度を取得する
+            const [longitude, latitude] = feature.geometry.coordinates; // ピンの経度・緯度を取得する
             const distance: number = haversineDistance(currentLat, currentLon, latitude, longitude); // 2点間の距離
 
             // 2点間の距離に応じて、gpsFlagを適切な値に設定する
@@ -136,7 +142,7 @@ export function GpsProvider({children}: {children: ReactNode}){
 
             // ピンの範囲内かどうかをチェックしてメッセージとして表示する
             showTestMessage({
-                isDo: isFirstDone && false,
+                isDo: isFirstDone/*  && false */, // TODO 本番環境ではチェック用メッセージは表示しない
                 feature,
                 distance,
                 radius,
@@ -144,7 +150,7 @@ export function GpsProvider({children}: {children: ReactNode}){
                 currentLon,
                 latitude,
                 longitude
-            }) // TODO 本番環境ではチェック用メッセージは表示しない
+            })
 
             if (distance <= radius) {
                 const locationId: string = String(feature.id) ?? "";
@@ -190,7 +196,7 @@ export function GpsProvider({children}: {children: ReactNode}){
             latitude,
             longitude
         } = settings;
-
+console.log("do", isDo)
         if(!isDo) return; // 実行しない場合、実行しない
 
         console.log(`${feature.properties?.localize.jp}: ${distance} / ${radius}`, "\n", {currentLat, currentLon, latitude, longitude});
@@ -212,7 +218,8 @@ export function GpsProvider({children}: {children: ReactNode}){
                 gpsFlag,
                 location,
                 currentLatitude,
-                currentLongitude
+                currentLongitude,
+                isLoadedGps
             }}
         >
             {children}
