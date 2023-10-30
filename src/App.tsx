@@ -125,7 +125,7 @@ export default function App() {
             camera={{ position: positionZ }}
             ref={canvasRef}
           >
-            {Boolean(gpsFlag) && ( // リングはピン設置箇所の近くでのみ表示される
+            {gpsFlag && ( // リングはピン設置箇所の近くでのみ表示される
               <TorusList isTakingPhoto={isTakingPhoto}/>
             )}
             <ambientLight intensity={1} />
