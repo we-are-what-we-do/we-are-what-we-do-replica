@@ -4,16 +4,16 @@ import { DbProvider } from "../providers/DbProvider";
 import { RingProvider } from "../providers/RingProvider";
 import { CameraProvider } from "../providers/CameraProvider";
 import { CaptureProvider } from "../providers/CaptureProvider";
-import { IpProvider } from "../providers/IpProvider";
+import { UserProvider } from "../providers/UserProvider";
 import { GpsProvider } from "../providers/GpsProvider";
 
 export function Providers({ children }: {children: React.ReactNode}) {
   return (
     <Provider store={store}>
       <DbProvider>
-        <IpProvider>{/* DbProvider配下にIpProviderを設置 */}
+        <UserProvider>{/* DbProvider配下にUserProviderを設置 */}
           <GpsProvider>
-            <RingProvider>{/* DbProvider, IpProvider, GpsProvider配下にRingProviderを設置 */}
+            <RingProvider>{/* DbProvider, UserProvider, GpsProvider配下にRingProviderを設置 */}
               <CameraProvider>
                 <CaptureProvider>{/* CameraProvider配下にCaptureProviderを設置 */}
                   {children}
@@ -21,7 +21,7 @@ export function Providers({ children }: {children: React.ReactNode}) {
               </CameraProvider>
             </RingProvider>
           </GpsProvider>
-        </IpProvider>
+        </UserProvider>
       </DbProvider>
     </Provider>
   )

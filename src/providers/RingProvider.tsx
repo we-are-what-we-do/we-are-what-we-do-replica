@@ -1,6 +1,6 @@
 import { createContext, useState, ReactNode, useEffect, useContext } from 'react';
 import { DbContext } from './DbProvider';
-import { IpContext } from './IpProvider';
+import { UserContext } from './UserProvider';
 import { GpsContext } from './GpsProvider';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
@@ -56,10 +56,10 @@ export function RingProvider({children}: {children: ReactNode}){
         ringsData
     } = useContext(DbContext);
 
-    // IPアドレスの状態を管理するcontext
+    // ユーザーIDを管理するcontext
     const {
-        currentIp
-    } = useContext(IpContext);
+        userId
+    } = useContext(UserContext);
 
     // GPSの状態を管理するcontext
     const {
@@ -193,10 +193,10 @@ export function RingProvider({children}: {children: ReactNode}){
             // (location === null) ||
             (currentLatitude === null) ||
             (currentLongitude === null) ||
-            (currentIp === null) ||
+            (userId === null) ||
             (newTorus === null)
         ){
-            console.error({location, currentLatitude, currentLongitude, currentIp, newTorus});
+            console.error({location, currentLatitude, currentLongitude, userId, newTorus});
             return null;
         }
 
@@ -205,7 +205,7 @@ export function RingProvider({children}: {children: ReactNode}){
             location: location ?? "",
             latitude: currentLatitude, // 撮影地点の緯度
             longitude: currentLongitude, // 撮影地点の経度
-            address: currentIp, // IPアドレス
+            user: userId, // ユーザーID
             indexed: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
             ring_hue: newTorus.ringHue, // リングの色調
             created_at: getIso8601DateTime() // 撮影日時

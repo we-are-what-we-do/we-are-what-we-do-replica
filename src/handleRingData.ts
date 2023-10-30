@@ -10,7 +10,7 @@ export type RingData = {
     "location":   string;   // ロケーションピンのUUID
     "latitude":   number; // 撮影地点の緯度
     "longitude":  number; // 撮影地点の経度
-    "address":    string; // IPアドレス
+    "user":    string; // ユーザーID
     "indexed":    number; // リング軌道内の順番(DEI中の何個目か、0~69)
     "ring_hue":    number; // リングの色調(0～360)
     "created_at": string; // 撮影日時

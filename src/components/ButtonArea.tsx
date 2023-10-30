@@ -4,7 +4,7 @@ import { RingData } from "../handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
 import { CameraContext } from "./../providers/CameraProvider";
 import { RingContext } from "./../providers/RingProvider";
-import { IpContext } from "../providers/IpProvider";
+import { UserContext } from "../providers/UserProvider";
 import { GpsContext } from "../providers/GpsProvider";
 import { DbContext } from "../providers/DbProvider";
 import { showErrorToast, showConfirmToast, showWarnToast, showSuccessToast } from "./ToastHelpers"
@@ -45,9 +45,9 @@ export default function ButtonArea(props: {
 
     // IPの状態を管理するcontext
     const {
-        // ipFlag
-    } = useContext(IpContext);
-    const ipFlag: boolean = true;// TODO 連続撮影機能(テスト)を削除する
+        // userFlag
+    } = useContext(UserContext);
+    const userFlag: boolean = true;// TODO 連続撮影機能(テスト)を削除する
 
     // GPSの状態を管理するcontext
     const {
@@ -96,7 +96,7 @@ export default function ButtonArea(props: {
         if(!Boolean(gpsFlag)){
             // 現在地がピンの範囲外なら、処理をやめる
             showWarnToast("I001"); // 「ARリングはピン設置箇所の近くでのみ表示されます。」というメッセージボックスを表示する
-        }else if((!Boolean(ipFlag)) || (hasPostRing.current)){
+        }else if((!userFlag) || (hasPostRing.current)){
             // 連続撮影orリングを送信済みなら、処理を止める
             showWarnToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
         }else{
