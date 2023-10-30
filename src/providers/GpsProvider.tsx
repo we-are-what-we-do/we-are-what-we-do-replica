@@ -2,7 +2,7 @@ import { createContext, useState, ReactNode, useEffect } from 'react';
 import { Feature, FeatureCollection, GeoJsonProperties, Point } from 'geojson';
 import { getLocationConfig } from '../api/fetchDb';
 import { haversineDistance } from '../api/distanceCalculations';
-import { showErrorToast, showInfoToast, showTestToast, showWarnToast } from '../components/ToastHelpers';
+import { showInfoToast, showTestToast, showWarnToast } from '../components/ToastHelpers';
 
 
 /* 定数定義 */
@@ -136,7 +136,7 @@ export function GpsProvider({children}: {children: ReactNode}){
 
             // ピンの範囲内かどうかをチェックしてメッセージとして表示する
             showTestMessage({
-                isDo: isFirstDone && false,
+                isDo: isFirstDone && false, // TODO 本番環境ではチェック用メッセージは表示しない
                 feature,
                 distance,
                 radius,
@@ -144,7 +144,7 @@ export function GpsProvider({children}: {children: ReactNode}){
                 currentLon,
                 latitude,
                 longitude
-            }) // TODO 本番環境ではチェック用メッセージは表示しない
+            })
 
             if (distance <= radius) {
                 const locationId: string = String(feature.id) ?? "";
