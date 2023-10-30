@@ -196,7 +196,7 @@ export function GpsProvider({children}: {children: ReactNode}){
             latitude,
             longitude
         } = settings;
-console.log("do", isDo)
+
         if(!isDo) return; // 実行しない場合、実行しない
 
         console.log(`${feature.properties?.localize.jp}: ${distance} / ${radius}`, "\n", {currentLat, currentLon, latitude, longitude});
