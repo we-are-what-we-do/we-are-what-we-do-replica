@@ -92,11 +92,11 @@ export function GpsProvider({children}: {children: ReactNode}){
     /* 関数定義 */
     // ユーザーの現在地が変更された際に実行される関数
     async function handleChangePosition(position: GeolocationPosition, geoJsonData: FeatureCollection<Point> | null, isFirstDone: boolean): Promise<void>{
-        // 現在地の緯度・経度をstateに保存する
-        setCurrentPositions(position);
-
         // ピン設定データを取得できていない場合、ピン範囲判別処理を行わない
         if(!geoJsonData) return;
+
+        // 現在地の緯度・経度をstateに保存する
+        setCurrentPositions(position);
 
         // 現在地の取得とピンの位置を比較する
         const locationId: string | null = compareCurrentLocationWithPin(position, geoJsonData, isFirstDone);
@@ -136,7 +136,7 @@ export function GpsProvider({children}: {children: ReactNode}){
 
             // ピンの範囲内かどうかをチェックしてメッセージとして表示する
             showTestMessage({
-                isDo: isFirstDone && false, // TODO 本番環境ではチェック用メッセージは表示しない
+                isDo: isFirstDone/*  && false */, // TODO 本番環境ではチェック用メッセージは表示しない
                 feature,
                 distance,
                 radius,
@@ -190,7 +190,7 @@ export function GpsProvider({children}: {children: ReactNode}){
             latitude,
             longitude
         } = settings;
-
+console.log("do", isDo)
         if(!isDo) return; // 実行しない場合、実行しない
 
         console.log(`${feature.properties?.localize.jp}: ${distance} / ${radius}`, "\n", {currentLat, currentLon, latitude, longitude});
