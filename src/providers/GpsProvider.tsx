@@ -128,7 +128,7 @@ export function GpsProvider({children}: {children: ReactNode}){
         // 各ピンの位置と現在地との距離をチェック
         for (const feature of geoJsonData.features) {
             // 2点間の距離を求める
-            const [latitude, longitude] = feature.geometry.coordinates; // ピンの経度・緯度を取得する
+            const [longitude, latitude] = feature.geometry.coordinates; // ピンの経度・緯度を取得する
             const distance: number = haversineDistance(currentLat, currentLon, latitude, longitude); // 2点間の距離
 
             // 2点間の距離に応じて、gpsFlagを適切な値に設定する
