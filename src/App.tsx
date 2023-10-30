@@ -6,7 +6,6 @@ import { GpsContext } from "./providers/GpsProvider";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas, } from '@react-three/fiber';
 import TorusList from './components/TorusList';
-// import LocationDataProvider from "./providers/LocationDataProvider";
 import Camera from "./components/Camera";
 import { ToastContainer } from 'react-toastify';
 import { Vector3 } from "three";
@@ -62,9 +61,6 @@ export default function App() {
     errorMessage
   } = useContext(GpsContext);
   const gpsFlag: boolean = true;// TODO どこでもリング表示機能(テスト)を削除する
-
-  // 既にリングを追加したかどうかを管理するref
-  const hasPostRing = useRef<boolean>(false);
 
   // 撮影ボタンの処理中かどうか
   const isTakingPhoto = useRef<boolean>(false);
@@ -136,10 +132,7 @@ export default function App() {
             ref={canvasRef}
           >
             {Boolean(gpsFlag) && ( // リングはピン設置箇所の近くでのみ表示される
-              <TorusList
-                hasPostRing={hasPostRing}
-                isTakingPhoto={isTakingPhoto}
-              />
+              <TorusList isTakingPhoto={isTakingPhoto}/>
             )}
             <ambientLight intensity={1} />
             <directionalLight intensity={1.5} position={[1,1,1]} />
@@ -164,12 +157,9 @@ export default function App() {
         </div>
       </div>
       <ThemeProvider theme={theme}>
-        {true && <TestButtons
-          hasPostRing={hasPostRing}
-        />}
+        {true && <TestButtons/>}
         <ButtonArea
           theme={theme}
-          hasPostRing={hasPostRing}
           isTakingPhoto={isTakingPhoto}
           initializePositionZ={() => initializePositionZ(window.innerWidth)}
           orbitControlsReset={orbitControlsReset}

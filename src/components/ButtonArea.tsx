@@ -7,6 +7,7 @@ import { RingContext } from "./../providers/RingProvider";
 import { UserContext } from "../providers/UserProvider";
 import { GpsContext } from "../providers/GpsProvider";
 import { DbContext } from "../providers/DbProvider";
+import { SocketContext } from "../providers/SocketProvider";
 import { showErrorToast, showConfirmToast, showWarnToast, showSuccessToast } from "./ToastHelpers"
 import DoubleCircleIcon from "./DoubleCircleIcon";
 import { Theme } from '@mui/material/styles';
@@ -24,7 +25,6 @@ import { changeButtonState } from "../redux/features/buttonState-slice";
 // ボタン類のコンポーネント
 export default function ButtonArea(props: {
     theme: Theme;
-    hasPostRing: React.MutableRefObject<boolean>;
     isTakingPhoto: React.MutableRefObject<boolean>;
     initializePositionZ(): void;
     orbitControlsReset(): void;
@@ -32,7 +32,6 @@ export default function ButtonArea(props: {
     /* useState等 */
     const {
         theme,
-        hasPostRing,
         isTakingPhoto,
         initializePositionZ,
         orbitControlsReset
@@ -73,6 +72,11 @@ export default function ButtonArea(props: {
         captureImage,
         saveImage
     } = useContext(CaptureContext);
+
+    // websocketを管理するcontext
+    const {
+        hasPostRing
+    } = useContext(SocketContext);
 
     // 画面幅がmd以上かどうか
     const isMdScreen = useMediaQuery(() => theme.breakpoints.up("md")); // md以上

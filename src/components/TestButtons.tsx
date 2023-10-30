@@ -2,17 +2,12 @@ import { useContext } from "react";
 import { postRingData } from './../api/fetchDb';
 import { DbContext } from "../providers/DbProvider";
 import { RingContext } from "./../providers/RingProvider";
+import { SocketContext } from "../providers/SocketProvider";
 import { RingData } from "../handleRingData";
 import { positionArray } from "./../torusPosition";
 
-export default function TestButtons(props: {
-    hasPostRing: React.MutableRefObject<boolean>;
-}) {
+export default function TestButtons() {
     /* useState等 */
-    const {
-        hasPostRing
-    } = props;
-
     // サーバーから取得したリングデータを管理するcontext
     const {
         setLatestRing
@@ -25,6 +20,11 @@ export default function TestButtons(props: {
         usedOrbitIndexes,
         setUsedOrbitIndexes
     } = useContext(RingContext);
+
+    // websocketを管理するcontext
+    const {
+        hasPostRing
+    } = useContext(SocketContext);
 
 
     /* 関数定義 */
