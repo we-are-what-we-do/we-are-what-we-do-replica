@@ -5,6 +5,7 @@ import { RingContext } from "./../providers/RingProvider";
 import { SocketContext } from "../providers/SocketProvider";
 import { RingData } from "../handleRingData";
 import { positionArray } from "./../torusPosition";
+import { GpsContext } from "../providers/GpsProvider";
 
 export default function TestButtons() {
     /* useState等 */
@@ -26,6 +27,11 @@ export default function TestButtons() {
         hasPostRing
     } = useContext(SocketContext);
 
+    // GPSの状態を管理するcontext
+    const {
+        currentLatitude,
+        currentLongitude
+    } = useContext(GpsContext);
 
     /* 関数定義 */
     // サーバーにリングを追加する処理(テスト用)
@@ -81,7 +87,8 @@ export default function TestButtons() {
             style={{
                 width: "100%",
                 position: "absolute",
-                top: "20%"
+                top: "5%",
+                left: "3%"
             }}
         >
             <button
@@ -100,6 +107,7 @@ export default function TestButtons() {
             >
                 リングデータ削除(テスト用)
             </button>
+            <br/>
             <span
                 style={{
                     position: "relative",
@@ -107,6 +115,15 @@ export default function TestButtons() {
                 }}
             >
                     リング数: {usedOrbitIndexes.length}/{positionArray.length}
+            </span>
+            <br/>
+            <span
+                style={{
+                    position: "relative",
+                    color: "white"
+                }}
+            >
+                    現在地: {currentLatitude}, {currentLongitude}
             </span>
         </div>
     );
