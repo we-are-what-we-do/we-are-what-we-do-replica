@@ -52,13 +52,14 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
 
 // ピン一か所から、リングのデータを取得する関数
 export async function getRingData(location?: string): Promise<RingsData> {
-    const apiEndpoint: string = "rings";
+    // const apiEndpoint: string = "rings";
     let queryParams: string = "";
     if(location){
         // ピンが指定されている場合、その一か所からのみリングのデータを取得する
         queryParams = `?id=${location}`;
     }
-    const response: Response = await makeGetRequest(apiEndpoint, queryParams);
+    // const response: Response = await makeGetRequest(apiEndpoint, queryParams);
+    const response: Response = await fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json"); // 仮取得
     const result: RingsData = await response.json();
     return result;
 }
