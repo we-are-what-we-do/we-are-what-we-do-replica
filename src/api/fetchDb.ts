@@ -3,13 +3,13 @@ import { RingData, RingsData } from "../handleRingData";
 
 
 /* 関数定義 */
-// const apiDomain: string = "https://api.wawwd.net/"; // アプリケーションサーバーのドメイン
-const apiDomain: string = "https://wawwdtestdb-default-rtdb.firebaseio.com/"; // 仮DBサーバーのドメイン
+const apiDomain: string = "https://api.wawwd.net/"; // アプリケーションサーバーのドメイン
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
     try {
-        const response = await fetch(apiDomain + apiEndpoint + (queryParams ?? ''));
+        const url: string = apiDomain + apiEndpoint + "/" + (queryParams ?? '');
+        const response = await fetch(url);
         if(response.ok){
             return response;
         }else{
@@ -38,9 +38,8 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
         // console.log("キャッシュからgeolocationデータを読み込みました", locationData);
     }else{
         // キャッシュデータがない場合、サーバーからデータを取得する
-        // const apiEndpoint: string = "locations";
-        // const response: Response = await makeGetRequest(apiEndpoint);
-        const response: Response = await fetch('https://wawwd.net/test/test_pin.json'); // 仮取得
+        const apiEndpoint: string = "locations";
+        const response: Response = await makeGetRequest(apiEndpoint);
         result = await response.json() as FeatureCollection<Point>;
         console.log("location: ",result);
 
@@ -53,8 +52,7 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
 
 // ピン一か所から、リングのデータを取得する関数
 export async function getRingData(location?: string): Promise<RingsData> {
-    // const apiEndpoint: string = "rings";
-    const apiEndpoint: string = "rings.json"; // 仮エンドポイント
+    const apiEndpoint: string = "rings";
     let queryParams: string = "";
     if(location){
         // ピンが指定されている場合、その一か所からのみリングのデータを取得する
@@ -68,7 +66,8 @@ export async function getRingData(location?: string): Promise<RingsData> {
 // JSONのPOSTリクエストを行う共通関数
 async function makePostRequest(apiEndpoint: string, data: Object): Promise<Response>{
     try {
-        const response: Response = await fetch(apiDomain + apiEndpoint, {
+        const url: string = apiDomain + apiEndpoint + "/";
+        const response: Response = await fetch(url, {
             method: 'POST',
             mode: 'cors',
             headers: {
@@ -92,16 +91,15 @@ async function makePostRequest(apiEndpoint: string, data: Object): Promise<Respo
 
 // リングのデータを送信する関数
 export async function postRingData(data: RingData): Promise<Response>{
-    // const apiEndpoint: string = "rings"; // リングのデータを送信するための、APIのエンドポイント
-    const apiEndpoint: string = "rings.json"; // 仮エンドポイント
+    const apiEndpoint: string = "rings"; // リングのデータを送信するための、APIのエンドポイント
+    // const apiEndpoint: string = "rings.json"; // 仮エンドポイント
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }
 
 // 撮影した写真を送信する関数
 export async function postNftImage(base64Data: string): Promise<Response>{
-    // const apiEndpoint: string = "nft"; // 撮影した写真を送信するための、APIのエンドポイント
-    const apiEndpoint: string = "nft.json"; // 仮エンドポイント
+    const apiEndpoint: string = "image"; // 撮影した写真を送信するための、APIのエンドポイント
     const data: { image: string } = { image: base64Data };
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
