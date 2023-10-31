@@ -66,7 +66,7 @@ export default function App() {
   // 初回レンダリング時、案内を送信する
   useEffect(() => {
     // 「ARリングを増やしましょう。」というメッセージボックスを表示する
-    showInfoToast("I003");
+    showInfoToast("I006");
   }, []);
 
 
