@@ -58,6 +58,7 @@ export async function getRingData(location?: string): Promise<RingsData> {
         // ピンが指定されている場合、その一か所からのみリングのデータを取得する
         queryParams = `?id=${location}`;
     }
+    console.log(queryParams)
     // const response: Response = await makeGetRequest(apiEndpoint, queryParams);
     const response: Response = await fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json"); // 仮取得
     const result: RingsData = await response.json();
