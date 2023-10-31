@@ -207,7 +207,7 @@ export function RingProvider({children}: {children: ReactNode}){
             longitude: currentLongitude, // 撮影地点の経度
             user: userId, // ユーザーID
             indexed: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
-            ring_hue: newTorus.ringHue, // リングの色調
+            hue: newTorus.ringHue, // リングの色調
             created_at: getIso8601DateTime() // 撮影日時
         };
 

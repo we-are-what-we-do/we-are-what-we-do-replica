@@ -38,7 +38,7 @@ function TorusList({isTakingPhoto}: {isTakingPhoto: React.MutableRefObject<boole
         >
           <torusGeometry args={[5.5, 1.5, 40, 50]} />
           <meshStandardMaterial
-                  color={torus.color}
+                  color={"rgb(255, 255, 255)"}
                   roughness={0.0}
                   transparent={true}
                   opacity={getTransparency(torus.id)}

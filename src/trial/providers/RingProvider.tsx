@@ -3,7 +3,7 @@ import { DbContext } from './DbProvider';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../../redux/store';
 import { TorusInfo, pushTorusInfo, resetHandle } from '../../redux/features/torusInfo-slice';
-import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRingColor } from '../features/handleRingData';
+import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRingColor } from '../../handleRingData';
 import { Ring, positionArray, torusScale } from '../../torusPosition';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -179,13 +179,14 @@ export function RingProvider({children}: {children: ReactNode}){
             return null;
         }
 
+        const TEST_LOCATION_ID: string = "36e94259-ceda-49fd-b6f7-29df955adfff";
         const newRingData: RingData = {
-            location: "unknown", // 撮影場所
+            location: TEST_LOCATION_ID, // 撮影場所
             latitude: 0, // 撮影地点の緯度
             longitude: 0, // 撮影地点の経度
-            address: "unknown", // IPアドレス
+            user: uuidv4(), // ユーザーID
             indexed: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
-            ring_hue: newTorus.ringHue, // リングの色調
+            hue: newTorus.ringHue, // リングの色調
             created_at: getIso8601DateTime() // 撮影日時
         };
 

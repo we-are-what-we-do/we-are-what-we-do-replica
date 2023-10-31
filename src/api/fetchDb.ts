@@ -1,6 +1,13 @@
 import { Point, FeatureCollection } from 'geojson';
-import { RingData, RingsData } from "../handleRingData";
+import { RingData } from "../handleRingData";
 
+/* 型定義 */
+type RingInstance = {
+    id: string; // インスタンスのid (UUID)
+    location: string; // その場所であるというLocation (UUID)
+    started_at: string; // インスタンスが作成された時間 (ISO8601)
+    rings?: RingData[]; // リングデータ
+}
 
 /* 関数定義 */
 const apiDomain: string = "https://api.wawwd.net/"; // アプリケーションサーバーのドメイン
@@ -41,7 +48,7 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
         const apiEndpoint: string = "locations";
         const response: Response = await makeGetRequest(apiEndpoint);
         result = await response.json() as FeatureCollection<Point>;
-        console.log("location: ",result);
+        console.log("location: ", result);
 
         // サーバーから取得したデータをキャッシュに保存する
         localStorage.setItem("locations", JSON.stringify(result));
@@ -51,17 +58,28 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
 }
 
 // ピン一か所から、リングのデータを取得する関数
-export async function getRingData(location?: string): Promise<RingsData> {
-    // const apiEndpoint: string = "rings";
-    let queryParams: string = "";
-    if(location){
-        // ピンが指定されている場合、その一か所からのみリングのデータを取得する
-        queryParams = `?id=${location}`;
-    }
-    // const response: Response = await makeGetRequest(apiEndpoint, queryParams);
-    const response: Response = await fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json"); // 仮取得
-    const result: RingsData = await response.json();
-    return result;
+export async function getRingData(): Promise<RingData[]>{
+    const apiEndpoint: string = "rings";
+
+    // 最新のインスタンスを取得する
+    const latestInstanceId: string = await getLatestInstanceId(apiEndpoint);
+    const queryParams: string = `?id=${latestInstanceId}`
+    const response: Response = await makeGetRequest(apiEndpoint, queryParams);
+    const data: RingInstance = await response.json();
+
+    // リングデータを取得する
+    const ringData: RingData[] | undefined = data.rings;
+    if(ringData === undefined) throw new Error("取得したデータにringsプロパティがありません")
+
+    return ringData;
+}
+
+// 最新のインスタンスのIDを取得する関数
+async function getLatestInstanceId(apiEndpoint: string): Promise<string>{
+    const response: Response = await makeGetRequest(apiEndpoint);
+    const data: RingInstance[] = await response.json();
+    const latestInstanceId: string = data[0].id;
+    return latestInstanceId;
 }
 
 // JSONのPOSTリクエストを行う共通関数
@@ -93,13 +111,12 @@ async function makePostRequest(apiEndpoint: string, data: Object): Promise<Respo
 // リングのデータを送信する関数
 export async function postRingData(data: RingData): Promise<Response>{
     const apiEndpoint: string = "rings"; // リングのデータを送信するための、APIのエンドポイント
-    // const apiEndpoint: string = "rings.json"; // 仮エンドポイント
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }
 
 // 撮影した写真を送信する関数
-export async function postNftImage(base64Data: string): Promise<Response>{
+export async function postImageData(base64Data: string): Promise<Response>{
     const apiEndpoint: string = "image"; // 撮影した写真を送信するための、APIのエンドポイント
     const data: { image: string } = { image: base64Data };
     const response: Response = await makePostRequest(apiEndpoint, data);

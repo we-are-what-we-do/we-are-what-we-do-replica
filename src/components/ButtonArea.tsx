@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { postNftImage, postRingData } from './../api/fetchDb';
+import { postImageData, postRingData } from './../api/fetchDb';
 import { RingData } from "../handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
 import { CameraContext } from "./../providers/CameraProvider";
@@ -141,7 +141,7 @@ export default function ButtonArea(props: {
                 try{
                     // リングデータを送信する
                     await postRingData(addedRingData); // サーバーにリングデータを送信する
-                    await postNftImage(newImage); // base64形式の画像をサーバーに送信する
+                    await postImageData(newImage); // base64形式の画像をサーバーに送信する
                     console.log("サーバーにデータを送信しました:\n", addedRingData);
 
                     // latestRingを更新する
