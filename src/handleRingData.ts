@@ -18,9 +18,6 @@ export type RingData = {
     "hue": number; // リングの色調 (0～360)
     "user": string; // ユーザーID (UUID)
     "created_at": string; // 撮影日時 (ISO8601)
-
-    "color"?: number;
-    "index"?: number;
 };
 
 
@@ -37,11 +34,10 @@ export function convertToTori(data: RingData[]): TorusInfo[]{
 
 // RingData型をTorusInfo型に変換する関数
 export function convertToTorus(data: RingData): TorusInfo{
-    if(!data.index || !data.color) throw new Error("hoge")
-    const newRingPosition: Ring = positionArray[data.index]; // リングの軌道設定
+    const newRingPosition: Ring = positionArray[data.indexed]; // リングの軌道設定
     const newTorusInfo: TorusInfo = {
         id: uuidv4(),
-        color: getRingColor(data.color),
+        color: getRingColor(data.hue),
         rotateX: newRingPosition.rotateX,
         rotateY: newRingPosition.rotateY,
         positionX: newRingPosition.positionX,

@@ -3,9 +3,14 @@ import { postRingData } from './../api/fetchDb';
 import { DbContext } from "../providers/DbProvider";
 import { RingContext } from "./../providers/RingProvider";
 import { SocketContext } from "../providers/SocketProvider";
-import { RingData } from "../handleRingData";
+import { RingData, getIso8601DateTime } from "../handleRingData";
 import { positionArray } from "./../torusPosition";
 import { GpsContext } from "../providers/GpsProvider";
+import { v4 as uuidv4 } from 'uuid';
+
+
+export const TEST_LOCATION_ID: string = "36e94259-ceda-49fd-b6f7-29df955adfff";
+
 
 export default function TestButtons() {
     /* useState等 */
@@ -43,11 +48,7 @@ export default function TestButtons() {
             const newTorus = addTorus(usedOrbitIndexes).torusData;
 
             // 描画に追加したリングのデータを取得する
-            addedRingData = getRingDataToAdd(newTorus);
-            if(addedRingData === null){
-                // リング描画を既に追加してしまっていて後に戻れないため、エラーを投げる(console.errorではダメ)
-                throw new Error("追加するリングデータを取得できませんでした");
-            };
+            addedRingData = generateTestRingData(newTorus.orbitIndex, newTorus.ringHue);
 
             setUsedOrbitIndexes((prev) => [...prev, addedRingData!.indexed]);
         }else{
@@ -68,6 +69,19 @@ export default function TestButtons() {
 
         // テスト用のstate更新
         setLatestRing(addedRingData);
+    }
+
+    // ランダムにリングデータを作成する関数
+    function generateTestRingData(orbitIndex: number, ringHue: number): RingData{
+        return {
+            location: TEST_LOCATION_ID,
+            latitude: 0, // 撮影地点の緯度
+            longitude: 0, // 撮影地点の経度
+            user: uuidv4(), // ユーザーID
+            indexed: orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
+            hue: ringHue, // リングの色調
+            created_at: getIso8601DateTime() // 撮影日時
+        };
     }
 
     // サーバーからリングデータを削除する処理(テスト用)

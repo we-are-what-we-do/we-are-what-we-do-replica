@@ -202,7 +202,7 @@ export function RingProvider({children}: {children: ReactNode}){
 
         const newRingData: RingData = {
             // location, // 撮影場所
-            location: location ?? "",
+            location: location ?? "36e94259-ceda-49fd-b6f7-29df955adfff",
             latitude: currentLatitude, // 撮影地点の緯度
             longitude: currentLongitude, // 撮影地点の経度
             user: userId, // ユーザーID
