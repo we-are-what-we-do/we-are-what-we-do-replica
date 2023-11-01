@@ -29,7 +29,8 @@ export default function TestButtons() {
 
     // websocketを管理するcontext
     const {
-        hasPostRing
+        hasPostRing,
+        socketRef
     } = useContext(SocketContext);
 
     // GPSの状態を管理するcontext
@@ -64,7 +65,8 @@ export default function TestButtons() {
         };
 
         //サーバーにリングデータを送信する
-        await postRingData(addedRingData);
+        // await postRingData(addedRingData);
+        socketRef.current?.send(JSON.stringify(addedRingData));
         console.log("サーバーにデータを送信しました:\n", addedRingData);
 
         // テスト用のstate更新

@@ -10,12 +10,13 @@ type RingInstance = {
 }
 
 /* 関数定義 */
-const apiDomain: string = "https://api.wawwd.net/"; // アプリケーションサーバーのドメイン
+export const API_DOMAIN: string = "api.wawwd.net"; // アプリケーションサーバーのドメイン
+const API_URL: string = `https://${API_DOMAIN}/`; // アプリケーションサーバーのURL
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
     try {
-        const url: string = apiDomain + apiEndpoint + "/" + (queryParams ?? '');
+        const url: string = API_URL + apiEndpoint + "/" + (queryParams ?? '');
         const response = await fetch(url);
         if(response.ok){
             return response;
@@ -85,7 +86,7 @@ async function getLatestInstanceId(apiEndpoint: string): Promise<string>{
 // JSONのPOSTリクエストを行う共通関数
 async function makePostRequest(apiEndpoint: string, data: Object): Promise<Response>{
     try {
-        const url: string = apiDomain + apiEndpoint + "/";
+        const url: string = API_URL + apiEndpoint + "/";
         const response: Response = await fetch(url, {
             method: 'POST',
             mode: 'cors',
