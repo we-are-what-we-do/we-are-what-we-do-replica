@@ -2,11 +2,19 @@ import { Point, FeatureCollection } from 'geojson';
 import { RingData } from "../handleRingData";
 
 /* 型定義 */
+// APサーバーから取得するリングデータ
 type RingInstance = {
     id: string; // インスタンスのid (UUID)
     location: string; // その場所であるというLocation (UUID)
     started_at: string; // インスタンスが作成された時間 (ISO8601)
     rings?: RingData[]; // リングデータ
+}
+
+// APサーバーにPOSTする画像データオブジェクト
+export type ImageData = {
+    ring_id: string // UUID形式のリングID
+    created_at: string; // ISO8601形式の時間データ
+    image: string; // base64形式の画像データ
 }
 
 /* 関数定義 */
@@ -16,7 +24,7 @@ const API_URL: string = `https://${API_DOMAIN}/`; // アプリケーションサ
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
     try {
-        const url: string = API_URL + apiEndpoint + "/" + (queryParams ?? '');
+        const url: string = API_URL + apiEndpoint + (queryParams ?? '');
         const response = await fetch(url);
         if(response.ok){
             return response;
@@ -35,15 +43,13 @@ async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promis
 export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
     let result: FeatureCollection<Point> | null = null;
     // キャッシュデータからのピン設定データ取得を試みる
-    // TODO geojsonデータの取得方法(仮)の修正
-    // const cashData: string | null = localStorage.getItem("locations");
-    const cashData: string | null = null;
-    localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
+    const cashData: string | null = localStorage.getItem("locations");
+    // localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
 
     if(cashData){
         const locationData = JSON.parse(cashData) as FeatureCollection<Point>;
         result = locationData;
-        // console.log("キャッシュからgeolocationデータを読み込みました", locationData);
+        console.log("キャッシュからgeolocationデータを読み込みました", locationData);
     }else{
         // キャッシュデータがない場合、サーバーからデータを取得する
         const apiEndpoint: string = "locations";
@@ -63,7 +69,7 @@ export async function getRingData(): Promise<RingData[]>{
     const apiEndpoint: string = "rings";
 
     // 最新のインスタンスを取得する
-    const latestInstanceId: string = await getLatestInstanceId(apiEndpoint);
+    const latestInstanceId: string = await getLatestInstanceId(apiEndpoint); // 全インスタンスを取得し、最新のインスタンスを切り出す
     const queryParams: string = `?id=${latestInstanceId}`
     const response: Response = await makeGetRequest(apiEndpoint, queryParams);
     const data: RingInstance = await response.json();
@@ -86,10 +92,11 @@ async function getLatestInstanceId(apiEndpoint: string): Promise<string>{
 // JSONのPOSTリクエストを行う共通関数
 async function makePostRequest(apiEndpoint: string, data: Object): Promise<Response>{
     try {
-        const url: string = API_URL + apiEndpoint + "/";
+        const url: string = API_URL + apiEndpoint;
+        console.log({url, data})
         const response: Response = await fetch(url, {
             method: 'POST',
-            mode: 'cors',
+            mode: "cors",
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -117,9 +124,8 @@ export async function postRingData(data: RingData): Promise<Response>{
 }
 
 // 撮影した写真を送信する関数
-export async function postImageData(base64Data: string): Promise<Response>{
+export async function postImageData(data: ImageData): Promise<Response>{
     const apiEndpoint: string = "image"; // 撮影した写真を送信するための、APIのエンドポイント
-    const data: { image: string } = { image: base64Data };
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }

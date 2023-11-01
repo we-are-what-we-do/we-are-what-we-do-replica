@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { postImageData, postRingData } from './../api/fetchDb';
+import { ImageData, postImageData, postRingData } from './../api/fetchDb';
 import { RingData } from "../handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
 import { CameraContext } from "./../providers/CameraProvider";
@@ -140,8 +140,18 @@ export default function ButtonArea(props: {
 
                 try{
                     // リングデータを送信する
-                    await postRingData(addedRingData); // サーバーにリングデータを送信する
-                    await postImageData(newImage); // base64形式の画像をサーバーに送信する
+                    const ringResponse: Response = await postRingData(addedRingData); // サーバーにリングデータを送信する
+                    const responseData = await ringResponse.json();
+                    console.log({responseData})
+
+                    // 画像データを送信する
+                    if(!responseData.id) console.error("リングデータ(POST)のレスポンスにidが含まれていません\n", responseData);
+                    const imageData: ImageData = { // 送信用画像データオブジェクトを作成する
+                        ring_id: responseData.id,
+                        created_at: addedRingData.created_at,
+                        image: newImage
+                    };
+                    await postImageData(imageData); // base64形式の画像をサーバーに送信する
                     console.log("サーバーにデータを送信しました:\n", addedRingData);
 
                     // latestRingを更新する

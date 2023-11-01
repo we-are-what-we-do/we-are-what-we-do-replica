@@ -65,8 +65,8 @@ export default function TestButtons() {
         };
 
         //サーバーにリングデータを送信する
-        // await postRingData(addedRingData);
-        socketRef.current?.send(JSON.stringify(addedRingData));
+        const res = await postRingData(addedRingData);
+        // socketRef.current?.send(JSON.stringify(addedRingData));
         console.log("サーバーにデータを送信しました:\n", addedRingData);
 
         // テスト用のstate更新
