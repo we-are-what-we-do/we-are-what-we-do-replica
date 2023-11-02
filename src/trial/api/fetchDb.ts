@@ -1,15 +1,22 @@
 import { Point, FeatureCollection } from 'geojson';
-import { RingData, RingsData } from "../features/handleRingData";
+import { RingData } from "../../handleRingData";
 
+/* 型定義 */
+type RingInstance = {
+    id: string; // インスタンスのid (UUID)
+    location: string; // その場所であるというLocation (UUID)
+    started_at: string; // インスタンスが作成された時間 (ISO8601)
+    rings?: RingData[]; // リングデータ
+}
 
 /* 関数定義 */
-// const apiDomain: string = "https://api.wawwd.net/"; // アプリケーションサーバーのドメイン
-const apiDomain: string = "https://wawwdtestdb-default-rtdb.firebaseio.com/trial/"; // 仮DBサーバーのドメイン
+const apiDomain: string = "https://api.wawwd.net/"; // アプリケーションサーバーのドメイン
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
     try {
-        const response = await fetch(apiDomain + apiEndpoint + (queryParams ?? ''));
+        const url: string = apiDomain + apiEndpoint + "/" + (queryParams ?? '');
+        const response = await fetch(url);
         if(response.ok){
             return response;
         }else{
@@ -27,8 +34,10 @@ async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promis
 export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
     let result: FeatureCollection<Point> | null = null;
     // キャッシュデータからのピン設定データ取得を試みる
-    const cashData: string | null = localStorage.getItem("locations");
-    // localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
+    // TODO geojsonデータの取得方法(仮)の修正
+    // const cashData: string | null = localStorage.getItem("locations");
+    const cashData: string | null = null;
+    localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
 
     if(cashData){
         const locationData = JSON.parse(cashData) as FeatureCollection<Point>;
@@ -36,10 +45,10 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
         // console.log("キャッシュからgeolocationデータを読み込みました", locationData);
     }else{
         // キャッシュデータがない場合、サーバーからデータを取得する
-        // const apiEndpoint: string = "locations";
-        const apiEndpoint: string = "locations.json"; // 仮エンドポイント
+        const apiEndpoint: string = "locations";
         const response: Response = await makeGetRequest(apiEndpoint);
         result = await response.json() as FeatureCollection<Point>;
+        console.log("location: ",result);
 
         // サーバーから取得したデータをキャッシュに保存する
         localStorage.setItem("locations", JSON.stringify(result));
@@ -49,23 +58,35 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
 }
 
 // ピン一か所から、リングのデータを取得する関数
-export async function getRingData(location?: string): Promise<RingsData> {
-    // const apiEndpoint: string = "rings";
-    const apiEndpoint: string = "rings.json"; // 仮エンドポイント
-    let queryParams: string = "";
-    if(location){
-        // ピンが指定されている場合、その一か所からのみリングのデータを取得する
-        queryParams = `?id=${location}`;
-    }
+export async function getRingData(): Promise<RingData[]>{
+    const apiEndpoint: string = "rings";
+
+    // 最新のインスタンスを取得する
+    const latestInstanceId: string = await getLatestInstanceId(apiEndpoint);
+    const queryParams: string = `?id=${latestInstanceId}`
     const response: Response = await makeGetRequest(apiEndpoint, queryParams);
-    const result: RingsData = await response.json();
-    return result;
+    const data: RingInstance = await response.json();
+
+    // リングデータを取得する
+    const ringData: RingData[] | undefined = data.rings;
+    if(ringData === undefined) throw new Error("取得したデータにringsプロパティがありません")
+
+    return ringData;
+}
+
+// 最新のインスタンスのIDを取得する関数
+async function getLatestInstanceId(apiEndpoint: string): Promise<string>{
+    const response: Response = await makeGetRequest(apiEndpoint);
+    const data: RingInstance[] = await response.json();
+    const latestInstanceId: string = data[0].id;
+    return latestInstanceId;
 }
 
 // JSONのPOSTリクエストを行う共通関数
 async function makePostRequest(apiEndpoint: string, data: Object): Promise<Response>{
     try {
-        const response: Response = await fetch(apiDomain + apiEndpoint, {
+        const url: string = apiDomain + apiEndpoint + "/";
+        const response: Response = await fetch(url, {
             method: 'POST',
             mode: 'cors',
             headers: {
@@ -89,25 +110,23 @@ async function makePostRequest(apiEndpoint: string, data: Object): Promise<Respo
 
 // リングのデータを送信する関数
 export async function postRingData(data: RingData): Promise<Response>{
-    // const apiEndpoint: string = "rings"; // リングのデータを送信するための、APIのエンドポイント
-    const apiEndpoint: string = "rings.json"; // 仮エンドポイント
+    const apiEndpoint: string = "rings"; // リングのデータを送信するための、APIのエンドポイント
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }
 
 // 撮影した写真を送信する関数
-export async function postNftImage(base64Data: string): Promise<Response>{
-    // const apiEndpoint: string = "nft"; // 撮影した写真を送信するための、APIのエンドポイント
-    const apiEndpoint: string = "nft.json"; // 仮エンドポイント
+export async function postImageData(base64Data: string): Promise<Response>{
+    const apiEndpoint: string = "image"; // 撮影した写真を送信するための、APIのエンドポイント
     const data: { image: string } = { image: base64Data };
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }
 
 
-// locationIdからlocationJpを取得する関数
+// locationIdからlocalize.jpを取得する関数
 export function getLocationJp(data: FeatureCollection<Point>, locationId: string): string | null{
-    // locationIdが一致するfeatureのproperties.locationJpを取得する
+    // locationIdが一致するfeatureのproperties.localize.jpを取得する
     const currentFeature = data.features.find((value) => value.id === locationId);
     if(!currentFeature) return null;
     const currentLocationJp: string | null = currentFeature.properties?.localize.jp || null; 

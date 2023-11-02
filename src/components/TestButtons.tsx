@@ -3,9 +3,14 @@ import { postRingData } from './../api/fetchDb';
 import { DbContext } from "../providers/DbProvider";
 import { RingContext } from "./../providers/RingProvider";
 import { SocketContext } from "../providers/SocketProvider";
-import { RingData } from "../handleRingData";
+import { RingData, getIso8601DateTime } from "../handleRingData";
 import { positionArray } from "./../torusPosition";
 import { GpsContext } from "../providers/GpsProvider";
+import { v4 as uuidv4 } from 'uuid';
+
+
+export const TEST_LOCATION_ID: string = "f8777292-0a66-4762-94cc-5243cd8bfb3e";
+
 
 export default function TestButtons() {
     /* useState等 */
@@ -24,7 +29,8 @@ export default function TestButtons() {
 
     // websocketを管理するcontext
     const {
-        hasPostRing
+        hasPostRing,
+        socketRef
     } = useContext(SocketContext);
 
     // GPSの状態を管理するcontext
@@ -43,11 +49,7 @@ export default function TestButtons() {
             const newTorus = addTorus(usedOrbitIndexes).torusData;
 
             // 描画に追加したリングのデータを取得する
-            addedRingData = getRingDataToAdd(newTorus);
-            if(addedRingData === null){
-                // リング描画を既に追加してしまっていて後に戻れないため、エラーを投げる(console.errorではダメ)
-                throw new Error("追加するリングデータを取得できませんでした");
-            };
+            addedRingData = generateTestRingData(newTorus.orbitIndex, newTorus.ringHue);
 
             setUsedOrbitIndexes((prev) => [...prev, addedRingData!.indexed]);
         }else{
@@ -58,16 +60,32 @@ export default function TestButtons() {
                 console.error("追加したリングデータを取得できませんでした");
                 return;
             };
+            addedRingData.user = uuidv4(); // ユーザーidのみランダムなものに変更しておく
 
             hasPostRing.current = true; // リングデータを送信済みとしてstateを更新する
         };
 
         //サーバーにリングデータを送信する
-        await postRingData(addedRingData);
+        console.log("testUser:", addedRingData.user)
+        const res = await postRingData(addedRingData);
+        // socketRef.current?.send(JSON.stringify(addedRingData));
         console.log("サーバーにデータを送信しました:\n", addedRingData);
 
         // テスト用のstate更新
         setLatestRing(addedRingData);
+    }
+
+    // ランダムにリングデータを作成する関数
+    function generateTestRingData(orbitIndex: number, ringHue: number): RingData{
+        return {
+            location: TEST_LOCATION_ID,
+            latitude: 0, // 撮影地点の緯度
+            longitude: 0, // 撮影地点の経度
+            user: uuidv4(), // ユーザーID
+            indexed: orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
+            hue: ringHue, // リングの色調
+            created_at: getIso8601DateTime() // 撮影日時
+        };
     }
 
     // サーバーからリングデータを削除する処理(テスト用)

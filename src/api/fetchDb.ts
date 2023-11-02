@@ -1,14 +1,31 @@
 import { Point, FeatureCollection } from 'geojson';
-import { RingData, RingsData } from "../handleRingData";
+import { RingData, compareISO8601Dates } from "../handleRingData";
 
+/* 型定義 */
+// APサーバーから取得するリングデータ
+type RingInstance = {
+    id: string; // インスタンスのid (UUID)
+    location: string; // その場所であるというLocation (UUID)
+    started_at: string; // インスタンスが作成された時間 (ISO8601)
+    rings?: RingData[]; // リングデータ
+}
+
+// APサーバーにPOSTする画像データオブジェクト
+export type ImageData = {
+    ring_id: string // UUID形式のリングID
+    created_at: string; // ISO8601形式の時間データ
+    image: string; // base64形式の画像データ
+}
 
 /* 関数定義 */
-const apiDomain: string = "https://api.wawwd.net/"; // アプリケーションサーバーのドメイン
+export const API_DOMAIN: string = "api.wawwd.net"; // アプリケーションサーバーのドメイン
+const API_URL: string = `https://${API_DOMAIN}/`; // アプリケーションサーバーのURL
 
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
     try {
-        const url: string = apiDomain + apiEndpoint + "/" + (queryParams ?? '');
+        const url: string = API_URL + apiEndpoint + (queryParams ?? '');
+        console.log({url})
         const response = await fetch(url);
         if(response.ok){
             return response;
@@ -27,21 +44,19 @@ async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promis
 export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
     let result: FeatureCollection<Point> | null = null;
     // キャッシュデータからのピン設定データ取得を試みる
-    // TODO geojsonデータの取得方法(仮)の修正
-    // const cashData: string | null = localStorage.getItem("locations");
-    const cashData: string | null = null;
-    localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
+    const cashData: string | null = localStorage.getItem("locations");
+    // localStorage.removeItem("locations"); // localStorageを削除したい際はこのコードで削除する
 
     if(cashData){
         const locationData = JSON.parse(cashData) as FeatureCollection<Point>;
         result = locationData;
-        // console.log("キャッシュからgeolocationデータを読み込みました", locationData);
+        console.log("キャッシュからgeolocationデータを読み込みました", locationData);
     }else{
         // キャッシュデータがない場合、サーバーからデータを取得する
         const apiEndpoint: string = "locations";
         const response: Response = await makeGetRequest(apiEndpoint);
         result = await response.json() as FeatureCollection<Point>;
-        console.log("location: ",result);
+        console.log("location: ", result);
 
         // サーバーから取得したデータをキャッシュに保存する
         localStorage.setItem("locations", JSON.stringify(result));
@@ -51,41 +66,74 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
 }
 
 // ピン一か所から、リングのデータを取得する関数
-export async function getRingData(location?: string): Promise<RingsData> {
-    // const apiEndpoint: string = "rings";
-    let queryParams: string = "";
-    if(location){
-        // ピンが指定されている場合、その一か所からのみリングのデータを取得する
-        queryParams = `?id=${location}`;
-    }
-    // const response: Response = await makeGetRequest(apiEndpoint, queryParams);
-    const response: Response = await fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json"); // 仮取得
-    const result: RingsData = await response.json();
-    return result;
+export async function getRingData(): Promise<RingData[]>{
+    const apiEndpoint: string = "rings";
+
+    // インスタンス一覧を取得する
+    const latestInstanceId: string | null = await getLatestInstanceId(apiEndpoint); // 全インスタンスを取得し、最新のインスタンスを切り出す
+    if(!latestInstanceId) return []; // 有効なインスタンスが一つもない場合は、空配列で開始する
+
+    // 最新のインスタンスを取得する
+    const queryParams: string = `?id=${latestInstanceId}`
+    const response: Response = await makeGetRequest(apiEndpoint, queryParams);
+    const data: RingInstance = await response.json();
+
+    // リングデータを取得する
+    const ringData: RingData[] | undefined = data.rings;
+    if(ringData === undefined) throw new Error("取得したデータにringsプロパティがありません")
+
+    return ringData;
+}
+
+// 最新のインスタンスのIDを取得する関数
+async function getLatestInstanceId(apiEndpoint: string): Promise<string | null>{
+    const response: Response = await makeGetRequest(apiEndpoint);
+    const data: RingInstance[] = await response.json();
+    const latestInstance: RingInstance | null = data.reduce((latestInstance: RingInstance | null, currentInstance: RingInstance) => {
+        if(!latestInstance){
+            return currentInstance;
+        }
+
+        // 新しい日付時刻文字列が見つかった場合に更新
+        const latestDate: string = latestInstance.started_at;
+        const currentDate: string = currentInstance.started_at;
+        if(compareISO8601Dates(currentDate, latestDate)){
+            return currentInstance;
+        }else{
+            return latestInstance;
+        }
+    }, null);
+    const latestInstanceId: string | null = latestInstance?.id ?? null; // 有効なインスタンスが一つもない場合は、nullを返す
+console.log({data, latestInstance})
+    return latestInstanceId;
 }
 
 // JSONのPOSTリクエストを行う共通関数
 async function makePostRequest(apiEndpoint: string, data: Object): Promise<Response>{
     try {
-        const url: string = apiDomain + apiEndpoint + "/";
+        const url: string = API_URL + apiEndpoint;
+        console.log({url, data})
         const response: Response = await fetch(url, {
             method: 'POST',
-            mode: 'cors',
+            mode: "cors",
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
-        });
+        })
+        console.log({apiEndpoint: response})
         if(response.ok){
             // HTTPステータスコードが2xx（成功）の場合にレスポンスを返す
             return response;
         }else{
+            console.log(response.status)
             // エラーレスポンスの場合はエラーハンドリングを行う
             throw new Error(`HTTPエラー: ${response.status}`);
         }
-    } catch (error) {
+    }catch(error){
         // エラーハンドリング
-        console.error('POSTリクエストエラー:', error);
+        console.log(error)
+        // console.error('POSTリクエストエラー:', error.message);
         throw error;
     }
 }
@@ -93,15 +141,13 @@ async function makePostRequest(apiEndpoint: string, data: Object): Promise<Respo
 // リングのデータを送信する関数
 export async function postRingData(data: RingData): Promise<Response>{
     const apiEndpoint: string = "rings"; // リングのデータを送信するための、APIのエンドポイント
-    // const apiEndpoint: string = "rings.json"; // 仮エンドポイント
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }
 
 // 撮影した写真を送信する関数
-export async function postNftImage(base64Data: string): Promise<Response>{
-    const apiEndpoint: string = "image"; // 撮影した写真を送信するための、APIのエンドポイント
-    const data: { image: string } = { image: base64Data };
+export async function postImageData(data: ImageData): Promise<Response>{
+    const apiEndpoint: string = "images"; // 撮影した写真を送信するための、APIのエンドポイント
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }

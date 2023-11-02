@@ -2,7 +2,6 @@ import { createContext, useState, ReactNode, useEffect } from 'react';
 import { TorusInfo } from "./../redux/features/torusInfo-slice";
 import {
     RingData,
-    RingsData,
     convertToTori,
     getLatestRing
 } from "../handleRingData";
@@ -12,7 +11,7 @@ import { getRingData } from "./../api/fetchDb";
 /* 型定義 */
 // contextに渡すデータの型
 type DbContent = {
-    ringsData: RingsData;
+    ringsData: RingData[];
     latestRing: RingData | null;
     toriData: TorusInfo[];
     initializeRingData: (location?: string) => Promise<void>;
@@ -24,7 +23,7 @@ type DbContent = {
 
 /* Provider */
 const initialData: DbContent = {
-    ringsData: {},
+    ringsData: [],
     latestRing: null,
     toriData: [],
     initializeRingData: () => Promise.resolve(),
@@ -37,7 +36,7 @@ export const DbContext = createContext<DbContent>(initialData);
 
 export function DbProvider({children}: {children: ReactNode}){
     // リングのデータを管理する
-    const [ringsData, setRingsData] = useState<RingsData>({}); // サーバーから取得したリングデータ
+    const [ringsData, setRingsData] = useState<RingData[]>([]); // サーバーから取得したリングデータ
     const [latestRing, setLatestRing] = useState<RingData | null>(null); // 直前に追加されたリングデータ
     const [toriData, setTori] = useState<TorusInfo[]>([]); // Three.jsで使用するリングデータ
 
@@ -53,9 +52,9 @@ export function DbProvider({children}: {children: ReactNode}){
 
     // リングのデータを、サーバーから取得したデータで初期化する関数
     async function initializeRingData(): Promise<void>{
-        const newRingsData: RingsData = await getRingData() ?? {};
+        const newRingsData: RingData[] = await getRingData() ?? [];
         // リングデータを70個までに限定して切り出す(一応)
-        const extractedRingData: RingsData = getLatestLap(newRingsData);
+        const extractedRingData: RingData[] = getLatestLap(newRingsData);
         const newLatestRing: RingData | null = getLatestRing(newRingsData);
         console.log({newLatestRing});
         let newTori: TorusInfo[] = convertToTori(newRingsData);
@@ -99,29 +98,19 @@ export function DbProvider({children}: {children: ReactNode}){
 
 /* 仮定義関数 */
 import { positionArray } from '../torusPosition';
-// オブジェクトの最後のn個のリングデータを直接取得する関数(非推奨)
-// TODO サーバーサイドに最新リングのみを取得するapiを作った方がいいかも
-function getLastRings(obj: RingsData, lastAmount: number): RingsData{
-    const keys: string[] = Object.keys(obj);
-    const lastKeys: string[] = keys.slice(-lastAmount); // オブジェクトの最後のn個のキーを取得
-
-    const result: RingsData = {};
-    for (const key of lastKeys) {
-        result[key] = obj[key]; // キーを使用してプロパティを抽出
-    }
-
-    return result;
+// 配列の最後のn個のリングデータを直接取得する関数
+function getLastRings(data: RingData[], lastAmount: number): RingData[]{
+    return data.slice(-lastAmount); // 配列の最後のn個を取得
 }
 
 // 過去周のDEI周を切り捨てる関数
-// TODO 仮定義なので、APIの方でリングデータが0～71個に限定されていることを確認次第、削除する
-export function getLatestLap(data: RingsData): RingsData{
+export function getLatestLap(data: RingData[]): RingData[]{
     const orbitLength: number = positionArray.length; // DEI一周に必要なリングの数
-    const ringAmount: number = Object.keys(data).length; // リングデータの数
-    let result: RingsData = {}; // 0～71個のリングデータ
+    const ringAmount: number = data.length; // リングデータの数
+    let result: RingData[] = []; // 0～71個のリングデータ
     if(ringAmount <= orbitLength){
         // リングが0～70個の場合
-        result = Object.assign({}, data);
+        result = [...data];
     }else{
         // リングが70個より多い場合
         const latestLapLength: number = ringAmount % orbitLength; // 最新のDEI周が何個のリングでできているか

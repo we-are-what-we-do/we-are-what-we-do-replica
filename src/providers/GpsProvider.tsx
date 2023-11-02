@@ -65,6 +65,8 @@ export function GpsProvider({children}: {children: ReactNode}){
                     (error) => {
                         if(error.code === error.PERMISSION_DENIED){
                             showWarnToast("E002"); // 「位置情報のアクセスを許可してください」というメッセージを表示する
+                        }else{
+                            showWarnToast("E099"); // 「システムエラー」というメッセージを表示する
                         }
                     },
                     { enableHighAccuracy: true } // 高い精度を要求

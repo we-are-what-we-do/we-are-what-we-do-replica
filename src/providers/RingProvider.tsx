@@ -8,6 +8,7 @@ import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusIn
 import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRingColor } from '../handleRingData';
 import { Ring, positionArray, torusScale } from '../torusPosition';
 import { v4 as uuidv4 } from 'uuid';
+import { TEST_LOCATION_ID } from '../components/TestButtons';
 
 
 /* 型定義 */
@@ -202,12 +203,12 @@ export function RingProvider({children}: {children: ReactNode}){
 
         const newRingData: RingData = {
             // location, // 撮影場所
-            location: location ?? "",
+            location: location ?? TEST_LOCATION_ID,
             latitude: currentLatitude, // 撮影地点の緯度
             longitude: currentLongitude, // 撮影地点の経度
             user: userId, // ユーザーID
             indexed: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
-            ring_hue: newTorus.ringHue, // リングの色調
+            hue: newTorus.ringHue, // リングの色調
             created_at: getIso8601DateTime() // 撮影日時
         };
 
