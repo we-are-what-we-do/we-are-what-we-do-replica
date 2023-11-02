@@ -18,7 +18,8 @@ export type ImageData = {
 }
 
 /* 関数定義 */
-export const API_DOMAIN: string = "api.wawwd.net"; // アプリケーションサーバーのドメイン
+// export const API_DOMAIN: string = "api.wawwd.net"; // 本番用アプリケーションサーバーのドメイン
+export const API_DOMAIN: string = "testApi.wawwd.net"; // 本番用アプリケーションサーバーのドメイン
 const API_URL: string = `https://${API_DOMAIN}/`; // アプリケーションサーバーのURL
 
 // GETリクエストを行う共通関数
