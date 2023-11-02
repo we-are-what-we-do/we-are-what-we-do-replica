@@ -111,7 +111,7 @@ export default function ButtonArea(props: {
 
             // 撮影した写真に確認を取る
             const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
-            console.log("isPhotoOk: ", isPhotoOk);
+            // console.log("isPhotoOk: ", isPhotoOk);
 
             // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
             if(isPhotoOk){
@@ -138,20 +138,23 @@ export default function ButtonArea(props: {
                     return;
                 }
 
+                // サーバー送信用に画像データの型付けを取り除く
+                const base64Str = newImage.split(',')[1]; // "data:image/png;base64"は省略されて取得される
+
                 try{
                     // リングデータを送信する
                     const ringResponse: Response = await postRingData(addedRingData); // サーバーにリングデータを送信する
-                    const responseData = await ringResponse.json();
-                    console.log({responseData})
+                    // const responseData = await ringResponse.json();
+                    // console.log({responseData})
 
                     // 画像データを送信する
-                    if(!responseData.id) console.error("リングデータ(POST)のレスポンスにidが含まれていません\n", responseData);
-                    const imageData: ImageData = { // 送信用画像データオブジェクトを作成する
-                        ring_id: responseData.id,
-                        created_at: addedRingData.created_at,
-                        image: newImage
-                    };
-                    await postImageData(imageData); // base64形式の画像をサーバーに送信する
+                    // if(!responseData.id) console.error("リングデータ(POST)のレスポンスにidが含まれていません\n", responseData);
+                    // const imageData: ImageData = { // 送信用画像データオブジェクトを作成する
+                    //     ring_id: responseData.id,
+                    //     created_at: addedRingData.created_at,
+                    //     image: base64Str
+                    // };
+                    // await postImageData(imageData); // base64形式の画像をサーバーに送信する
                     console.log("サーバーにデータを送信しました:\n", addedRingData);
 
                     // latestRingを更新する
@@ -167,13 +170,13 @@ export default function ButtonArea(props: {
                     saveImage(newImage);
                 }catch(error){
                     // サーバーにリングデータを送信できなかった際のエラーハンドリング
-                    console.error(
-                        "サーバーにデータを送信できませんでした", "\n",
-                        "以下の可能性があります", "\n",
-                        "- 送信しようとしたリングデータがコンフリクトを起こした", "\n",
-                        "- サーバーにアクセスできない", "\n",
-                        error
-                    );
+                    // console.error(
+                    //     "サーバーにデータを送信できませんでした", "\n",
+                    //     "以下の可能性があります", "\n",
+                    //     "- 送信しようとしたリングデータがコンフリクトを起こした", "\n",
+                    //     "- サーバーにアクセスできない", "\n",
+                    //     error
+                    // );
 
                     // データを更新する
                     await initializeRingData();

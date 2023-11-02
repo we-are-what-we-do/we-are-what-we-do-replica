@@ -1,9 +1,10 @@
 import { createContext, ReactNode, useEffect, useRef } from 'react';
 import { API_DOMAIN } from '../api/fetchDb';
+import { TEST_LOCATION_ID } from '../components/TestButtons';
 
 
 /* 定数定義 */
-const WS_URL: string = `wss://${API_DOMAIN}/ws-rings?location=36e94259-ceda-49fd-b6f7-29df955adfff`;
+const WS_URL: string = `wss://${API_DOMAIN}/ws-rings?location=${TEST_LOCATION_ID}`;
 
 
 /* 型定義 */
@@ -32,19 +33,20 @@ export function SocketProvider({children}: {children: ReactNode}){
     // #0.WebSocket関連の処理は副作用なので、useEffect内で実装
     useEffect(() => {
         // #1.WebSocketオブジェクトを生成しサーバとの接続を開始
-        const websocket = new WebSocket(WS_URL);
-        console.log("websocket:", websocket);
-        socketRef.current = websocket;
+        // const websocket = new WebSocket(WS_URL);
+        // console.log("websocket:", websocket);
+        // socketRef.current = websocket;
 
         // #2.メッセージ受信時のイベントハンドラを設定
-        // const onMessage = (event: MessageEvent<string>) => {
-        //     setMessage(event.data)
+        // const onMessage = (event: MessageEvent<any>) => {
+            // setMessage(event.data)
+        //     console.log({event, data: JSON.parse(event.data)})
         // }
         // websocket.addEventListener('message', onMessage)
 
         // #3.useEffectのクリーンアップの中で、WebSocketのクローズ処理を実行
         return () => {
-            websocket.close();
+            // websocket.close();
             // websocket.removeEventListener('message', onMessage)
         }
     }, [])

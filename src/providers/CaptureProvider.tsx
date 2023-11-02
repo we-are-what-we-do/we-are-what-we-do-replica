@@ -66,7 +66,6 @@ export function CaptureProvider({children}: {children: ReactNode}){
 
         // base64として出力する
         const dataURL: string = canvasElement.toDataURL('image/png');
-        // console.log(dataURL);
         return dataURL;
     }
 

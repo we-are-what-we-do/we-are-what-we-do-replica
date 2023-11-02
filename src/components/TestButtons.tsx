@@ -60,11 +60,13 @@ export default function TestButtons() {
                 console.error("追加したリングデータを取得できませんでした");
                 return;
             };
+            addedRingData.user = uuidv4(); // ユーザーidのみランダムなものに変更しておく
 
             hasPostRing.current = true; // リングデータを送信済みとしてstateを更新する
         };
 
         //サーバーにリングデータを送信する
+        console.log("testUser:", addedRingData.user)
         const res = await postRingData(addedRingData);
         // socketRef.current?.send(JSON.stringify(addedRingData));
         console.log("サーバーにデータを送信しました:\n", addedRingData);

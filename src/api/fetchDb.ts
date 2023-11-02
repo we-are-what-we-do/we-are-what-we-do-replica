@@ -101,17 +101,20 @@ async function makePostRequest(apiEndpoint: string, data: Object): Promise<Respo
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
-        });
+        })
+        console.log({apiEndpoint: response})
         if(response.ok){
             // HTTPステータスコードが2xx（成功）の場合にレスポンスを返す
             return response;
         }else{
+            console.log(response.status)
             // エラーレスポンスの場合はエラーハンドリングを行う
             throw new Error(`HTTPエラー: ${response.status}`);
         }
-    } catch (error) {
+    }catch(error){
         // エラーハンドリング
-        console.error('POSTリクエストエラー:', error);
+        console.log(error)
+        // console.error('POSTリクエストエラー:', error.message);
         throw error;
     }
 }
