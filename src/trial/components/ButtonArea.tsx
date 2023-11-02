@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { postImageData, postRingData } from '../api/fetchDb';
+import { postRingData } from '../api/fetchDb';
 import { RingData } from "../../handleRingData";
 import { CaptureContext } from "../../providers/CaptureProvider";
 import { CameraContext } from "../../providers/CameraProvider";
@@ -76,11 +76,12 @@ export default function ButtonArea(props: {
         isTakingPhoto.current = true; // 撮影ボタンの処理中であることを記録する
 
         // リングが未送信状態なら、写真撮影の処理を開始する
-        videoRef.current?.pause();    // カメラを一時停止する
+        videoRef.current?.pause(); // カメラを一時停止する
         setEnableOrbitControl(false); // 3Dの視点を固定する
 
         // 撮影した写真に確認を取る
         const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
+        // console.log("isPhotoOk: ", isPhotoOk);
 
         // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
         if(isPhotoOk){
@@ -100,18 +101,29 @@ export default function ButtonArea(props: {
                 }
             }catch(error){
                 console.error(error);
-                videoRef.current?.play();      // カメラを再生する
-                setEnableOrbitControl(true);   // 3Dの視点固定を解除する
+                videoRef.current?.play(); // カメラを再生する
+                setEnableOrbitControl(true); // 3Dの視点固定を解除する
                 isTakingPhoto.current = false; // 撮影ボタンの処理が終わったことを記録する
                 showErrorToast("E004"); // 「"撮影画像のアップロードに失敗しました。」というメッセージを表示する
                 return;
             }
 
+            // サーバー送信用に画像データの型付けを取り除く
+            const base64Str = newImage.split(',')[1]; // "data:image/png;base64"は省略されて取得される
+
             try{
                 // リングデータを送信する
-                await postRingData(addedRingData); // サーバーにリングデータを送信する
-                await postImageData(newImage); // base64形式の画像をサーバーに送信する
-                console.log("サーバーにデータを送信しました:\n", addedRingData);
+                const ringResponse: Response = await postRingData(addedRingData); // サーバーにリングデータを送信する
+                const responseData = await ringResponse.json();
+                console.log({responseData})
+
+                // 体験用ページでは、画像データを送信しない
+
+                // latestRingを更新する
+                // setLatestRing(addedRingData);
+
+                // リングデータを送信済みとしてrefを更新する
+                // hasPostRing.current = true;
 
                 // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
                 showSuccessToast("I005");
@@ -120,7 +132,7 @@ export default function ButtonArea(props: {
                 saveImage(newImage);
 
                 // データを更新する
-                await initializeRingData();
+                await initializeRingData(); // 体験用ページでは、latestRingを更新せずに、一度全データを再読み込みする
             }catch(error){
                 // サーバーにリングデータを送信できなかった際のエラーハンドリング
                 console.error(
@@ -142,8 +154,8 @@ export default function ButtonArea(props: {
             // console.log("撮影やり直しのために処理を中断しました");
         }
 
-        videoRef.current?.play();      // カメラを再生する
-        setEnableOrbitControl(true);   // 3Dの視点固定を解除する
+        videoRef.current?.play(); // カメラを再生する
+        setEnableOrbitControl(true); // 3Dの視点固定を解除する
 
         isTakingPhoto.current = false; // 撮影ボタンの処理が終わったことを記録する
     }

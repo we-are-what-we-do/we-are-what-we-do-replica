@@ -1,10 +1,4 @@
 import { createContext, ReactNode, useEffect, useRef } from 'react';
-import { API_DOMAIN } from '../api/fetchDb';
-import { TEST_LOCATION_ID } from '../components/TestButtons';
-
-
-/* 定数定義 */
-// const WS_URL: string = `wss://${API_DOMAIN}/ws-rings?location=${TEST_LOCATION_ID}`;
 
 
 /* 型定義 */
@@ -31,8 +25,8 @@ export function SocketProvider({children}: {children: ReactNode}){
     const socketRef = useRef<WebSocket | null>(null);
 
     // #0.WebSocket関連の処理は副作用なので、useEffect内で実装
-/*     useEffect(() => {
-        // #1.WebSocketオブジェクトを生成しサーバとの接続を開始
+    useEffect(() => {
+/*         // #1.WebSocketオブジェクトを生成しサーバとの接続を開始
         const websocket = new WebSocket(WS_URL);
         // console.log("websocket:", websocket);
         socketRef.current = websocket;
@@ -48,8 +42,8 @@ export function SocketProvider({children}: {children: ReactNode}){
         return () => {
             websocket.close();
             websocket.removeEventListener('message', onMessage)
-        }
-    }, []) */
+        } */
+    }, [])
 
     return (
         <SocketContext.Provider
