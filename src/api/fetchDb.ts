@@ -25,6 +25,7 @@ const API_URL: string = `https://${API_DOMAIN}/`; // アプリケーションサ
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
     try {
         const url: string = API_URL + apiEndpoint + (queryParams ?? '');
+        console.log({url})
         const response = await fetch(url);
         if(response.ok){
             return response;
@@ -68,8 +69,11 @@ export async function getLocationConfig(): Promise<FeatureCollection<Point>>{
 export async function getRingData(): Promise<RingData[]>{
     const apiEndpoint: string = "rings";
 
+    // インスタンス一覧を取得する
+    const latestInstanceId: string | null = await getLatestInstanceId(apiEndpoint); // 全インスタンスを取得し、最新のインスタンスを切り出す
+    if(!latestInstanceId) return []; // 有効なインスタンスが一つもない場合は、空配列で開始する
+
     // 最新のインスタンスを取得する
-    const latestInstanceId: string = await getLatestInstanceId(apiEndpoint); // 全インスタンスを取得し、最新のインスタンスを切り出す
     const queryParams: string = `?id=${latestInstanceId}`
     const response: Response = await makeGetRequest(apiEndpoint, queryParams);
     const data: RingInstance = await response.json();
@@ -82,7 +86,7 @@ export async function getRingData(): Promise<RingData[]>{
 }
 
 // 最新のインスタンスのIDを取得する関数
-async function getLatestInstanceId(apiEndpoint: string): Promise<string>{
+async function getLatestInstanceId(apiEndpoint: string): Promise<string | null>{
     const response: Response = await makeGetRequest(apiEndpoint);
     const data: RingInstance[] = await response.json();
     const latestInstance: RingInstance | null = data.reduce((latestInstance: RingInstance | null, currentInstance: RingInstance) => {
@@ -99,8 +103,7 @@ async function getLatestInstanceId(apiEndpoint: string): Promise<string>{
             return latestInstance;
         }
     }, null);
-    if(latestInstance === null) throw new Error("有効なリング周回のインスタンスがありません")
-    const latestInstanceId: string = latestInstance.id;
+    const latestInstanceId: string | null = latestInstance?.id ?? null; // 有効なインスタンスが一つもない場合は、nullを返す
 console.log({data, latestInstance})
     return latestInstanceId;
 }
@@ -144,7 +147,7 @@ export async function postRingData(data: RingData): Promise<Response>{
 
 // 撮影した写真を送信する関数
 export async function postImageData(data: ImageData): Promise<Response>{
-    const apiEndpoint: string = "image"; // 撮影した写真を送信するための、APIのエンドポイント
+    const apiEndpoint: string = "images"; // 撮影した写真を送信するための、APIのエンドポイント
     const response: Response = await makePostRequest(apiEndpoint, data);
     return response;
 }

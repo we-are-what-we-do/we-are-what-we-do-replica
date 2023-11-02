@@ -39,7 +39,7 @@ export function UserProvider({children}: {children: ReactNode}){
         setUserId(currentUserId);
         setUserFlag(isDifferentUser);
 
-        // console.log(`userId: ${currentUserId}\nuserFlag: ${isDifferentUser}`)
+        // console.log({userId: currentUserId, userFlag: isDifferentUser, latestUserId: latestRing?.user})
     }, [latestRing]);
 
 

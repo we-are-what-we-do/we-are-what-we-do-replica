@@ -9,7 +9,7 @@ import { GpsContext } from "../providers/GpsProvider";
 import { v4 as uuidv4 } from 'uuid';
 
 
-export const TEST_LOCATION_ID: string = "36e94259-ceda-49fd-b6f7-29df955adfff";
+export const TEST_LOCATION_ID: string = "f8777292-0a66-4762-94cc-5243cd8bfb3e";
 
 
 export default function TestButtons() {
