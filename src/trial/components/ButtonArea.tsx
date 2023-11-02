@@ -108,9 +108,6 @@ export default function ButtonArea(props: {
                 return;
             }
 
-            // サーバー送信用に画像データの型付けを取り除く
-            const base64Str = newImage.split(',')[1]; // "data:image/png;base64"は省略されて取得される
-
             try{
                 // リングデータを送信する
                 const ringResponse: Response = await postRingData(addedRingData); // サーバーにリングデータを送信する
