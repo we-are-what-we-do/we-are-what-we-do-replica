@@ -1,5 +1,5 @@
 import { Point, FeatureCollection } from 'geojson';
-import { RingData } from "../handleRingData";
+import { RingData, compareISO8601Dates } from "../handleRingData";
 
 /* 型定義 */
 // APサーバーから取得するリングデータ
@@ -85,7 +85,23 @@ export async function getRingData(): Promise<RingData[]>{
 async function getLatestInstanceId(apiEndpoint: string): Promise<string>{
     const response: Response = await makeGetRequest(apiEndpoint);
     const data: RingInstance[] = await response.json();
-    const latestInstanceId: string = data[0].id;
+    const latestInstance: RingInstance | null = data.reduce((latestInstance: RingInstance | null, currentInstance: RingInstance) => {
+        if(!latestInstance){
+            return currentInstance;
+        }
+
+        // 新しい日付時刻文字列が見つかった場合に更新
+        const latestDate: string = latestInstance.started_at;
+        const currentDate: string = currentInstance.started_at;
+        if(compareISO8601Dates(currentDate, latestDate)){
+            return currentInstance;
+        }else{
+            return latestInstance;
+        }
+    }, null);
+    if(latestInstance === null) throw new Error("有効なリング周回のインスタンスがありません")
+    const latestInstanceId: string = latestInstance.id;
+console.log({data, latestInstance})
     return latestInstanceId;
 }
 

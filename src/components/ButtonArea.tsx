@@ -40,7 +40,8 @@ export default function ButtonArea(props: {
     // サーバーからリングデータを取得するためのcontext
     const {
         initializeRingData,
-        setLatestRing
+        setLatestRing,
+        isLoadedData
     } = useContext(DbContext);
 
     // IPの状態を管理するcontext
@@ -51,7 +52,8 @@ export default function ButtonArea(props: {
 
     // GPSの状態を管理するcontext
     const {
-        // gpsFlag
+        // gpsFlag,
+        isLoadedGps
     } = useContext(GpsContext);
     const gpsFlag: boolean = true;// TODO どこでもリング表示機能(テスト)を削除する
 
@@ -218,7 +220,7 @@ export default function ButtonArea(props: {
                     orbitControlsReset();
                     initializePositionZ();
                 }}
-                disabled={!gpsFlag}
+                disabled={!(isLoadedData && isLoadedGps && gpsFlag)}
             >
                 <CenterFocusWeak
                     style={{
@@ -234,11 +236,12 @@ export default function ButtonArea(props: {
                 aria-label="capture-display"
                 color="primary"
                 onClick={handleTakePhotoButton}
+                disabled={!(isLoadedData && isLoadedGps)}
             >
                 <DoubleCircleIcon
                     width={ICON_SIZE}
                     height={ICON_SIZE}
-                    color={gpsFlag ? ICON_COLOR : DISABLED_COLOR}
+                    color={(isLoadedData && isLoadedGps && gpsFlag) ? ICON_COLOR : DISABLED_COLOR}
                 />
             </IconButton>
             <IconButton

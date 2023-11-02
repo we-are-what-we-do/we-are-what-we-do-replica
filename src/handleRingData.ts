@@ -98,7 +98,7 @@ export function getIso8601DateTime(): string{
 }
 
 // ISO8601形式の日付時刻文字列同士を比較し、どちらが新しいのかを真偽値で取得する関数
-function compareISO8601Dates(dateStr1: string, dateStr2: string): boolean{
+export function compareISO8601Dates(dateStr1: string, dateStr2: string): boolean{
     const date1 = new Date(dateStr1);
     const date2 = new Date(dateStr2);
 
