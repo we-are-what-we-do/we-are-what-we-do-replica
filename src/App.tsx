@@ -66,6 +66,7 @@ export default function App() {
   // 3Dの視点移動(OrbitControl)が有効かどうかを管理するstate
   const enableOrbitControl = useAppSelector((state) => state.buttonState.value);
 
+
   /* DEIの初期表示をレスポンシブに行う */
   // position-zをuseStateで管理する
   const [positionZ, setPositionZ] = useState<Vector3>(new Vector3(0,0,10));
@@ -95,6 +96,7 @@ export default function App() {
     }
   }
 
+
   //OrbitControlsの初期化
   const orbitControlsRef = useRef<OrbitControlsImpl>(null!);
   /**
@@ -105,6 +107,7 @@ export default function App() {
   function orbitControlsReset() {
     orbitControlsRef.current.reset();
   }
+
 
   return(
     <> 

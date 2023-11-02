@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "./redux/store";
 import { TorusInfo, pushTorusInfo, resetHandle } from "./../redux/features/torusInfo-slice";
 import { getUpdateTime } from "./redux/features/updateTime-slice";
-import { RingsData, convertToTorus } from "./../handleRingData";
+import { RingData, convertToTorus } from "./../handleRingData";
 
 import { DbContext, getLatestLap } from "./../providers/DbProvider";
 import { FeatureCollection, Point } from "geojson";
@@ -94,10 +94,8 @@ function App() {
   function initializeRingDraw(): void {
     dispatch(resetHandle()); // 全3Dを消去する
   
-    const extractedRingData: RingsData = getLatestLap(ringsData); // リングデータを70個までに限定して切り出す(一応)
-
-    // 3Dオブジェクトの初期表示を行う
-    Object.values(extractedRingData).forEach((value) => {
+    const extractedRingData: RingData[] = getLatestLap(ringsData);
+    extractedRingData.forEach((value) => {
       const newTorus: TorusInfo = convertToTorus(value);
       dispatch(pushTorusInfo(newTorus));
     });

@@ -6,6 +6,7 @@ import { CameraProvider } from "../providers/CameraProvider";
 import { CaptureProvider } from "../providers/CaptureProvider";
 import { UserProvider } from "../providers/UserProvider";
 import { GpsProvider } from "../providers/GpsProvider";
+import { SocketProvider } from "../providers/SocketProvider";
 
 export function Providers({ children }: {children: React.ReactNode}) {
   return (
@@ -16,7 +17,9 @@ export function Providers({ children }: {children: React.ReactNode}) {
             <RingProvider>{/* DbProvider, UserProvider, GpsProvider配下にRingProviderを設置 */}
               <CameraProvider>
                 <CaptureProvider>{/* CameraProvider配下にCaptureProviderを設置 */}
-                  {children}
+                  <SocketProvider>
+                    {children}
+                  </SocketProvider>
                 </CaptureProvider>
               </CameraProvider>
             </RingProvider>

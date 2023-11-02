@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { postNftImage, postRingData } from './../api/fetchDb';
+import { ImageData, postImageData, postRingData } from './../api/fetchDb';
 import { RingData } from "../handleRingData";
 import { CaptureContext } from "./../providers/CaptureProvider";
 import { CameraContext } from "./../providers/CameraProvider";
@@ -21,6 +21,7 @@ import { ICON_SIZE, ICON_COLOR, DISABLED_COLOR, BUTTON_MARGIN } from "./../App";
 import { useDispatch } from "react-redux";
 import { AppDispatch, useAppSelector } from "../redux/store";
 import { changeButtonState } from "../redux/features/buttonState-slice";
+import { v4 as uuidv4} from "uuid";
 
 // ボタン類のコンポーネント
 export default function ButtonArea(props: {
@@ -40,7 +41,8 @@ export default function ButtonArea(props: {
     // サーバーからリングデータを取得するためのcontext
     const {
         initializeRingData,
-        setLatestRing
+        setLatestRing,
+        isLoadedData
     } = useContext(DbContext);
 
     // IPの状態を管理するcontext
@@ -50,7 +52,8 @@ export default function ButtonArea(props: {
 
     // GPSの状態を管理するcontext
     const {
-        gpsFlag
+        gpsFlag,
+        isLoadedGps
     } = useContext(GpsContext);
 
     // リングのデータを追加するためのcontext
@@ -103,13 +106,14 @@ export default function ButtonArea(props: {
             // 連続撮影orリングを送信済みなら、処理を止める
             showWarnToast("I002"); // 「連続撮影はできません。」というメッセージボックスを表示する
         }else{
+            console.log({userFlag})
             // リングが未送信状態なら、写真撮影の処理を開始する
             videoRef.current?.pause(); // カメラを一時停止する
             dispatch(changeButtonState()); // 3Dの視点を固定する
 
             // 撮影した写真に確認を取る
             const isPhotoOk: boolean = await showConfirmToast(); // 「撮影画像はこちらでよいですか」というメッセージボックスを表示する
-            console.log("isPhotoOk: ", isPhotoOk);
+            // console.log("isPhotoOk: ", isPhotoOk);
 
             // 撮影した写真に承諾が取れたら、サーバーにリングを送信する
             if(isPhotoOk){
@@ -136,11 +140,25 @@ export default function ButtonArea(props: {
                     return;
                 }
 
+                // サーバー送信用に画像データの型付けを取り除く
+                const base64Str = newImage.split(',')[1]; // "data:image/png;base64"は省略されて取得される
+
                 try{
                     // リングデータを送信する
-                    await postRingData(addedRingData); // サーバーにリングデータを送信する
-                    await postNftImage(newImage); // base64形式の画像をサーバーに送信する
-                    // console.log("サーバーにデータを送信しました:\n", addedRingData);
+                    // addedRingData.user = uuidv4(); // TODO テスト用のランダムユーザーIDをやめる
+                    const ringResponse: Response = await postRingData(addedRingData); // サーバーにリングデータを送信する
+                    const responseData = await ringResponse.json();
+                    console.log({responseData})
+
+                    // 画像データを送信する
+                    if(!responseData.id) console.error("リングデータ(POST)のレスポンスにidが含まれていません\n", responseData);
+                    const imageData: ImageData = { // 送信用画像データオブジェクトを作成する
+                        ring_id: responseData.id,
+                        created_at: addedRingData.created_at,
+                        image: base64Str
+                    };
+                    await postImageData(imageData); // base64形式の画像をサーバーに送信する
+                    console.log("サーバーにデータを送信しました:\n", addedRingData);
 
                     // latestRingを更新する
                     setLatestRing(addedRingData);
@@ -203,7 +221,7 @@ export default function ButtonArea(props: {
                     orbitControlsReset();
                     initializePositionZ();
                 }}
-                disabled={!gpsFlag}
+                disabled={!(isLoadedData && isLoadedGps && gpsFlag)}
             >
                 <CenterFocusWeak
                     style={{
@@ -219,11 +237,12 @@ export default function ButtonArea(props: {
                 aria-label="capture-display"
                 color="primary"
                 onClick={handleTakePhotoButton}
+                disabled={!(isLoadedData && isLoadedGps)}
             >
                 <DoubleCircleIcon
                     width={ICON_SIZE}
                     height={ICON_SIZE}
-                    color={gpsFlag ? ICON_COLOR : DISABLED_COLOR}
+                    color={(isLoadedData && isLoadedGps && gpsFlag) ? ICON_COLOR : DISABLED_COLOR}
                 />
             </IconButton>
             <IconButton

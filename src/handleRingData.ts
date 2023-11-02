@@ -6,25 +6,26 @@ import { v4 as uuidv4 } from 'uuid';
 /* 型定義 */
 // リングの型
 export type RingData = {
-    "instance"?:   string;   // 周回中のインスタンスを表すID
-    "location":   string;   // ロケーションピンのUUID
-    "latitude":   number; // 撮影地点の緯度
-    "longitude":  number; // 撮影地点の経度
-    "user":    string; // ユーザーID
-    "indexed":    number; // リング軌道内の順番(DEI中の何個目か、0~69)
-    "ring_hue":    number; // リングの色調(0～360)
-    "created_at": string; // 撮影日時
-};
-export type RingsData = {
-    [id: string]: RingData;
+    "id"?: string; // リングデータのID (UUID)
+    "pos_in"?: { // torusの座標
+        "x": number;
+        "y": number;
+    };
+    "location": string; // ロケーションピンのID (UUID)
+    "longitude": number; // 撮影地点の経度
+    "latitude": number; // 撮影地点の緯度
+    "indexed": number; // リング軌道内の順番 (DEI中の何個目か、0~69)
+    "hue": number; // リングの色調 (0～360)
+    "user": string; // ユーザーID (UUID)
+    "created_at": string; // 撮影日時 (ISO8601)
 };
 
 
 /* 関数定義 */
-// RingsData型をTorusInfo[]型に変換する関数
-export function convertToTori(data: RingsData): TorusInfo[]{
+// RingData[]型をTorusInfo[]型に変換する関数
+export function convertToTori(data: RingData[]): TorusInfo[]{
     const result: TorusInfo[] = new Array;
-    Object.entries(data).forEach(([_key, value], _index) => {
+    data.forEach((value, _index) => {
         const newLocalTorus: TorusInfo = convertToTorus(value);
         result.push(newLocalTorus);
     });
@@ -36,7 +37,7 @@ export function convertToTorus(data: RingData): TorusInfo{
     const newRingPosition: Ring = positionArray[data.indexed]; // リングの軌道設定
     const newTorusInfo: TorusInfo = {
         id: uuidv4(),
-        color: getRingColor(data.ring_hue),
+        color: getRingColor(data.hue),
         rotateX: newRingPosition.rotateX,
         rotateY: newRingPosition.rotateY,
         positionX: newRingPosition.positionX,
@@ -52,8 +53,8 @@ export function getRingColor(ringHue: number): string{
 }
 
 // 全データの中から、直前に追加されたリングのデータを取得する関数
-export function getLatestRing(data: RingsData): RingData | null{
-    return Object.values(data).reduce((latestRing: RingData | null, currentRing: RingData) => {
+export function getLatestRing(data: RingData[]): RingData | null{
+    return data.reduce((latestRing: RingData | null, currentRing: RingData) => {
         if(!latestRing){
             return currentRing;
         }
@@ -97,7 +98,7 @@ export function getIso8601DateTime(): string{
 }
 
 // ISO8601形式の日付時刻文字列同士を比較し、どちらが新しいのかを真偽値で取得する関数
-function compareISO8601Dates(dateStr1: string, dateStr2: string): boolean{
+export function compareISO8601Dates(dateStr1: string, dateStr2: string): boolean{
     const date1 = new Date(dateStr1);
     const date2 = new Date(dateStr2);
 
