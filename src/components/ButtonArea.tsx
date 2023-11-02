@@ -21,6 +21,7 @@ import { ICON_SIZE, ICON_COLOR, DISABLED_COLOR, BUTTON_MARGIN } from "./../App";
 import { useDispatch } from "react-redux";
 import { AppDispatch, useAppSelector } from "../redux/store";
 import { changeButtonState } from "../redux/features/buttonState-slice";
+import { v4 as uuidv4} from "uuid";
 
 // ボタン類のコンポーネント
 export default function ButtonArea(props: {
@@ -46,8 +47,9 @@ export default function ButtonArea(props: {
 
     // IPの状態を管理するcontext
     const {
-        userFlag
+        // userFlag
     } = useContext(UserContext);
+    const userFlag: boolean = true;// TODO 連続撮影機能(テスト)を削除する
 
     // GPSの状態を管理するcontext
     const {
@@ -145,6 +147,7 @@ export default function ButtonArea(props: {
 
                 try{
                     // リングデータを送信する
+                    addedRingData.user = uuidv4(); // TODO テスト用のランダムユーザーIDをやめる
                     const ringResponse: Response = await postRingData(addedRingData); // サーバーにリングデータを送信する
                     const responseData = await ringResponse.json();
                     console.log({responseData})
