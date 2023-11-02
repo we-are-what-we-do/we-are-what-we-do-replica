@@ -239,7 +239,7 @@ export default function ButtonArea(props: {
                 aria-label="capture-display"
                 color="primary"
                 onClick={handleTakePhotoButton}
-                disabled={!(isLoadedData && isLoadedGps)}
+                disabled={!(isLoadedData && isLoadedGps && gpsFlag)}
             >
                 <DoubleCircleIcon
                     width={ICON_SIZE}
