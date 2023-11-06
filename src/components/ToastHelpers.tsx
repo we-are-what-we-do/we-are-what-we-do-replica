@@ -9,20 +9,13 @@ export const showErrorToast = (errorCode: string) => {
 };
 
 export const showWarnToast = (infoCode: string) => {
-  const message: string[] = [...INFO_MESSAGES[infoCode]];
+  const message = INFO_MESSAGES[infoCode];
   toast.warn(message, {autoClose: false, theme: "colored"});
 };
 
 export const showInfoToast = (infoCode: string) => {
-  const messages: string[] = [...INFO_MESSAGES[infoCode]];
-  const messagesElements: JSX.Element[] = new Array;
-  messages.forEach((value, index) => {
-    const newElement: JSX.Element = <div>{value}</div>;
-    messagesElements.push(newElement);
-  })
-  toast.info(
-    <>{messagesElements}</>,
-    {autoClose: false, theme: "colored"});
+  const message = INFO_MESSAGES[infoCode];
+  toast.info(message, {autoClose: false, theme: "colored"});
 };
 
 export const showSuccessToast = (infoCode: string) => {
