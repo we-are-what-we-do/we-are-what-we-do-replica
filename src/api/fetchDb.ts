@@ -1,27 +1,10 @@
 import { Point, FeatureCollection } from 'geojson';
 import { RingData, compareISO8601Dates } from "../handleRingData";
+import { ImageData, RingInstance } from '../types';
+import { API_URL } from '../constants';
 
-/* 型定義 */
-// APサーバーから取得するリングデータ
-type RingInstance = {
-    id: string; // インスタンスのid (UUID)
-    location: string; // その場所であるというLocation (UUID)
-    started_at: string; // インスタンスが作成された時間 (ISO8601)
-    rings?: RingData[]; // リングデータ
-}
-
-// APサーバーにPOSTする画像データオブジェクト
-export type ImageData = {
-    ring_id: string // UUID形式のリングID
-    created_at: string; // ISO8601形式の時間データ
-    image: string; // base64形式の画像データ
-}
 
 /* 関数定義 */
-// export const API_DOMAIN: string = "api.wawwd.net"; // 本番用アプリケーションサーバーのドメイン
-export const API_DOMAIN: string = "testApi.wawwd.net"; // 本番用アプリケーションサーバーのドメイン
-const API_URL: string = `https://${API_DOMAIN}/`; // アプリケーションサーバーのURL
-
 // GETリクエストを行う共通関数
 async function makeGetRequest(apiEndpoint: string, queryParams?: string): Promise<Response>{
     try {

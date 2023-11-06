@@ -7,9 +7,7 @@ import { RingData, getIso8601DateTime } from "../handleRingData";
 import { positionArray } from "./../torusPosition";
 import { GpsContext } from "../providers/GpsProvider";
 import { v4 as uuidv4 } from 'uuid';
-
-
-export const TEST_LOCATION_ID: string = "f8777292-0a66-4762-94cc-5243cd8bfb3e";
+import { TEST_LOCATION_ID } from "../constants";
 
 
 export default function TestButtons() {
@@ -30,7 +28,7 @@ export default function TestButtons() {
     // websocketを管理するcontext
     const {
         hasPostRing,
-        socketRef
+        // socketRef
     } = useContext(SocketContext);
 
     // GPSの状態を管理するcontext
