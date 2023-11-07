@@ -25,8 +25,8 @@ import { ImageData } from "../types";
 
 
 // リングデータがコンフリクトした際のエラーレスポンスのメッセージ
-const CONFLICT_INDEX_MESSAGE: string = "Conflict in, `RingSet`. `Index` should be Unique within a defined value.";
-const CONFLICT_USER_ID_MESSAGE: string = "Conflict in, `Ring`. `UserId` conflicts with the last registered user.";
+const CONFLICT_INDEX_MESSAGE: string = "Conflict in, `ring`. `Index` should be Unique within a defined value.";
+const CONFLICT_USER_ID_MESSAGE: string = "Conflict in, `ring`. `UserId` conflicts with the last registered user.";
 
 
 // ボタン類のコンポーネント
@@ -159,7 +159,7 @@ export default function ButtonArea(props: {
 
                     // リングデータ送信失敗時のエラーハンドリングを行う
                     if(!ringResponse.ok){
-                        const errorResponseMessage: string | undefined = responseData.error;
+                        const errorResponseMessage: string | undefined = responseData.message;
                         if(errorResponseMessage){
                             throw new Error(errorResponseMessage);
                         }else{
