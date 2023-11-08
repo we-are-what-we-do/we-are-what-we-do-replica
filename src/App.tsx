@@ -1,6 +1,5 @@
 import "./App.css";
 import { useContext, useEffect, useRef, useState } from "react";
-import { DbContext } from "./providers/DbProvider";
 import { CaptureContext } from "./providers/CaptureProvider";
 import { GpsContext } from "./providers/GpsProvider";
 import { OrbitControls } from "@react-three/drei";
@@ -15,6 +14,7 @@ import { CircularProgress } from "@mui/material";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useAppSelector } from "./redux/store";
 import { SocketContext } from "./providers/SocketProvider";
+import TestButtons from "./components/TestButtons";
 
 
 /* 定数定義 */
@@ -154,6 +154,7 @@ export default function App() {
           )}
         </div>
       </div>
+      <TestButtons/>
       <ThemeProvider theme={theme}>
         <ButtonArea
           theme={theme}

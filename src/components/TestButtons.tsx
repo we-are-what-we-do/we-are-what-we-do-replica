@@ -28,7 +28,7 @@ export default function TestButtons() {
     // websocketを管理するcontext
     const {
         hasPostRing,
-        // socketRef
+        socketRef
     } = useContext(SocketContext);
 
     // GPSの状態を管理するcontext
@@ -65,8 +65,7 @@ export default function TestButtons() {
 
         //サーバーにリングデータを送信する
         console.log("testUser:", addedRingData.user)
-        await postRingData(addedRingData);
-        // socketRef.current?.send(JSON.stringify(addedRingData));
+        socketRef.current?.send(JSON.stringify(addedRingData));
         console.log("サーバーにデータを送信しました:\n", addedRingData);
 
         // テスト用のstate更新
@@ -86,18 +85,6 @@ export default function TestButtons() {
         };
     }
 
-    // サーバーからリングデータを削除する処理(テスト用)
-    async function testDeleteRing(): Promise<void>{
-        await fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/rings.json", {
-            method: 'DELETE'
-        });
-        await fetch("https://wawwdtestdb-default-rtdb.firebaseio.com/nft.json", {
-            method: 'DELETE'
-        });
-        location.reload();
-    }
-
-
     return (
         <div
             style={{
@@ -113,14 +100,6 @@ export default function TestButtons() {
                 }}
             >
                 リング追加(テスト用)
-            </button>
-            <button
-                onClick={testDeleteRing}
-                style={{
-                    position: "relative",
-                }}
-            >
-                リングデータ削除(テスト用)
             </button>
             <br/>
             <span

@@ -4,14 +4,18 @@ import { DbContext } from './DbProvider';
 import { convertToTorus, RingData } from '../handleRingData';
 import { ImageData } from '../types';
 import { postImageData } from '../api/fetchDb';
-import { showErrorToast } from '../components/ToastHelpers';
+import { showErrorToast, showSuccessToast, showWarnToast } from '../components/ToastHelpers';
 import { UserContext } from './UserProvider';
 import { RingContext } from './RingProvider';
 import { positionArray } from '../torusPosition';
 import { pushTorusInfo, replaceTorus, resetHandle, TorusInfo } from '../redux/features/torusInfo-slice';
 import { useDispatch } from 'react-redux';
 import { AppDispatch, useAppSelector } from '../redux/store';
+import { CaptureContext } from './CaptureProvider';
 
+// リングデータがコンフリクトした際のエラーレスポンスのメッセージ
+const CONFLICT_INDEX_MESSAGE: string = "Conflict data creation. reason: conflict_ring: Conflict in, `ring`. `Index` should be Unique within a defined value.";
+const CONFLICT_USER_ID_MESSAGE: string = "Conflict data creation. reason: conflict_ring: Conflict in, `ring`. `UserId` conflicts with the last registered user.";
 
 /* 型定義 */
 // contextに渡すデータの型
@@ -67,6 +71,11 @@ export function SocketProvider({children}: {children: ReactNode}){
         reChoiceAddedTorus
     } = useContext(RingContext);
 
+    // 写真撮影(リング+カメラ)のためのcontext
+    const {
+        saveImage
+    } = useContext(CaptureContext);
+
     // reduxのdispatch
     const dispatch = useDispatch<AppDispatch>();
     const torusList = useAppSelector((state) => state.torusInfo.value); // 描画に追加されているリングデータ
@@ -107,23 +116,40 @@ export function SocketProvider({children}: {children: ReactNode}){
     /* function */
     // メッセージ受信時のイベントハンドラ関数
     function handleWsEvent(event: MessageEvent<any>){
-        const data: any = JSON.parse(event.data); // 受け取ったレスポンスデータ
-        console.log("wsOnMessage:", {event, data: JSON.parse(event.data)});
+        if(event.data === CONFLICT_USER_ID_MESSAGE){
+            console.error("ユーザーIDがコンフリクトしました", event.data, event);
+            showWarnToast("I002");
+            return;
+        }
+        if(event.data === CONFLICT_INDEX_MESSAGE){
+            console.error("リングデータがコンフリクトしました", event.data, event);
+            showErrorToast("E099");
+            return;
+        }
 
-        if(data.user) console.log("受信したユーザーID:\n", data.user, "\n自分のユーザーID\n", userIdRef.current)
+        try{
+            const data: any = JSON.parse(event.data); // 受け取ったレスポンスデータ
+            console.log("wsOnMessage:", {event, data});
 
-        if(data.rings){
-            // 初回接続時の最新リングデータインスタンスの取得をした場合
-            console.log("初回リングデータ読み込みを行いました");
-            handleOnConnect(data);
-        }else if(data.user && userIdRef.current === data.user){
-            // 受け取ったレスポンスの送信元が自分の場合
-            console.log("自分が送信元のリングデータを受信しました");
-            handleOwnRing(data);
-        }else{
-            // 他人からレスポンスを受け取った場合
-            console.log("他ユーザーからリングデータを受信しました");
-            handleResponseRing(data);
+            if(data.user) console.log("受信したユーザーID:\n", data.user, "\n自分のユーザーID\n", userIdRef.current)
+
+            if(data.rings){
+                // 初回接続時の最新リングデータインスタンスの取得をした場合
+                console.log("初回リングデータ読み込みを行いました");
+                handleOnConnect(data);
+            }else if(data.user && userIdRef.current === data.user){
+                // 受け取ったレスポンスの送信元が自分の場合
+                console.log("自分が送信元のリングデータを受信しました");
+                handleOwnRing(data);
+            }else{
+                // 他人からレスポンスを受け取った場合
+                console.log("他ユーザーからリングデータを受信しました");
+                handleResponseRing(data);
+            }
+        }catch(error){
+            console.error(error);
+            console.error("送信されたリングデータのハンドリングエラー", event);
+            showErrorToast("E099");
         }
     }
 
@@ -168,6 +194,14 @@ export function SocketProvider({children}: {children: ReactNode}){
 
             // 生成したリングの軌道indexを使用済みとしてstateに保存する
             setUsedOrbitIndexes(prev => [...prev, ringData.indexed]);
+
+
+            // 現在のリング数が70個でDEIが完成している場合、描画を初期化して新たな周を始める
+            if(torusList.length >= positionArray.length){
+                dispatch(resetHandle());
+                setUsedOrbitIndexes([]);
+                console.log("DEIの最後に追加しようとしていた自分のリングが他人に取られたため、新たなDEI周を開始します");
+            }
 
             // 他ユーザーがリングを新たに登録し、連続撮影でなくなったので新しく追加するリングを選ぶ
             reChoiceAddedTorus();
@@ -214,12 +248,24 @@ export function SocketProvider({children}: {children: ReactNode}){
         const imageData: ImageData = {
             ring_id: ownRingData.id,
             created_at: ownRingData.created_at,
-            image: base64Ref.current
+            image: base64Ref.current.split(',')[1] // "data:image/png;base64"は省略されて取得される
         };
 
         try{
             // base64形式の画像をサーバーに送信する
             await postImageData(imageData);
+
+            // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
+            showSuccessToast("I005");
+
+            // 撮影した写真をダウンロードする
+            saveImage(base64Ref.current);
+
+            // latestRingを更新する
+            setLatestRing(ownRingData);
+
+            // リングデータを送信済みとしてrefを更新する
+            hasPostRing.current = true;
         }catch(error){
             console.error("画像データの送信に失敗しました", error);
             showErrorToast("E004"); // 「撮影画像のアップロードに失敗」というメッセージを表示する

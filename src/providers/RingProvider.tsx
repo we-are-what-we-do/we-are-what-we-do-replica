@@ -1,5 +1,4 @@
-import { createContext, useState, ReactNode, useEffect, useContext } from 'react';
-import { DbContext } from './DbProvider';
+import { createContext, useState, ReactNode, useContext } from 'react';
 import { UserContext } from './UserProvider';
 import { GpsContext } from './GpsProvider';
 import { useDispatch } from 'react-redux';
@@ -8,8 +7,6 @@ import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusIn
 import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRingColor } from '../handleRingData';
 import { Ring, positionArray, torusScale } from '../torusPosition';
 import { v4 as uuidv4 } from 'uuid';
-import { TEST_LOCATION_ID } from '../constants';
-import { SocketContext } from './SocketProvider';
 
 
 /* 型定義 */
@@ -68,10 +65,6 @@ export function RingProvider({children}: {children: ReactNode}){
         currentLatitude,
         currentLongitude
     } = useContext(GpsContext);
-
-    const {
-        fugaRef
-    } = useContext(SocketContext);
 
     // リングデータを管理するstate
     const [addedTorus, setAddedTorus] = useState<TorusWithData |null>(null); // 追加したリング(AddedTorusInfo)のデータ
@@ -220,7 +213,6 @@ export function RingProvider({children}: {children: ReactNode}){
         };
 
         // TODO テスト用のランダムユーザーIDをやめる
-        const temp = userIdRef.current
         const newRandomUserId: string = uuidv4();
         newRingData.user = newRandomUserId;
         userIdRef.current = newRandomUserId;
