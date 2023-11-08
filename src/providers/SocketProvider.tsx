@@ -181,31 +181,33 @@ export function SocketProvider({children}: {children: ReactNode}){
         // 他人のリングを描画上に生成する、あるいは自分が選択していたリングを他人のリングで置き換える
         console.log({other: ringData.indexed, own: addedTorus?.torusData.orbitIndex})
         if(hasPostRing.current){
+            console.log("Flow1");
             // 既に自分がリングデータを送信済みの場合
             // 現在のリング数が70個でDEIが完成している場合、描画を初期化して新たな周を始める
             if(torusList.length >= positionArray.length){
                 dispatch(resetHandle());
-                setUsedOrbitIndexes([]);
-                console.log("DEIの最後に追加しようとしていた自分のリングが他人に取られたため、新たなDEI周を開始します");
+                setUsedOrbitIndexes([ringData.indexed]);
+                console.log("あなたがDEIを完成させましたが、他の人がリングを追加したので新たなDEI周が開始します");
+            }else{
+                // 生成したリングの軌道indexを使用済みとしてstateに保存する
+                setUsedOrbitIndexes(prev => [...prev, ringData.indexed]);
             }
-
+            console.log("受け取り追加前",{ringCount: torusList.length});
             //リング情報をオブジェクトに詰め込みstoreへ送る
             dispatch(pushTorusInfo(newTorus));
-
-            // 生成したリングの軌道indexを使用済みとしてstateに保存する
-            setUsedOrbitIndexes(prev => [...prev, ringData.indexed]);
-
+            console.log("受け取り追加後",{ringCount: torusList.length});
 
             // 現在のリング数が70個でDEIが完成している場合、描画を初期化して新たな周を始める
             if(torusList.length >= positionArray.length){
                 dispatch(resetHandle());
                 setUsedOrbitIndexes([]);
-                console.log("DEIの最後に追加しようとしていた自分のリングが他人に取られたため、新たなDEI周を開始します");
+                console.log("他の人がDEIを完成させたため、新たなDEI周が開始します");
             }
-
             // 他ユーザーがリングを新たに登録し、連続撮影でなくなったので新しく追加するリングを選ぶ
             reChoiceAddedTorus();
+            console.log("自分追加後",{ringCount: torusList.length});
         }else if(ringData.indexed === addedTorus?.torusData.orbitIndex){
+            console.log("Flow2");
             // 他ユーザーが生成したリングが、自分が生成しようとしていたリングと被っていた場合、他ユーザーのリングで置き換える
             dispatch(replaceTorus({existedId: addedTorus.torus.id, newTorus}));
 
@@ -220,6 +222,11 @@ export function SocketProvider({children}: {children: ReactNode}){
             reChoiceAddedTorus();
             console.log("追加しようとしていたリングを選び直しました");
         }else{
+            console.log("Flow3");
+            if(torusList.length >= positionArray.length){
+                console.error("何かがおかしい。", torusList.length)
+            }
+
             //リング情報をオブジェクトに詰め込みstoreへ送る
             dispatch(pushTorusInfo(newTorus));
 
