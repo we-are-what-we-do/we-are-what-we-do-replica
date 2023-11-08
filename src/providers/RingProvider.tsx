@@ -9,6 +9,7 @@ import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRin
 import { Ring, positionArray, torusScale } from '../torusPosition';
 import { v4 as uuidv4 } from 'uuid';
 import { TEST_LOCATION_ID } from '../constants';
+import { SocketContext } from './SocketProvider';
 
 
 /* 型定義 */
@@ -19,6 +20,8 @@ type RingContent = {
     usedOrbitIndexes: number[];
     setUsedOrbitIndexes: React.Dispatch<React.SetStateAction<number[]>>;
     addedTorus: TorusWithData |null;
+    initializeRingDraw(ringsData: RingData[]): void;
+    reChoiceAddedTorus(): void;
 };
 
 // 追加したリング(TorusInfo)のデータ
@@ -44,7 +47,9 @@ const initialData: RingContent = {
     addTorus: () => ({} as TorusWithData),
     usedOrbitIndexes: [],
     setUsedOrbitIndexes: () => {},
-    addedTorus: null
+    addedTorus: null,
+    initializeRingDraw: () => {},
+    reChoiceAddedTorus: () => {}
 };
 
 export const RingContext = createContext<RingContent>(initialData);
@@ -52,14 +57,9 @@ export const RingContext = createContext<RingContent>(initialData);
 // リング追加を司るプロバイダー
 export function RingProvider({children}: {children: ReactNode}){
     /* useState, useContext等 */
-    // サーバーから取得したリングデータを管理するcontext
-    const {
-        ringsData
-    } = useContext(DbContext);
-
     // ユーザーIDを管理するcontext
     const {
-        userId
+        userIdRef
     } = useContext(UserContext);
 
     // GPSの状態を管理するcontext
@@ -69,6 +69,10 @@ export function RingProvider({children}: {children: ReactNode}){
         currentLongitude
     } = useContext(GpsContext);
 
+    const {
+        fugaRef
+    } = useContext(SocketContext);
+
     // リングデータを管理するstate
     const [addedTorus, setAddedTorus] = useState<TorusWithData |null>(null); // 追加したリング(AddedTorusInfo)のデータ
     const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
@@ -77,15 +81,9 @@ export function RingProvider({children}: {children: ReactNode}){
     const dispatch = useDispatch<AppDispatch>();
 
 
-    /* useEffect等 */
-    // ringsDataに変更があれば、リングの初期表示+追加を行う
-    useEffect(() => {
-        initializeRingDraw();
-    }, [ringsData]);
-
     /* 関数定義 */
     // 現在のリングのデータ(ringsData)で、3Dオブジェクトを初期表示して、リングを追加する関数
-    function initializeRingDraw(): void{
+    function initializeRingDraw(ringsData: RingData[]): void{
         // 描画の初期化処理
         dispatch(resetHandle()); // 全3Dを消去する
         let newUsedOrbitIndexes: number[] = [];
@@ -99,7 +97,7 @@ export function RingProvider({children}: {children: ReactNode}){
             newUsedOrbitIndexes.push(value.indexed); // 使用済みの軌道indexとして保管する
         });
 
-        // リングを追加する
+        // 取得したデータ+1でリングを追加し、追加した軌道indexを取得する
         const newTorus: TorusWithData = addTorus(newUsedOrbitIndexes);
         const newTorusData: AddedTorusInfo = newTorus.torusData;
         const newOrbitIndex: number = newTorusData.orbitIndex;
@@ -108,6 +106,17 @@ export function RingProvider({children}: {children: ReactNode}){
 
         setUsedOrbitIndexes(newUsedOrbitIndexes); // 使用済みの軌道indexをstateで保管する
         setAddedTorus(newTorus); // 追加したリングデータ
+    }
+
+    // 自分が追加するリングデータを選び直す関数
+    function reChoiceAddedTorus(): void{
+        // 新しくリングを選択する
+        const newTorus: TorusWithData = addTorus(usedOrbitIndexes);
+        const newOrbitIndex: number = newTorus.torusData.orbitIndex;
+
+        // 選択したリングの情報をstateに保存する
+        setUsedOrbitIndexes(prev => [...prev, newOrbitIndex]);
+        setAddedTorus(newTorus);
     }
 
     // リングのデータ(TorusInfo)を生成する関数
@@ -158,16 +167,16 @@ export function RingProvider({children}: {children: ReactNode}){
         let needDrawClear: boolean = false; // リング追加の描画時に、canvasの初期化が必要かどうか
 
         // 追加するためのリングを生成する
+        // 既にDEIが完成していてもうリングを追加できない場合は、nullが取得される
         let newTorusData: TorusWithData | null = createTorus(orbitIndexes);
 
         // DEIが完成している場合、描画を初期化してから、リング生成をもう一度試みる
         if(!newTorusData){
-            // 描画とリング軌道内位置の空き情報を初期化する
+            // 描画を初期化するよう設定する
             needDrawClear = true;
-            const initialOrbitIndexes: number[] = []; // リングがないときの軌道番号配列
 
             // リング生成をもう一度試みる
-            newTorusData = createTorus(initialOrbitIndexes);
+            newTorusData = createTorus([]);
 
             // それでもダメだった場合、エラーを返す
             if(!newTorusData){
@@ -175,7 +184,7 @@ export function RingProvider({children}: {children: ReactNode}){
             };
 
             // 描画を初期化したので、stateで保管している軌道index配列も初期化する
-            setUsedOrbitIndexes(initialOrbitIndexes);
+            setUsedOrbitIndexes([]);
         }
 
         //リング情報をオブジェクトに詰め込みstoreへ送る
@@ -190,13 +199,13 @@ export function RingProvider({children}: {children: ReactNode}){
     // サーバーに送信するためのリングデータを取得する関数
     function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus?.torusData ?? null): RingData | null{
         if(
-            (location === null) ||
+            (!location) ||
             (currentLatitude === null) ||
             (currentLongitude === null) ||
-            (userId === null) ||
-            (newTorus === null)
+            (!userIdRef.current) ||
+            (!newTorus)
         ){
-            console.error({location, currentLatitude, currentLongitude, userId, newTorus});
+            console.error({location, currentLatitude, currentLongitude, userId: userIdRef.current, newTorus});
             return null;
         }
 
@@ -204,13 +213,17 @@ export function RingProvider({children}: {children: ReactNode}){
             location, // 撮影場所
             latitude: currentLatitude, // 撮影地点の緯度
             longitude: currentLongitude, // 撮影地点の経度
-            user: userId, // ユーザーID
+            user: userIdRef.current, // ユーザーID
             indexed: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
             hue: newTorus.ringHue, // リングの色調
             created_at: getIso8601DateTime() // 撮影日時
         };
 
-        newRingData.user = uuidv4(); // TODO テスト用のランダムユーザーIDをやめる
+        // TODO テスト用のランダムユーザーIDをやめる
+        const temp = userIdRef.current
+        const newRandomUserId: string = uuidv4();
+        newRingData.user = newRandomUserId;
+        userIdRef.current = newRandomUserId;
 
         return newRingData;
     }
@@ -222,7 +235,9 @@ export function RingProvider({children}: {children: ReactNode}){
                 addTorus,
                 usedOrbitIndexes,
                 setUsedOrbitIndexes,
-                addedTorus
+                addedTorus,
+                initializeRingDraw,
+                reChoiceAddedTorus
             }}
         >
             {children}

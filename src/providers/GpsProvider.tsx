@@ -58,6 +58,7 @@ export function GpsProvider({children}: {children: ReactNode}){
                 setGeoJsonData(data);
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
+                        console.log("GPS done")
                         // 位置情報が変更されたときに呼び出されるコールバック
                         handleChangePosition(position, data, true).then(() => {
                             setIsLoadedGps(true);
@@ -65,6 +66,7 @@ export function GpsProvider({children}: {children: ReactNode}){
                         });
                     },
                     (error) => {
+                        console.log("GPS error")
                         if(error.code === error.PERMISSION_DENIED){
                             showWarnToast("E002"); // 「位置情報のアクセスを許可してください」というメッセージを表示する
                         }else{

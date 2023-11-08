@@ -46,14 +46,13 @@ export default function ButtonArea(props: {
 
     // サーバーからリングデータを取得するためのcontext
     const {
-        initializeRingData,
-        setLatestRing,
-        isLoadedData
+        setLatestRing
     } = useContext(DbContext);
 
     // IPの状態を管理するcontext
     const {
         // userFlag
+        userIdRef
     } = useContext(UserContext);
     const userFlag = true; // TODO テスト用プログラムの修正
 
@@ -85,7 +84,10 @@ export default function ButtonArea(props: {
 
     // websocketを管理するcontext
     const {
-        hasPostRing
+        isLoadedData,
+        hasPostRing,
+        socketRef,
+        base64Ref
     } = useContext(SocketContext);
 
     // 画面幅がmd以上かどうか
@@ -153,29 +155,11 @@ export default function ButtonArea(props: {
 
                 try{
                     // リングデータを送信する
-                    const ringResponse: Response = await postRingData(addedRingData); // サーバーにリングデータを送信する
-                    const responseData = await ringResponse.json();
-                    console.log({ringResponse, responseData, responseStatus: ringResponse.status})
-
-                    // リングデータ送信失敗時のエラーハンドリングを行う
-                    if(!ringResponse.ok){
-                        const errorResponseMessage: string | undefined = responseData.error;
-                        if(errorResponseMessage){
-                            throw new Error(errorResponseMessage);
-                        }else{
-                            throw new Error("リングデータ送信エラー");
-                        }
-                    }
-
-                    // 画像データを送信する
-                    if(!responseData.id) throw new Error("リングデータ(POST)のレスポンスに、画像データの送信に必要なidが返って来ませんでした");
-                    const imageData: ImageData = { // 送信用画像データオブジェクトを作成する
-                        ring_id: responseData.id,
-                        created_at: addedRingData.created_at,
-                        image: base64Str
-                    };
-                    await postImageData(imageData); // base64形式の画像をサーバーに送信する
+                    socketRef.current?.send(JSON.stringify(addedRingData));
                     console.log("サーバーにデータを送信しました:\n", addedRingData);
+
+                    // 画像データを送信待機用refに保存する(レスポンスを受け取ったら送信する予定)
+                    base64Ref.current = base64Str;
 
                     // latestRingを更新する
                     setLatestRing(addedRingData);
@@ -193,7 +177,7 @@ export default function ButtonArea(props: {
                     switch(error.message){
                         case CONFLICT_INDEX_MESSAGE:
                             console.error("送信しようとしたリングデータがコンフリクトを起こしました", error);
-                            await initializeRingData(); // データを更新する
+                            // await initializeRingData(); // データを更新する
                             showErrorToast("E005"); // 「再度、お試しください。」というメッセージボックスを表示する
                             break;
                         case CONFLICT_USER_ID_MESSAGE:
