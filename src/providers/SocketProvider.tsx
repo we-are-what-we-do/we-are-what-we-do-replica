@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
-import { WS_URL } from '../constants';
+import { clientId, WS_URL } from '../constants';
 import { DbContext } from './DbProvider';
 import { convertToTorus, RingData } from '../handleRingData';
 import { ImageData } from '../types';
@@ -117,6 +117,7 @@ export function SocketProvider({children}: {children: ReactNode}){
     /* function */
     // メッセージ受信時のイベントハンドラ関数
     function handleWsEvent(event: MessageEvent<any>){
+        // エラーデータ受信時のエラーハンドリング
         if(event.data === CONFLICT_USER_ID_MESSAGE){
             console.error("ユーザーIDがコンフリクトしました", event.data, event);
             showWarnToast("I002");
@@ -128,17 +129,18 @@ export function SocketProvider({children}: {children: ReactNode}){
             return;
         }
 
+        // 受信したメッセージデータを処理する
         try{
             const data: any = JSON.parse(event.data); // 受け取ったレスポンスデータ
             console.log("wsOnMessage:", {event, data});
 
-            if(data.user) console.log("受信したユーザーID:\n", data.user, "\n自分のユーザーID\n", userIdRef.current)
+            if(data.user) console.log("受信した送信者ID:\n", data.nonce, "\n自分の送信者ID\n", clientId);
 
             if(data.rings){
                 // 初回接続時の最新リングデータインスタンスの取得をした場合
                 console.log("初回リングデータ読み込みを行いました");
                 handleOnConnect(data);
-            }else if(data.user && userIdRef.current === data.user){
+            }else if(data.nonce && clientId === data.nonce){
                 // 受け取ったレスポンスの送信元が自分の場合
                 console.log("自分が送信元のリングデータを受信しました");
                 handleOwnRing(data);

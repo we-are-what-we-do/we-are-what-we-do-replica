@@ -7,12 +7,13 @@ import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusIn
 import { RingData, convertToTorus, getAvailableIndex, getIso8601DateTime, getRingColor } from '../handleRingData';
 import { Ring, positionArray, torusScale } from '../torusPosition';
 import { v4 as uuidv4 } from 'uuid';
+import { clientId } from '../constants';
 
 
 /* 型定義 */
 // contextに渡すデータの型
 type RingContent = {
-    getRingDataToAdd: (newTorus?: AddedTorusInfo | null) => RingData | null;
+    getRingDataToAdd: (newTorus?: AddedTorusInfo | null,  nonce?: string) => RingData | null;
     addTorus: (usedOrbitIndexes: number[]) => TorusWithData;
     usedOrbitIndexes: number[];
     setUsedOrbitIndexes: React.Dispatch<React.SetStateAction<number[]>>;
@@ -201,7 +202,7 @@ export function RingProvider({children}: {children: ReactNode}){
     };
 
     // サーバーに送信するためのリングデータを取得する関数
-    function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus?.torusData ?? null): RingData | null{
+    function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus?.torusData ?? null, nonce: string = clientId): RingData | null{
         if(
             (!location) ||
             (currentLatitude === null) ||
@@ -220,13 +221,13 @@ export function RingProvider({children}: {children: ReactNode}){
             user: userIdRef.current, // ユーザーID
             indexed: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
             hue: newTorus.ringHue, // リングの色調
-            created_at: getIso8601DateTime() // 撮影日時
+            created_at: getIso8601DateTime(), // 撮影日時
+            nonce // 送信者ID
         };
 
         // TODO テスト用のランダムユーザーIDをやめる
         const newRandomUserId: string = uuidv4();
         newRingData.user = newRandomUserId;
-        userIdRef.current = newRandomUserId;
 
         return newRingData;
     }

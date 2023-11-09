@@ -24,7 +24,7 @@ export default function TestButtons() {
     const {
         getRingDataToAdd,
         usedOrbitIndexes,
-        addTorus
+        addedTorus
     } = useContext(RingContext);
 
     // websocketを管理するcontext
@@ -46,17 +46,18 @@ export default function TestButtons() {
     // サーバーにリングを追加する処理(テスト用)
     async function testAddRing(): Promise<void>{
         let addedRingData: RingData | null = null;
+        const testUser: string = uuidv4();
+        console.log("testUser:", testUser)
 
         // 既に描画に追加したリングのデータを送信する
-        addedRingData = getRingDataToAdd();
+        addedRingData = getRingDataToAdd(addedTorus?.torusData, testUser);
         if(!addedRingData){
             console.error("追加したリングデータを取得できませんでした");
             return;
         };
-        addedRingData.user = uuidv4();
+        addedRingData.user = testUser;
 
         //サーバーにリングデータを送信する
-        console.log("testUser:", addedRingData.user)
         socketRef.current?.send(JSON.stringify(addedRingData));
         console.log("サーバーにデータを送信しました:\n", addedRingData);
 
