@@ -5,7 +5,6 @@ import { convertToTorus, RingData } from '../handleRingData';
 import { ImageData } from '../types';
 import { postImageData } from '../api/fetchDb';
 import { showErrorToast, showSuccessToast, showWarnToast } from '../components/ToastHelpers';
-import { UserContext } from './UserProvider';
 import { RingContext } from './RingProvider';
 import { positionArray } from '../torusPosition';
 import { initializeTorus, pushTorusInfo, replaceTorus, resetHandle, TorusInfo } from '../redux/features/torusInfo-slice';
@@ -14,8 +13,8 @@ import { AppDispatch, useAppSelector } from '../redux/store';
 import { CaptureContext } from './CaptureProvider';
 
 // リングデータがコンフリクトした際のエラーレスポンスのメッセージ
-const CONFLICT_INDEX_MESSAGE: string = "Conflict data creation. reason: conflict_ring: Conflict in, `ring`. `Index` should be Unique within a defined value.";
-const CONFLICT_USER_ID_MESSAGE: string = "Conflict data creation. reason: conflict_ring: Conflict in, `ring`. `UserId` conflicts with the last registered user.";
+const CONFLICT_INDEX_MESSAGE: string = "conflict_ring: Conflict in, `ring`. `Index` should be Unique within a defined value.";
+const CONFLICT_USER_ID_MESSAGE: string = "conflict_ring: Conflict in, `ring`. `UserId` conflicts with the last registered user.";
 
 /* 型定義 */
 // contextに渡すデータの型
@@ -51,11 +50,6 @@ export function SocketProvider({children}: {children: ReactNode}){
 
     // base64データを保持しておくためのref
     const base64Ref = useRef<string | null>(null);
-
-    // ユーザーIDのcontext
-    const {
-        userIdRef
-    } = useContext(UserContext);
 
     // リングデータをやりとりするためのcontext
     const {
@@ -117,25 +111,35 @@ export function SocketProvider({children}: {children: ReactNode}){
     /* function */
     // メッセージ受信時のイベントハンドラ関数
     function handleWsEvent(event: MessageEvent<any>){
-        // エラーデータ受信時のエラーハンドリング
-        if(event.data === CONFLICT_USER_ID_MESSAGE){
-            console.error("ユーザーIDがコンフリクトしました", event.data, event);
-            showWarnToast("I002");
-            return;
-        }
-        if(event.data === CONFLICT_INDEX_MESSAGE){
-            console.error("リングデータがコンフリクトしました", event.data, event);
-            showErrorToast("E099");
-            return;
-        }
+        console.log("wsOnMessage:", {event});
 
         // 受信したメッセージデータを処理する
         try{
-            const data: any = JSON.parse(event.data); // 受け取ったレスポンスデータ
-            console.log("wsOnMessage:", {event, data});
-
+            // 受け取ったレスポンスデータを取得する
+            const data: any = JSON.parse(event.data);
+            console.log("received data:", data);
             if(data.user) console.log("受信した送信者ID:\n", data.nonce, "\n自分の送信者ID\n", clientId);
 
+            // エラーデータ受信時のエラーハンドリング
+            if(data.error){
+                switch(data.reason){
+                    case CONFLICT_USER_ID_MESSAGE:
+                        console.error("ユーザーIDがコンフリクトしました", data);
+                        showWarnToast("I002");
+                        return;
+                    case CONFLICT_INDEX_MESSAGE:
+                        console.error("リングデータがコンフリクトしました", data);
+                        showErrorToast("E005");
+                        return;
+                    default:
+                        console.error("エラーメッセージを受信しました", data);
+                        showErrorToast("E099");
+                        return;
+                }
+            }
+            console.log("reason", data.reason, data.reason === CONFLICT_USER_ID_MESSAGE, event.data.reason === CONFLICT_INDEX_MESSAGE)
+
+            // 送信元やタイミングによって処理を行う
             if(data.rings){
                 // 初回接続時の最新リングデータインスタンスの取得をした場合
                 console.log("初回リングデータ読み込みを行いました");
@@ -151,7 +155,7 @@ export function SocketProvider({children}: {children: ReactNode}){
             }
         }catch(error){
             console.error(error);
-            console.error("送信されたリングデータのハンドリングエラー", event);
+            console.error("送信されたリングデータのハンドリングエラー", event.data);
             showErrorToast("E099");
         }
     }
