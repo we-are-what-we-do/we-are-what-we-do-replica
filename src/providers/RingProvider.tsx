@@ -229,8 +229,6 @@ export function RingProvider({children}: {children: ReactNode}){
         const newRandomUserId: string = uuidv4();
         newRingData.user = newRandomUserId;
 
-        newRingData.indexed = 0;
-
         return newRingData;
     }
 
