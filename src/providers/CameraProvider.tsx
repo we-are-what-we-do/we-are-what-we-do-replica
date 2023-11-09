@@ -139,7 +139,7 @@ export function CameraProvider({children}: {children: ReactNode}){
             setCameraFacing(nextFacing);
         }else{
             console.error("カメラを切り替えられませんでした");
-            showErrorToast("E099"); // 「システムエラー」というメッセージボックスを表示する
+            showErrorToast("E006"); // 「カメラの切り替えに失敗しました」というメッセージボックスを表示する
         };
     }
 
