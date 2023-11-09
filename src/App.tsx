@@ -154,7 +154,7 @@ export default function App() {
           )}
         </div>
       </div>
-      <TestButtons/>
+      {/* <TestButtons/> */}
       <ThemeProvider theme={theme}>
         <ButtonArea
           theme={theme}
