@@ -97,6 +97,7 @@ export function SocketProvider({children}: {children: ReactNode}){
         return () => {
             websocket.close();
             websocket.removeEventListener('message', onMessage);
+            console.log("websocket接続が切れました");
         }
     }, [])
 
