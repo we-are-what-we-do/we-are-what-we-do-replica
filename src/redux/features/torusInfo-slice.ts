@@ -26,6 +26,7 @@ export const torusInfo = createSlice({
         initializeTorus : ((state, action) => {
             const newTorus: TorusInfo = action.payload;
             state.value = [newTorus];
+            console.log({newTorus, array: state.value})
         })
     }
 });

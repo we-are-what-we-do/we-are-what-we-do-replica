@@ -18,7 +18,7 @@ type RingContent = {
     setUsedOrbitIndexes: React.Dispatch<React.SetStateAction<number[]>>;
     addedTorus: TorusWithData |null;
     initializeRingDraw(ringsData: RingData[]): void;
-    reChoiceAddedTorus(): void;
+    reChoiceAddedTorus(usedOrbitIndexes: number[]): number;
 };
 
 // 追加したリング(TorusInfo)のデータ
@@ -46,7 +46,7 @@ const initialData: RingContent = {
     setUsedOrbitIndexes: () => {},
     addedTorus: null,
     initializeRingDraw: () => {},
-    reChoiceAddedTorus: () => {}
+    reChoiceAddedTorus: () => 0
 };
 
 export const RingContext = createContext<RingContent>(initialData);
@@ -102,16 +102,25 @@ export function RingProvider({children}: {children: ReactNode}){
     }
 
     // 自分が追加するリングデータを選び直す関数
-    function reChoiceAddedTorus(formerIndex?: number): void{
+    function reChoiceAddedTorus(usedOrbitIndexes: number[]): number{
         // 新しくリングを選択する
         // const currentUsedOrbitIndexes: number[] = [usedOrbitIndexes]
-        console.log({formerIndex: addedTorus?.torusData.orbitIndex, usedOrbitIndexes})
-        const newTorus: TorusWithData = addTorus(usedOrbitIndexes);
-        const newOrbitIndex: number = newTorus.torusData.orbitIndex;
+        console.log("reChoiceAddedTorus", {formerIndex: addedTorus?.torusData.orbitIndex, usedOrbitIndexes})
+        // 追加するためのリングを生成する
+        // 既にDEIが完成していてもうリングを追加できない場合は、nullが取得される
+        let newTorusData: TorusWithData | null = createTorus(usedOrbitIndexes);
+        if(!newTorusData) throw new Error("DEIに空きがなく、リングを選び直せませんでした");
+
+        // 生成したリングの軌道indexを取得する
+        const newOrbitIndex: number = newTorusData.torusData.orbitIndex;
+
+        // 生成したリングを追加する
+        dispatch(pushTorusInfo(newTorusData.torus));
 
         // 選択したリングの情報をstateに保存する
-        setUsedOrbitIndexes(prev => [...prev, newOrbitIndex]);
-        setAddedTorus(newTorus);
+        setAddedTorus(newTorusData);
+
+        return newOrbitIndex;
     }
 
     // リングのデータ(TorusInfo)を生成する関数
