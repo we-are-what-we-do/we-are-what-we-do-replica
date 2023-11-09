@@ -8,7 +8,7 @@ import { showErrorToast, showSuccessToast, showWarnToast } from '../components/T
 import { UserContext } from './UserProvider';
 import { RingContext } from './RingProvider';
 import { positionArray } from '../torusPosition';
-import { pushTorusInfo, replaceTorus, resetHandle, TorusInfo } from '../redux/features/torusInfo-slice';
+import { initializeTorus, pushTorusInfo, replaceTorus, resetHandle, TorusInfo } from '../redux/features/torusInfo-slice';
 import { useDispatch } from 'react-redux';
 import { AppDispatch, useAppSelector } from '../redux/store';
 import { CaptureContext } from './CaptureProvider';
@@ -180,34 +180,40 @@ export function SocketProvider({children}: {children: ReactNode}){
 
         // 他人のリングを描画上に生成する、あるいは自分が選択していたリングを他人のリングで置き換える
         console.log({other: ringData.indexed, own: addedTorus?.torusData.orbitIndex})
+        let ringCount: number = torusList.length;
         if(hasPostRing.current){
-            console.log("Flow1");
+            console.log("Flow1", {ringCount: torusList.length});
             // 既に自分がリングデータを送信済みの場合
             // 現在のリング数が70個でDEIが完成している場合、描画を初期化して新たな周を始める
-            if(torusList.length >= positionArray.length){
-                dispatch(resetHandle());
+            if(ringCount >= positionArray.length){
+                // 新しいリング1つで描画を初期化する
+                dispatch(initializeTorus(newTorus));
                 setUsedOrbitIndexes([ringData.indexed]);
+                ringCount = 1;
                 console.log("あなたがDEIを完成させましたが、他の人がリングを追加したので新たなDEI周が開始します");
             }else{
                 // 生成したリングの軌道indexを使用済みとしてstateに保存する
                 setUsedOrbitIndexes(prev => [...prev, ringData.indexed]);
+
+                //リング情報をオブジェクトに詰め込みstoreへ送る
+                dispatch(pushTorusInfo(newTorus));
+                ringCount++;
             }
-            console.log("受け取り追加前",{ringCount: torusList.length});
-            //リング情報をオブジェクトに詰め込みstoreへ送る
-            dispatch(pushTorusInfo(newTorus));
-            console.log("受け取り追加後",{ringCount: torusList.length});
+            console.log("Flow1: 他人リング追加後", {ringCount, length: torusList.length});
 
             // 現在のリング数が70個でDEIが完成している場合、描画を初期化して新たな周を始める
-            if(torusList.length >= positionArray.length){
+            if(ringCount >= positionArray.length){
                 dispatch(resetHandle());
                 setUsedOrbitIndexes([]);
+                ringCount = 0;
                 console.log("他の人がDEIを完成させたため、新たなDEI周が開始します");
             }
             // 他ユーザーがリングを新たに登録し、連続撮影でなくなったので新しく追加するリングを選ぶ
             reChoiceAddedTorus();
-            console.log("自分追加後",{ringCount: torusList.length});
+            ringCount++;
+            console.log("Flow1: 自分リング追加後", {ringCount, length: torusList.length});
         }else if(ringData.indexed === addedTorus?.torusData.orbitIndex){
-            console.log("Flow2");
+            console.log("Flow2", {ringCount, length: torusList.length});
             // 他ユーザーが生成したリングが、自分が生成しようとしていたリングと被っていた場合、他ユーザーのリングで置き換える
             dispatch(replaceTorus({existedId: addedTorus.torus.id, newTorus}));
 
@@ -215,25 +221,28 @@ export function SocketProvider({children}: {children: ReactNode}){
             if(torusList.length >= positionArray.length){
                 dispatch(resetHandle());
                 setUsedOrbitIndexes([]);
+                ringCount = 0;
                 console.log("DEIの最後に追加しようとしていた自分のリングが他人に取られたため、新たなDEI周を開始します");
             }
 
             // 他ユーザーが生成したリングが、自分が生成しようとしていたリングと被っていたので、リングを選びなおす
             reChoiceAddedTorus();
+            ringCount++;
             console.log("追加しようとしていたリングを選び直しました");
         }else{
-            console.log("Flow3");
-            if(torusList.length >= positionArray.length){
+            console.log("Flow3", {ringCount, length: torusList.length});
+            if(ringCount >= positionArray.length){
                 console.error("何かがおかしい。", torusList.length)
             }
 
             //リング情報をオブジェクトに詰め込みstoreへ送る
             dispatch(pushTorusInfo(newTorus));
+            ringCount++;
 
             // 生成したリングの軌道indexを使用済みとしてstateに保存する
             setUsedOrbitIndexes(prev => [...prev, ringData.indexed]);
 
-            if(torusList.length > positionArray.length){
+            if(ringCount > positionArray.length){
                 console.error("自分のリングと被ることなくリング数が70個を超えたため、リング描画を初期化して次周を開始できませんでした");
             }
         }

@@ -22,9 +22,13 @@ export const torusInfo = createSlice({
             const newData: {existedId: string, newTorus: TorusInfo} = action.payload;
             const index = state.value.findIndex(element => element.id === newData.existedId);
             if (index !== -1) state.value.splice(index, 1, );
+        }),
+        initializeTorus : ((state, action) => {
+            const newTorus: TorusInfo = action.payload;
+            state.value = [newTorus];
         })
     }
 });
 
-export const { pushTorusInfo, resetHandle, replaceTorus } = torusInfo.actions;
+export const { pushTorusInfo, resetHandle, replaceTorus, initializeTorus } = torusInfo.actions;
 export default torusInfo.reducer;

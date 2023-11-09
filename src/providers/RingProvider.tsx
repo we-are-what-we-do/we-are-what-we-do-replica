@@ -102,8 +102,10 @@ export function RingProvider({children}: {children: ReactNode}){
     }
 
     // 自分が追加するリングデータを選び直す関数
-    function reChoiceAddedTorus(): void{
+    function reChoiceAddedTorus(formerIndex?: number): void{
         // 新しくリングを選択する
+        // const currentUsedOrbitIndexes: number[] = [usedOrbitIndexes]
+        console.log({formerIndex: addedTorus?.torusData.orbitIndex, usedOrbitIndexes})
         const newTorus: TorusWithData = addTorus(usedOrbitIndexes);
         const newOrbitIndex: number = newTorus.torusData.orbitIndex;
 
