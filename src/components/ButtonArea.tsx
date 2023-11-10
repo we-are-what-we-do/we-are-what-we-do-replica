@@ -68,7 +68,8 @@ export default function ButtonArea(props: {
 
     // 写真撮影(リング+カメラ)のためのcontext
     const {
-        captureImage
+        captureImage,
+        saveImage
     } = useContext(CaptureContext);
 
     // websocketを管理するcontext
@@ -125,6 +126,14 @@ export default function ButtonArea(props: {
                 if(isTrialPage){
                     // 連続撮影できるようリングデータを送信する
                     testAddRing();
+
+                    // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
+                    showSuccessToast("I005");
+
+                    // 撮影した写真をダウンロードする
+                    const newImage: string | null = captureImage(); // 写真(リング+カメラ)を撮影をして、base64形式で取得する
+                    if(!newImage) throw new Error("写真を撮影できませんでした");
+                    saveImage(newImage); // 取得した写真をダウンロードする
                 }else{
                     // websocketでリングデータを送信し、画像データ送信を待機する
                     sendRingData();
