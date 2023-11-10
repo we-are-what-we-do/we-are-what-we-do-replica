@@ -60,7 +60,9 @@ export function GpsProvider({children}: {children: ReactNode}){
     useEffect(() => {
         if(isTrialPage){
             setLocation(TEST_LOCATION_ID); // ロケーションIDを保存する
-            setGpsFlag(true);  // 現在地がピンの範囲内かどうかを保存する
+            setGpsFlag(true); // 現在地がピンの範囲内かどうかを保存する
+            setCurrentLatitude(0); // 現在地の緯度を保存する
+            setCurrentLongitude(0);// 現在地の経度を保存する
             setIsLoadedGps(true);
         }else{
             // ピン設定データを取得する
