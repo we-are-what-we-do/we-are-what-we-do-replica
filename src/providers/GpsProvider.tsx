@@ -1,4 +1,4 @@
-import { createContext, useState, ReactNode, useEffect, useContext, useMemo, useRef } from 'react';
+import { createContext, useState, ReactNode, useEffect, useContext, useRef } from 'react';
 import { Feature, FeatureCollection, GeoJsonProperties, Point } from 'geojson';
 import { getLocationConfig } from '../api/fetchDb';
 import { haversineDistance } from '../api/distanceCalculations';
@@ -204,7 +204,6 @@ export function GpsProvider({children}: {children: ReactNode}){
             longitude
         } = settings;
 
-        console.log({isDo})
         if(!isDo) return; // 実行しない場合、実行しない
 
         console.log(`${feature.properties?.localize.jp}: ${distance} / ${radius}`, "\n", {currentLat, currentLon, latitude, longitude});
