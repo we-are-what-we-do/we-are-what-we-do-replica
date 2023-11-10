@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
-import { clientId, WS_URL } from '../constants';
+import { clientId, TEST_WS_URL, WS_URL } from '../constants';
 import { DbContext } from './DbProvider';
 import { convertToTorus, RingData } from '../handleRingData';
 import { ImageData } from '../types';
@@ -11,6 +11,7 @@ import { initializeTorus, pushTorusInfo, replaceTorus, resetHandle, TorusInfo } 
 import { useDispatch } from 'react-redux';
 import { AppDispatch, useAppSelector } from '../redux/store';
 import { CaptureContext } from './CaptureProvider';
+import { SettingsContent } from './SettingsProvider';
 
 // リングデータがコンフリクトした際のエラーレスポンスのメッセージ
 const CONFLICT_INDEX_MESSAGE: string = "conflict_ring: Conflict in, `ring`. `Index` should be Unique within a defined value.";
@@ -71,6 +72,11 @@ export function SocketProvider({children}: {children: ReactNode}){
         saveImage
     } = useContext(CaptureContext);
 
+    // 設定を管理するcontext
+    const {
+        isTrialPage
+    } = useContext(SettingsContent);
+
     // reduxのdispatch
     const dispatch = useDispatch<AppDispatch>();
     const torusList = useAppSelector((state) => state.torusInfo.value); // 描画に追加されているリングデータ
@@ -80,7 +86,8 @@ export function SocketProvider({children}: {children: ReactNode}){
     // WebSocket関連の処理は副作用なので、useEffect内で実装
     useEffect(() => {
         // WebSocketオブジェクトを生成しサーバとの接続を開始
-        const websocket = new WebSocket(WS_URL);
+        const wsUrl: string = isTrialPage ? TEST_WS_URL : WS_URL;
+        const websocket = new WebSocket(wsUrl);
         console.log("websocket:", websocket);
         socketRef.current = websocket;
 
@@ -287,7 +294,7 @@ export function SocketProvider({children}: {children: ReactNode}){
 
         try{
             // base64形式の画像をサーバーに送信する
-            await postImageData(imageData);
+            await postImageData(isTrialPage, imageData);
 
             // 「ARリングの生成に成功しました。」というメッセージボックスを表示する
             showSuccessToast("I005");
