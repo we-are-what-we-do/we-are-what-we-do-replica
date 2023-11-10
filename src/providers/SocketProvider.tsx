@@ -279,6 +279,10 @@ export function SocketProvider({children}: {children: ReactNode}){
 
     // 自分が送信元のリングデータを受け取った際に、撮影処理でrefに一旦保持した画像データを送信する関数
     async function handleOwnRing(ownRingData: RingData): Promise<void>{
+        if(isTrialPage){
+            console.error("体験版ページは他人名義でリングを送信する設計なのに、自分名義のリングを受信しました");
+            return;
+        }
         if(!base64Ref.current) return;
         if(!(ownRingData.id && ownRingData.created_at)){
             console.error("自分が送信したリングデータを受け取りましたが、`id`や`created_at`が設定されていなかったので画像データを送信できませんでした", ownRingData);
