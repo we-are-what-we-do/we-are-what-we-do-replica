@@ -104,7 +104,7 @@ export default function ButtonArea(props: {
 
         isTakingPhoto.current = true; // 撮影ボタンの処理中であることを記録する
 
-        if(!gpsFlag){
+        if(!isTrialPage && !gpsFlag){
             // 現在地がピンの範囲外なら、処理をやめる
             showWarnToast("I001"); // 「ARリングはピン設置箇所の近くでのみ表示されます。」というメッセージボックスを表示する
         }else if(!isTrialPage && ((!userFlag) || (hasPostRing.current))){
