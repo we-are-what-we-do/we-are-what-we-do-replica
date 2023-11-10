@@ -27,7 +27,7 @@ function App() {
   const [ringCount, setRingCount] = useState<number>(0);
 
   useEffect(() => {
-      getRingData(false).then((ringsData) => {
+      getRingData().then((ringsData) => {
           const newRingCount: number = Object.keys(ringsData).length;
           setRingCount(newRingCount);
       })
@@ -44,7 +44,7 @@ function App() {
   const geoJsonRef = useRef<FeatureCollection<Point> | null>(null); // GeoJSONデータ
 
   useEffect(() => {
-    getLocationConfig(false).then((data) => {
+    getLocationConfig().then((data) => {
       geoJsonRef.current = data;
     })
   }, []);
