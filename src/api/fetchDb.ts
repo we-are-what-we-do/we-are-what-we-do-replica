@@ -1,5 +1,6 @@
 import { Point, FeatureCollection } from 'geojson';
-import { RingData, compareISO8601Dates } from "../handleRingData";
+import { compareISO8601Dates } from "../handleRingData";
+import { RingData } from "../types";
 import { ImageData, RingInstance } from '../types';
 import { API_URL, TEST_API_URL } from '../constants';
 
@@ -56,11 +57,11 @@ export async function getLocationConfig(isTrialPage: boolean = false): Promise<F
 }
 
 // ピン一か所から、リングのデータを取得する関数
-export async function getRingData(isTrialPage: boolean = false): Promise<RingData[]>{
+export async function getRingData(isTrialPage: boolean = false, requireFinished: boolean = false): Promise<RingData[]>{
     const apiEndpoint: string = "rings";
 
     // インスタンス一覧を取得する
-    const latestInstanceId: string | null = await getLatestInstanceId(isTrialPage, apiEndpoint); // 全インスタンスを取得し、最新のインスタンスを切り出す
+    const latestInstanceId: string | null = await getLatestInstanceId(isTrialPage, apiEndpoint, requireFinished); // 全インスタンスを取得し、最新のインスタンスを切り出す
     if(!latestInstanceId) return []; // 有効なインスタンスが一つもない場合は、空配列で開始する
 
     // 最新のインスタンスを取得する
@@ -76,10 +77,15 @@ export async function getRingData(isTrialPage: boolean = false): Promise<RingDat
 }
 
 // 最新のインスタンスのIDを取得する関数
-async function getLatestInstanceId(isTrialPage: boolean, apiEndpoint: string): Promise<string | null>{
+async function getLatestInstanceId(isTrialPage: boolean, apiEndpoint: string, requireFinished: boolean = false): Promise<string | null>{
     const response: Response = await makeGetRequest(isTrialPage, apiEndpoint);
     const data: RingInstance[] = await response.json();
     const latestInstance: RingInstance | null = data.reduce((latestInstance: RingInstance | null, currentInstance: RingInstance) => {
+        // 終了済みのインスタンスの中から最新のものを取得する場合は、finished_atが付いたもののみを計算する
+        if(requireFinished && !currentInstance.finished_at){
+            return latestInstance;
+        }
+
         if(!latestInstance){
             return currentInstance;
         }
@@ -96,6 +102,26 @@ async function getLatestInstanceId(isTrialPage: boolean, apiEndpoint: string): P
     const latestInstanceId: string | null = latestInstance?.id ?? null; // 有効なインスタンスが一つもない場合は、nullを返す
 console.log({data, latestInstance})
     return latestInstanceId;
+}
+
+// 完成しているリングインスタンスの数を取得する関数
+export async function getFinishedInstancesCount(isTrialPage: boolean = false): Promise<number>{
+    const apiEndpoint: string = "rings";
+
+    // インスタンス一覧を取得する
+    let data: RingInstance[] = [];
+    try{
+        const response: Response = await makeGetRequest(isTrialPage, apiEndpoint);
+        data = await response.json();
+    }catch(error){
+        console.error(error);
+    }
+
+    const finishedInstances: RingInstance[] = data.filter((ringInstance) => {
+        if(ringInstance.finished_at) return ringInstance;
+    });
+
+    return finishedInstances.length;
 }
 
 // JSONのPOSTリクエストを行う共通関数

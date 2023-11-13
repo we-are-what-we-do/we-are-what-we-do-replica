@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { RingData } from "../handleRingData";
+import { RingData } from "../types";
 import { CaptureContext } from "./../providers/CaptureProvider";
 import { CameraContext } from "./../providers/CameraProvider";
 import { RingContext } from "./../providers/RingProvider";
@@ -102,6 +102,12 @@ export default function ButtonArea(props: {
             console.error("既に撮影ボタンが押されています");
             return;
         };
+
+        // websocket接続ができていないなら、処理を中止する
+        if(socketRef.current === null){
+            showErrorToast("E008"); //「サーバーとの接続が切断されました。」
+            return;
+        }
 
         isTakingPhoto.current = true; // 撮影ボタンの処理中であることを記録する
 

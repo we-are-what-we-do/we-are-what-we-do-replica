@@ -1,14 +1,13 @@
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { WS_URL } from '../../constants';
 import { DbContext } from './../../providers/DbProvider';
-import { convertToTorus, RingData } from '../../handleRingData';
-import { ImageData } from '../../types';
-import { postImageData } from '../../api/fetchDb';
-import { showErrorToast } from '../../components/ToastHelpers';
+import { convertToTorus } from '../../handleRingData';
+import { RingData } from '../../types';
 import { positionArray } from '../../torusPosition';
 import { pushTorusInfo, replaceTorus, resetHandle, TorusInfo } from '../../redux/features/torusInfo-slice';
 import { useDispatch } from 'react-redux';
 import { AppDispatch, useAppSelector } from '../../redux/store';
+import { getRingData } from '../../api/fetchDb';
 
 
 /* 型定義 */
@@ -18,6 +17,7 @@ type Context = {
     socketRef: React.MutableRefObject<WebSocket | null>;
     base64Ref: React.MutableRefObject<string | null>;
     isLoadedData: boolean;
+    currentRingCount: number;
 };
 
 
@@ -26,7 +26,8 @@ const initialData: Context = {
     hasPostRing: {} as React.MutableRefObject<boolean>,
     socketRef: {} as React.MutableRefObject<WebSocket | null>,
     base64Ref: {} as React.MutableRefObject<string | null>,
-    isLoadedData: false
+    isLoadedData: false,
+    currentRingCount: 0
 };
 
 export const SocketContext = createContext<Context>(initialData);
@@ -45,6 +46,9 @@ export function SocketProvider({children}: {children: ReactNode}){
 
     // base64データを保持しておくためのref
     const base64Ref = useRef<string | null>(null);
+
+    // ページを開いてからのリング数を管理するstate
+    const [currentRingCount, setCurrentRingCount] = useState<number>(0);
 
     // リングデータをやりとりするためのcontext
     const {
@@ -71,8 +75,14 @@ export function SocketProvider({children}: {children: ReactNode}){
             setWsEvent(event);
         }
 
+        // websocket接続切断時のイベントハンドラ関数
+        function onClose(){
+            console.log("websocket接続がタイムアウトしました");
+        }
+
         // websocketインスタンスにイベントハンドラを登録する
         websocket.addEventListener("message", onMessage);
+        websocket.addEventListener("close", onClose);
 
         // useEffectのクリーンアップの中で、WebSocketのクローズ処理を実行
         return () => {
@@ -107,16 +117,25 @@ export function SocketProvider({children}: {children: ReactNode}){
     }
 
     // websocket接続時に最新リングデータインスタンスを取得し、画面リング描画を初期化する関数
-    function handleOnConnect(data: any){
-        const ringsData: RingData[] = data.rings; // リングデータの配列(0～70個)
+    async function handleOnConnect(data: any): Promise<void>{
+        let ringsData: RingData[] = data.rings; // リングデータの配列(0～70個)
         if(ringsData.length > positionArray.length){
             console.error("受け取ったリングデータが70個より多いです");
             return;
         }
 
+        // 最新インスタンスのリング数を取得する
+        const ringCount: number = ringsData.length;
+
+        // リングデータが70n個のとき、websocketで取得したデータがは0個になるので、RestApiでリングデータは取得する
+        if(ringsData.length <= 0){
+            ringsData = await getRingData(false, true);
+        }
+
         // 取得したリングデータで画面リング描画を初期化する
         initializeLatestRing(ringsData); // 最新リングを更新する
         initializeRingDraw(ringsData); // 画面リング描画を初期化する
+        setCurrentRingCount(ringCount); // リング数を初期化する
 
         // リングデータの読み込みが終わったことを周知させる
         setIsLoadedData(true);
@@ -138,6 +157,9 @@ export function SocketProvider({children}: {children: ReactNode}){
 
         //リング情報をオブジェクトに詰め込みstoreへ送る
         dispatch(pushTorusInfo(newTorus));
+
+        // リング数を+1する
+        setCurrentRingCount(prev => prev + 1);
     }
 
         /**
@@ -162,7 +184,8 @@ export function SocketProvider({children}: {children: ReactNode}){
                 hasPostRing,
                 socketRef,
                 base64Ref,
-                isLoadedData
+                isLoadedData,
+                currentRingCount
             }}
         >
             {children}

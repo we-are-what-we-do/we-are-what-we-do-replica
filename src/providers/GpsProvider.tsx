@@ -1,4 +1,4 @@
-import { createContext, useState, ReactNode, useEffect, useContext } from 'react';
+import { createContext, useState, ReactNode, useEffect, useContext, useRef } from 'react';
 import { Feature, FeatureCollection, GeoJsonProperties, Point } from 'geojson';
 import { getLocationConfig } from '../api/fetchDb';
 import { haversineDistance } from '../api/distanceCalculations';
@@ -22,6 +22,7 @@ type Context = {
     currentLatitude: number | null;
     currentLongitude: number | null;
     isLoadedGps: boolean;
+    geoJson: FeatureCollection<Point> | null;
 };
 
 
@@ -31,7 +32,8 @@ const initialData: Context = {
     location: null,
     currentLatitude: null,
     currentLongitude: null,
-    isLoadedGps: false
+    isLoadedGps: false,
+    geoJson: null
 };
 
 export const GpsContext = createContext<Context>(initialData);
@@ -47,7 +49,7 @@ export function GpsProvider({children}: {children: ReactNode}){
     const [gpsFlag, setGpsFlag] = useState<boolean>(false); // 現在地がピンの範囲内かどうかのフラグ
 
     // リングデータをサーバーに送信する際に必要なGPS情報を管理するstate
-    const [geoJsonData, setGeoJsonData] = useState<FeatureCollection<Point> | null>(null); // GeoJSONデータ
+    const [geoJson, setGeoJson] = useState<FeatureCollection<Point> | null>(null); // GeoJSONデータ
     const [location, setLocation] = useState<string | null>(null); // 現在値
     const [currentLatitude, setCurrentLatitude] = useState<number | null>(null); // 現在地の緯度
     const [currentLongitude, setCurrentLongitude] = useState<number | null>(null); // 現在地の経度
@@ -56,7 +58,7 @@ export function GpsProvider({children}: {children: ReactNode}){
     const [isLoadedGps, setIsLoadedGps] = useState<boolean>(false);
 
     /* useEffect等 */
-    // 初回レンダリング時、GeoJSON Pointデータを取得し、現在地がピンの範囲内かどうかを調べる
+    // ユーザーの位置情報を監視し、現在地がピンの範囲内かどうかを調べる
     useEffect(() => {
         if(isTrialPage){
             setLocation(TEST_LOCATION_ID); // ロケーションIDを保存する
@@ -65,44 +67,27 @@ export function GpsProvider({children}: {children: ReactNode}){
             setCurrentLongitude(0);// 現在地の経度を保存する
             setIsLoadedGps(true);
         }else{
-            // ピン設定データを取得する
-            try{
-                getLocationConfig(isTrialPage).then(data => {
-                    setGeoJsonData(data);
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            console.log("GPS done")
-                            // 位置情報が変更されたときに呼び出されるコールバック
-                            handleChangePosition(position, data, true).then(() => {
-                                setIsLoadedGps(true);
-                                console.log("isLoadedGps is OK");
-                            });
-                        },
-                        (error) => {
-                            console.log("GPS error")
-                            showErrorToast("E002");
-                        },
-                        { enableHighAccuracy: true } // 高い精度を要求
-                    );
-                });
-            }catch(error){
-                console.error("Error fetching GeoJSON Point data.", error);
-            }
-        }
-    }, []);
-
-    // ユーザーの位置情報を監視し、現在地がピンの範囲内かどうかを調べる
-    useEffect(() => {
-        if(!isTrialPage){
             const watchId = navigator.geolocation.watchPosition(
                 (position) => {
+                    console.log("GPS changed")
                     // 位置情報が変更されたときに呼び出されるコールバック
-                    handleChangePosition(position, geoJsonData, false);
+                    handleChangePosition(position);
                 },
                 (error) => {
                     console.error(`Watching GPS Error:`, error);
+                    if(error.code == error.PERMISSION_DENIED){
+                        // GPSの許可がされていない場合
+                        showErrorToast("E002"); // 「位置情報サービスをオンにして再度お試しください」
+                    }else{
+                        // GPSへのアクセスがタイムアウトした場合
+                        showErrorToast("E007"); // 「位置情報の取得に失敗しました」
+                    }
                 },
-                { enableHighAccuracy: true } // 高い精度を要求
+                {
+                    enableHighAccuracy: true, // 高い精度を要求
+                    maximumAge: 0, // 常に最新の位置情報を取得
+                    timeout: 10 * 1000 // 10秒以内に位置情報を取得
+                }
             );
 
             // コンポーネントがアンマウントされたときに監視を停止
@@ -112,26 +97,38 @@ export function GpsProvider({children}: {children: ReactNode}){
         }
     }, []);
 
+    // 初回ページ読み込み時のメッセージを表示する
+    useEffect(() => {
+        if(isLoadedGps){
+            showWelcomeMessage(gpsFlag);
+        }
+    }, [isLoadedGps]);
+
 
     /* 関数定義 */
     // ユーザーの現在地が変更された際に実行される関数
-    async function handleChangePosition(position: GeolocationPosition, geoJsonData: FeatureCollection<Point> | null, isFirstDone: boolean): Promise<void>{
-        // ピン設定データを取得できていない場合、ピン範囲判別処理を行わない
-        if(!geoJsonData) return;
+    async function handleChangePosition(position: GeolocationPosition): Promise<void>{
+        // ピン設定データを取得する
+        let geoJsonData: FeatureCollection<Point> | null = null;
+        if(!geoJson){
+            geoJsonData = await getLocationConfig();
+            setGeoJson(geoJsonData);
+        }else{
+            geoJsonData = geoJson;
+        }
 
         // 現在地の緯度・経度をstateに保存する
         setCurrentPositions(position);
 
         // 現在地の取得とピンの位置を比較する
-        const locationId: string | null = compareCurrentLocationWithPin(position, geoJsonData, isFirstDone) ?? TEST_LOCATION_ID; // TODO テスト用ロケーションIDを使用しないよう修正
+        const locationId: string | null = compareCurrentLocationWithPin(position, geoJsonData) ?? TEST_LOCATION_ID; // TODO テスト用ロケーションIDを使用しないよう修正
 
         // 比較した結果をstateに保存する
         setLocation(locationId); // ロケーションIDを保存する
         const isInLocation: boolean = Boolean(locationId); // 現在地がピンの範囲内かどうか
         setGpsFlag(isInLocation);  // 現在地がピンの範囲内かどうかを保存する
 
-        // 初回ページ読み込み時のメッセージを表示する
-        if(isFirstDone) showWelcomeMessage(isInLocation);
+        setIsLoadedGps(true);
     }
 
     // 現在地の緯度・経度をstateに保存する関数
@@ -141,7 +138,7 @@ export function GpsProvider({children}: {children: ReactNode}){
     }
 
     // 現在地の取得とピンの位置を比較する関数
-    function compareCurrentLocationWithPin(position: GeolocationPosition, geoJsonData: FeatureCollection<Point>, isFirstDone: boolean): string | null{
+    function compareCurrentLocationWithPin(position: GeolocationPosition, geoJsonData: FeatureCollection<Point>): string | null{
         // 現在地がどのピンIDの範囲内か
         let result: string | null = null;
 
@@ -159,16 +156,16 @@ export function GpsProvider({children}: {children: ReactNode}){
             const radius: number = feature.properties?.radius ?? RADIUS; // デフォルトの半径としてRADIUSを指定
 
             // ピンの範囲内かどうかをチェックしてメッセージとして表示する
-            showTestMessage({
-                isDo: isFirstDone/*  && false */, // TODO 本番環境ではチェック用メッセージは表示しない
-                feature,
-                distance,
-                radius,
-                currentLat,
-                currentLon,
-                latitude,
-                longitude
-            })
+            // showTestMessage({
+            //     isDo: isFirstDone/*  && false */, // TODO 本番環境ではチェック用メッセージは表示しない
+            //     feature,
+            //     distance,
+            //     radius,
+            //     currentLat,
+            //     currentLon,
+            //     latitude,
+            //     longitude
+            // })
 
             if (distance <= radius) {
                 const locationId: string = String(feature.id) ?? "";
@@ -237,7 +234,8 @@ export function GpsProvider({children}: {children: ReactNode}){
                 location,
                 currentLatitude,
                 currentLongitude,
-                isLoadedGps
+                isLoadedGps,
+                geoJson
             }}
         >
             {children}
