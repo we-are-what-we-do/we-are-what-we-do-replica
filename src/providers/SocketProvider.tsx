@@ -88,7 +88,7 @@ export function SocketProvider({children}: {children: ReactNode}){
     useEffect(() => {
         // WebSocketオブジェクトを生成しサーバとの接続を開始
         const wsUrl: string = isTrialPage ? TEST_WS_URL : WS_URL;
-        const websocket = new WebSocket(wsUrl);
+        let websocket: WebSocket = new WebSocket(wsUrl);
         console.log("websocket:", websocket);
         socketRef.current = websocket;
 
@@ -103,6 +103,11 @@ export function SocketProvider({children}: {children: ReactNode}){
             console.log("websocket接続がタイムアウトしました");
             showErrorToast("E008"); //「サーバーとの接続が切断されました。」
             socketRef.current = null;
+
+            // websocket切断時、websocketに再接続する
+            websocket = new WebSocket(wsUrl);
+            socketRef.current = websocket;
+            console.log("websocketに再び接続しました");
         }
 
         // websocketインスタンスにイベントハンドラを登録する
