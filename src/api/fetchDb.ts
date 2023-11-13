@@ -36,8 +36,8 @@ export async function getLocationConfig(isTrialPage: boolean = false): Promise<F
 
     // localStorageを取り扱うためのラベルを取得する
     const isDevelopment: boolean = API_URL === TEST_API_URL; // developかどうかを判断する
-    const labelLocations: string = isDevelopment ? "locations" : "locations-test";
-    const labelETag: string = isDevelopment ? "ETag" : "ETag-test";
+    const labelLocations: string = isDevelopment ? "locations-test" : "locations";
+    const labelETag: string = isDevelopment ? "ETag-test" : "ETag";
 
     // 前回のETagをLocalStorageから取得
     const previousETag = localStorage.getItem(labelETag) || null;
