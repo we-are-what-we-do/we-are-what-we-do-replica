@@ -4,7 +4,7 @@ import { NumericField } from "./NumericField";
 
 
 export default function Utilities({props}: {props: {
-    setUiVisible: React.Dispatch<React.SetStateAction<boolean>>;
+    setUiVisible: React.Dispatch<React.SetStateAction<0 | 1 | 2>>;
     playbackSpeed: string;
     setPlaybackSpeed: React.Dispatch<React.SetStateAction<string>>;
     enableMovingTorus: boolean;
@@ -55,7 +55,7 @@ const {
             <Button
                 variant="contained"
                 startIcon={<VisibilityOffIcon/>}
-                onClick={() => setUiVisible(false)}
+                onClick={() => setUiVisible(0)}
             >   UI非表示
             </Button>
         </FormGroup>
