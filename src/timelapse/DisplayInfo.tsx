@@ -28,6 +28,7 @@ export default function DisplayInfo({
         const currentCount: number = targetIndexes[1] + 1; // 現在描画中のリング数
         const newRingCount: number = finishedCount + currentCount;
         setRingCount(newRingCount);
+        console.log({targetIndexes, finishedCount, currentCount})
     }, [targetIndexes]);
 
     // targetIndexが変わったら、最終更新日時updatedTimeを更新する
