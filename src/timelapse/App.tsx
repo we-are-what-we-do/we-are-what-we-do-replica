@@ -95,7 +95,7 @@ export default function App(){
                 }
 
                 // 新しい周の描画を開始する際、描画を初期化する
-                if(j >= instance.length -1) dispatch(resetHandle());
+                if(j === 0) dispatch(resetHandle());
 
                 // リングを描画に追加する
                 const newTorus: TorusInfo = convertToTorus(ring);
@@ -110,6 +110,8 @@ export default function App(){
                 prevRing = ring;
             }
         }
+
+        console.log("タイムラプスの再生が終了しました");
     }
 
     // UIの表示/非表示を切り替える関数
