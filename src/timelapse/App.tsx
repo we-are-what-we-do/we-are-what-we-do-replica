@@ -8,13 +8,18 @@ import { FeatureCollection, Point } from "geojson";
 import { getAllRingData, getLocationConfig } from "../api/fetchDb";
 import { useKey } from "rooks";
 import Utilities from "./Utilities";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../redux/store";
+import { TorusInfo, pushTorusInfo, resetHandle } from "../redux/features/torusInfo-slice";
+import { convertToTorus } from "../handleRingData";
+import { getLocationsImagePath } from "./LocationsMap";
 
+import image0 from "../assets/images/locations/愛媛大.jpg";
 
 export default function App(){
     /* stateやref */
     // リングデータを管理するstate
     const [allRings, setAllRings] = useState<RingData[][] | null>(null); // 全リングデータ
-    const [drawingRings, setDrawingRings] = useState<RingData[]>([]); // 描画中のリング周
     const [targetIndexes, setTargetIndexes] = useState<[number, number]>([0, 0]); // 描画上の最新リングが、全リングデータのどこのindexを参照しているか
 
     // ロケーションデータを管理するref
@@ -26,6 +31,9 @@ export default function App(){
     const [enableMovingTorus, setEnableMovingTorus] = useState<boolean>(false); // リングのアニメーションを有効にするかどうか
     const [backgroundImageVisible, setBackgroundImageVisible] = useState<boolean>(true); // 背景を表示するかどうか
     const [backgroundImagePath, setBackgroundImagePath] = useState<string | null>(null); // 背景画像のパス
+
+    // リング管理用redux
+    const dispatch = useDispatch<AppDispatch>();
 
     /* useState */
     // リングデータとロケーションデータを取得する
@@ -73,9 +81,6 @@ export default function App(){
         for(let i: number = 0; i < allRings.length; i++){
             const instance: RingData[] = allRings[i];
 
-            // 新しい周の描画を開始する際、描画を初期化する
-            setDrawingRings([]);
-
             for(let j: number = 0; j < instance.length; j++){
                 const ring: RingData = instance[j];
 
@@ -89,9 +94,18 @@ export default function App(){
                     await new Promise(resolve => setTimeout(resolve, waitTime));
                 }
 
+                // 新しい周の描画を開始する際、描画を初期化する
+                if(j >= instance.length -1) dispatch(resetHandle());
+
                 // リングを描画に追加する
-                setDrawingRings(prev => [...prev, ring]);
-                setBackgroundImagePath(ring.location); // 背景画像を切り替える
+                const newTorus: TorusInfo = convertToTorus(ring);
+                dispatch(pushTorusInfo(newTorus));
+
+                // 背景画像を切り替える
+                const newImagePath: string = getLocationsImagePath(ring.location);
+                setBackgroundImagePath(newImagePath);
+
+                // 現状を保存する
                 setTargetIndexes([i, j]);
                 prevRing = ring;
             }
@@ -107,17 +121,21 @@ export default function App(){
     return(
         <div
             className="canvas"
-            style={{ backgroundImage: (backgroundImageVisible) ? (backgroundImagePath ?? "") : ""}}
+            // style={{ }}
+            style={{
+                background: (backgroundImageVisible && backgroundImagePath)
+                    ? `url(${backgroundImagePath}) center center / cover no-repeat fixed black`
+                    : "",
+            }}
         >
             <Canvas camera={{ position: [0,0,8], far: 50}} >
-                <color attach="background" args={[0xff000000]} /> {/*背景色*/}
+                {/* <color attach="background" args={[0xff000000]} /> */} {/*背景色*/}
                 <ambientLight intensity={1} />
                 <directionalLight intensity={1.5} position={[1,1,1]} />
                 <directionalLight intensity={1.5} position={[1,1,-1]} />
                 <pointLight intensity={1} position={[1,1,5]} />
                 <pointLight intensity={1} position={[1,1,-5]} />
                 <TorusList
-                    rings={drawingRings}
                     enableMovingTorus={enableMovingTorus}
                 />
             </Canvas>

@@ -1,25 +1,16 @@
 import { Vector3 } from "three";
 import { useFrame } from "react-three-fiber";
-import { RingData } from "../types";
-import { TorusInfo } from "../redux/features/torusInfo-slice";
-import { useEffect, useState } from "react";
-import { convertToTori } from "../handleRingData";
+import { useAppSelector } from "../redux/store";
 
-export default function TorusList({rings, enableMovingTorus}: {rings: RingData[], enableMovingTorus: boolean}){
-  const [torusList, setTorusList] = useState<TorusInfo[]>([]);
-
-  // リングデータをthree.jsで扱えるデータに変換する
-  useEffect(() => {
-    const newToriData: TorusInfo[] = convertToTori(rings);
-    setTorusList(newToriData);
-  }, [rings]);
+export default function TorusList({enableMovingTorus}: {enableMovingTorus: boolean}){
+  const torusList = useAppSelector((state) => state.torusInfo.value); // 描画に追加されているリングデータ
 
   // リングのアニメーションを実行する
   useFrame((state) => {
-    if(!enableMovingTorus) return;
-
-    const elapsedTime = state.clock.getElapsedTime();
     const deviceWidth = window.innerWidth;
+    const elapsedTime = state.clock.getElapsedTime();
+
+    if(!enableMovingTorus) return;
 
     if (deviceWidth >= 600 && deviceWidth <= 960) {
       state.camera.position.x = Math.cos(elapsedTime * 0.1) * 10;
