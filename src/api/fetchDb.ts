@@ -11,10 +11,10 @@ async function makeGetRequest(isTrialPage: boolean, apiEndpoint: string, queryPa
     const apiUrl: string = isTrialPage ? TEST_API_URL : API_URL;
     try {
         const url: string = apiUrl + apiEndpoint + (queryParams ?? "");
-        console.log({url});
+        // console.log({url});
 
         const response = await fetch(url);
-        console.log(response)
+        // console.log(response)
 
         // レスポンスをハンドリングする
         if(response.ok){
@@ -41,7 +41,7 @@ export async function getLocationConfig(isTrialPage: boolean = false): Promise<F
 
     // 前回のETagをLocalStorageから取得
     const previousETag = localStorage.getItem(labelETag) || null;
-    console.log({previousETag});
+    // console.log({previousETag});
 
     // ロケーションデータのGETリクエストを行う
     const url: string = (isTrialPage ? TEST_API_URL : API_URL) + "locations";
@@ -51,7 +51,7 @@ export async function getLocationConfig(isTrialPage: boolean = false): Promise<F
             method: "GET",
             headers
         });
-        console.log(response)
+        // console.log(response)
 
         // レスポンスをハンドリングする
         if(response.ok){
@@ -64,14 +64,14 @@ export async function getLocationConfig(isTrialPage: boolean = false): Promise<F
 
             // サーバーから取得したデータをキャッシュに保存する
             localStorage.setItem(labelLocations, JSON.stringify(result));
-            console.log("キャッシュにgeolocationデータを保存しました");
+            // console.log("キャッシュにgeolocationデータを保存しました");
         }else if(response.status === 304){
             // etagで、前回取得したデータと変わらない場合は、キャッシュに保存されたロケーションデータを返す
             const cashData: string | null = localStorage.getItem(labelLocations);
             if(!cashData) throw new Error("etagを使ったのにキャッシュからgeolocationデータを読み込めませんでした");
             const locationData = JSON.parse(cashData) as FeatureCollection<Point>;
             result = locationData;
-            console.log("キャッシュからロケーションデータを読み込みました", locationData);
+            // console.log("キャッシュからロケーションデータを読み込みました", locationData);
         }else{
             // エラーレスポンスの場合はエラーハンドリングを行う
             throw new Error(`HTTPエラー: ${response.status}`);
@@ -85,7 +85,7 @@ export async function getLocationConfig(isTrialPage: boolean = false): Promise<F
     return result;
 }
 
-// ピン一か所から、リングのデータを取得する関数
+// 最新周のリングデータを取得する関数
 export async function getRingData(isTrialPage: boolean = false, requireFinished: boolean = false): Promise<RingData[]>{
     const apiEndpoint: string = "rings";
 
@@ -152,6 +152,35 @@ export async function getFinishedInstancesCount(isTrialPage: boolean = false): P
 
     return finishedInstances.length;
 }
+
+// 全リングデータを取得する関数
+export async function getAllRingData(isTrialPage: boolean = false): Promise<RingData[][]>{
+    const apiEndpoint: string = "rings";
+    let result: RingData[][] = [];
+
+    // インスタンスid一覧を取得する
+    const instancesResponse: Response = await makeGetRequest(isTrialPage, apiEndpoint);
+    const instancesData: RingInstance[] = await instancesResponse.json();
+    const instanceIdList: string[] = instancesData.map(value => value.id); // インスタンスid一覧
+
+    // リングの全データを取得する
+    for(const instanceId of instanceIdList){
+        // リングデータをサーバーから取得する
+        const queryParams: string = `?id=${instanceId}`;
+        const ringsResponse: Response = await makeGetRequest(isTrialPage, apiEndpoint, queryParams);
+        const ringsData: RingInstance = await ringsResponse.json();
+        
+        // 取得したデータからリングデータを抜き出す
+        const ringInstance: RingData[] | undefined = ringsData.rings;
+        if(ringInstance === undefined) throw new Error("取得したデータにringsプロパティがありません");
+
+        // 抜き出したリングデータを配列に追加する
+        result.push(ringInstance);
+    };
+
+    return result;
+}
+
 
 // JSONのPOSTリクエストを行う共通関数
 async function makePostRequest(isTrialPage: boolean, apiEndpoint: string, data: Object): Promise<Response>{
