@@ -4,7 +4,7 @@ import image2 from "../assets/images/locations/愛媛新聞社.jpg";
 import image3 from "../assets/images/locations/ミウラート・ヴィレッジ.jpg";
 import image4 from "../assets/images/locations/朝日ヶ丘.jpg";
 import image5 from "../assets/images/locations/えひめこどもの城.jpg";
-import image6 from "../assets/images/locations/タオル美術館.jpg";
+import image6 from "../assets/images/locations/愛媛県美術館.jpg";
 import image7 from "../assets/images/locations/ニンジニア.jpg";
 import image8 from "../assets/images/locations/大王製紙.jpg";
 import image9 from "../assets/images/locations/科博.jpg";
