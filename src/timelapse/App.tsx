@@ -14,7 +14,6 @@ import { TorusInfo, pushTorusInfo, resetHandle } from "../redux/features/torusIn
 import { convertToTorus } from "../handleRingData";
 import { getLocationsImagePath } from "./LocationsMap";
 
-import image0 from "../assets/images/locations/愛媛大.jpg";
 
 export default function App(){
     /* stateやref */
@@ -26,11 +25,13 @@ export default function App(){
     const locationsData = useRef<FeatureCollection<Point> | null>(null); // ロケーション設定のGeoJSONデータ
 
     // タイムラプス再生設定を管理するstate
-    const [uiVisible, setUiVisible] = useState<boolean>(true);
+    const [uiVisible, setUiVisible] = useState<0 | 1 | 2>(2); // UIの表示状態(0: 非表示, 1: Infoのみ表示, 2: Info + UI表示)
     const [playbackSpeed, setPlaybackSpeed] = useState<string>("1"); // タイムラプスの再生速度
     const [enableMovingTorus, setEnableMovingTorus] = useState<boolean>(false); // リングのアニメーションを有効にするかどうか
     const [backgroundImageVisible, setBackgroundImageVisible] = useState<boolean>(true); // 背景を表示するかどうか
     const [backgroundImagePath, setBackgroundImagePath] = useState<string | null>(null); // 背景画像のパス
+
+    const [isPlayingTimeLapse, setIsPlayingTimeLapse] = useState<boolean>(false); // タイムラプスを再生中かどうか
 
     // リング管理用redux
     const dispatch = useDispatch<AppDispatch>();
@@ -51,7 +52,7 @@ export default function App(){
 
     // キーボードにイベントを割り当てる
     useKey(["Space"], playTimeLapse); // Spaceキーでタイムラプスを再生するよう設定
-    useKey(["Shift"], toggleUiVisible); // CtrlキーでUIの表示/非表示を切り替えるよう設定
+    useKey("Control", toggleUiVisible); // CtrlキーでUIの表示/非表示を切り替えるよう設定
 
 
 
@@ -73,6 +74,7 @@ export default function App(){
         const lastDate: Date = new Date(lastRing.created_at);
         const lastTime = convertTimeToString(new Date(lastDate));
         console.log(`${firstTime} から ${lastTime} までのタイムラプスを${playbackSpeed}倍速で再生します`);
+        setIsPlayingTimeLapse(true);
 
         // 初期化処理
         setTargetIndexes([0, 0]);
@@ -112,18 +114,21 @@ export default function App(){
         }
 
         console.log("タイムラプスの再生が終了しました");
+        setIsPlayingTimeLapse(false);
     }
 
     // UIの表示/非表示を切り替える関数
     function toggleUiVisible(){
-        setUiVisible(prev => !prev);
+        setUiVisible((prev) => {
+            if(prev === 2) return 0;
+            return (prev + 1) as (0 | 1 | 2);
+        });
     }
 
 
     return(
         <div
             className="canvas"
-            // style={{ }}
             style={{
                 background: (backgroundImageVisible && backgroundImagePath)
                     ? `url(${backgroundImagePath}) center center / cover no-repeat fixed black`
@@ -141,25 +146,26 @@ export default function App(){
                     enableMovingTorus={enableMovingTorus}
                 />
             </Canvas>
-            {uiVisible && (
-                <>
-                    <DisplayInfo
-                        allRings={allRings ?? []}
-                        targetIndexes={targetIndexes}
-                        locationsData={locationsData}
-                    />
-                    <Utilities
-                        props={{
-                            setUiVisible,
-                            playbackSpeed,
-                            setPlaybackSpeed,
-                            enableMovingTorus,
-                            setEnableMovingTorus,
-                            backgroundImageVisible,
-                            setBackgroundImageVisible
-                        }}
-                    />
-                </>
+            {(uiVisible >= 1) && (
+                <DisplayInfo
+                    allRings={allRings ?? []}
+                    targetIndexes={targetIndexes}
+                    locationsData={locationsData}
+                    isPlayingTimeLapse={isPlayingTimeLapse}
+                />
+            )}
+            {(uiVisible >= 2) && (
+                <Utilities
+                    props={{
+                        setUiVisible,
+                        playbackSpeed,
+                        setPlaybackSpeed,
+                        enableMovingTorus,
+                        setEnableMovingTorus,
+                        backgroundImageVisible,
+                        setBackgroundImageVisible
+                    }}
+                />
             )}
         </div>
     );
