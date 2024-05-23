@@ -1,7 +1,6 @@
 import "./App.css";
 import { useContext, useEffect, useRef, useState } from "react";
 import { CaptureContext } from "./providers/CaptureProvider";
-import { GpsContext } from "./providers/GpsProvider";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber';
 import TorusList from './components/TorusList';
@@ -12,16 +11,17 @@ import ButtonArea from "./components/ButtonArea";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CircularProgress } from "@mui/material";
 import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { useAppSelector } from "./redux/store";
-import { SocketContext } from "./providers/SocketProvider";
+import { AppDispatch, useAppSelector } from "./redux/store";
 import TestButtons from "./components/TestButtons";
 import { RingData } from "./types";
 import { v4 as uuidv4 } from 'uuid';
 import { DbContext } from "./providers/DbProvider";
 import { RingContext } from "./providers/RingProvider";
-import TestLocations from "./components/TestLocations";
+import { getRingData, postRingData } from "./api/fetchDb";
+import { useDispatch } from "react-redux";
 
-import { showWarnToast } from "./components/ToastHelpers"
+const urlQuery: string = window.location.search;
+const isDevMode: boolean = (urlQuery === "?mode=dev");
 
 /* 定数定義 */
 export const ICON_SIZE: string = "5rem"; // ボタンの大きさ
@@ -51,12 +51,6 @@ const theme = createTheme({
 });
 
 export default function App() {
-  // TODO サービス再開時にはサービス停止中メッセージを削除すること
-  // 「現在、ARカメラアプリのサービスを停止しています」的なメッセージを表示する
-  useEffect(() => {
-    showWarnToast("I007");
-  }, []);
-
   /* stateやcontext等 */
   // サーバーから取得したリングデータを管理するcontext
   const {
@@ -68,22 +62,12 @@ export default function App() {
     canvasRef
   } = useContext(CaptureContext);
 
-  // GPSの状態を管理するcontext
-  const {
-    gpsFlag,
-    isLoadedGps
-  } = useContext(GpsContext);
-
-  // websocketを管理するcontext
-  const {
-    isLoadedData,
-    socketRef
-  } = useContext(SocketContext);
-
   // リングのデータを追加するためのcontext
   const {
     getRingDataToAdd,
-    addedTorus
+    addedTorus,
+    initializeRingDraw,
+    addNewTorus
   } = useContext(RingContext);
 
   // 撮影ボタンの処理中かどうか
@@ -91,6 +75,8 @@ export default function App() {
 
   // 3Dの視点移動(OrbitControl)が有効かどうかを管理するstate
   const enableOrbitControl = useAppSelector((state) => state.buttonState.value);
+
+  const dispatch = useDispatch<AppDispatch>();
 
 
   /* DEIの初期表示をレスポンシブに行う */
@@ -102,6 +88,14 @@ export default function App() {
     initializePositionZ(width);
   }, []);
 
+
+  useEffect(() => {
+    getRingData().then((ringsData) => {
+      initializeRingDraw(ringsData); // 画面リング描画を初期化する
+    })
+  }, [])
+
+  useEffect(()=>{console.log({addedTorus})},[addedTorus])
 
   /**
    * リロード時に3Dオブジェクトをレスポンシブに配置する関数です。
@@ -150,11 +144,11 @@ export default function App() {
     addedRingData.user = testUser;
 
     // 他人名義でサーバーにリングデータを送信する
-    socketRef.current?.send(JSON.stringify(addedRingData));
+    postRingData(addedRingData);
     console.log("サーバーにデータを送信しました:\n", addedRingData);
 
     // state更新
-    setLatestRing(addedRingData);
+    addNewTorus();
   }
 
 
@@ -166,7 +160,6 @@ export default function App() {
         </div>
         <div className='canvas'>
           <Canvas
-            hidden={!(isLoadedData && isLoadedGps)}
             onCreated={({ gl }) => {
               gl.setClearColor(0xFF0000, 0);
               gl.autoClear = true;
@@ -176,9 +169,7 @@ export default function App() {
             camera={{ position: positionZ }}
             ref={canvasRef}
           >
-            {gpsFlag && ( // リングはピン設置箇所の近くでのみ表示される
-              <TorusList isTakingPhoto={isTakingPhoto}/>
-            )}
+            <TorusList isTakingPhoto={isTakingPhoto}/>
             <ambientLight intensity={1} />
             <directionalLight intensity={1.5} position={[1,1,1]} />
             <directionalLight intensity={1.5} position={[1,1,-1]} />
@@ -186,23 +177,20 @@ export default function App() {
             <pointLight intensity={1} position={[1,1,-5]} />
             <OrbitControls enabled={!enableOrbitControl} maxDistance={50} ref={orbitControlsRef} />
           </Canvas>
-          {!(isLoadedData && isLoadedGps) && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%",
-                height: "100%"
-              }}
-            >
-              <CircularProgress />
-            </div>
-          )}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              height: "100%"
+            }}
+          >
+            <CircularProgress />
+          </div>
         </div>
       </div>
-      <TestButtons testAddRing={testAddRing}/>{/* TODO テスト用ボタンは本番では表示しない */}
-      <TestLocations/>{/* TODO テスト用ロケーション表示は本番では表示しない */}
+      {isDevMode && (<TestButtons testAddRing={testAddRing}/>)}{/* TODO テスト用ボタンは本番では表示しない */}
       <ThemeProvider theme={theme}>
         <ButtonArea
           theme={theme}

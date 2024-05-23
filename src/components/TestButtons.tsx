@@ -1,20 +1,10 @@
-import { useContext } from "react";
 import { positionArray } from "./../torusPosition";
-import { GpsContext } from "../providers/GpsProvider";
 import { useAppSelector } from "../redux/store";
-
 
 export default function TestButtons({testAddRing}: {testAddRing(): void}) {
     /* useState等 */
-    // GPSの状態を管理するcontext
-    const {
-        currentLatitude,
-        currentLongitude
-    } = useContext(GpsContext);
-
     // redux
     const torusList = useAppSelector((state) => state.torusInfo.value);
-
 
     return (
         <div
@@ -32,6 +22,17 @@ export default function TestButtons({testAddRing}: {testAddRing(): void}) {
             >
                 リング追加(テスト用)
             </button>
+            <button
+                onClick={() => {
+                    localStorage.clear();
+                    location.reload();
+                }}
+                style={{
+                    position: "relative"
+                }}
+            >
+                全データ削除(テスト用)
+            </button>
             <br/>
             <span
                 style={{
@@ -40,8 +41,6 @@ export default function TestButtons({testAddRing}: {testAddRing(): void}) {
                 }}
             >
                 リング数: {torusList.length}/{positionArray.length}
-                <br/>
-                現在地: {currentLatitude}, {currentLongitude}
             </span>
         </div>
     );

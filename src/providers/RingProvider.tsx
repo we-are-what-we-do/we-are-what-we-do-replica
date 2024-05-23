@@ -1,6 +1,4 @@
 import { createContext, useState, ReactNode, useContext } from 'react';
-import { UserContext } from './UserProvider';
-import { GpsContext } from './GpsProvider';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
 import { TorusInfo, pushTorusInfo, resetHandle } from '../redux/features/torusInfo-slice';
@@ -21,6 +19,7 @@ type RingContent = {
     addedTorus: TorusWithData |null;
     initializeRingDraw(ringsData: RingData[]): void;
     reChoiceAddedTorus(usedOrbitIndexes: number[]): number;
+    addNewTorus(): TorusWithData;
 };
 
 // 追加したリング(TorusInfo)のデータ
@@ -48,7 +47,8 @@ const initialData: RingContent = {
     setUsedOrbitIndexes: () => {},
     addedTorus: null,
     initializeRingDraw: () => {},
-    reChoiceAddedTorus: () => 0
+    reChoiceAddedTorus: () => 0,
+    addNewTorus: () => {return {} as TorusWithData}
 };
 
 export const RingContext = createContext<RingContent>(initialData);
@@ -56,18 +56,6 @@ export const RingContext = createContext<RingContent>(initialData);
 // リング追加を司るプロバイダー
 export function RingProvider({children}: {children: ReactNode}){
     /* useState, useContext等 */
-    // ユーザーIDを管理するcontext
-    const {
-        userIdRef
-    } = useContext(UserContext);
-
-    // GPSの状態を管理するcontext
-    const {
-        location,
-        currentLatitude,
-        currentLongitude
-    } = useContext(GpsContext);
-
     // リングデータを管理するstate
     const [addedTorus, setAddedTorus] = useState<TorusWithData |null>(null); // 追加したリング(AddedTorusInfo)のデータ
     const [usedOrbitIndexes, setUsedOrbitIndexes] = useState<number[]>([]); // リングが既に埋まっている軌道内位置のデータ
@@ -101,6 +89,25 @@ export function RingProvider({children}: {children: ReactNode}){
 
         setUsedOrbitIndexes(newUsedOrbitIndexes); // 使用済みの軌道indexをstateで保管する
         setAddedTorus(newTorus); // 追加したリングデータ
+        console.log({newTorus})
+    }
+
+    function addNewTorus(): TorusWithData{
+        // 取得したデータ+1でリングを追加し、追加した軌道indexを取得する
+        const newTorus: TorusWithData = addTorus(usedOrbitIndexes);
+        const newTorusData: AddedTorusInfo = newTorus.torusData;
+        const newOrbitIndex: number = newTorusData.orbitIndex;
+
+        // 使用済みの軌道indexをstateで保管する
+        setUsedOrbitIndexes((prev) => {
+            let newUsedOrbitIndexes: number[] = [...prev];
+            if(newUsedOrbitIndexes.length >= orbitLength) newUsedOrbitIndexes = [];
+            newUsedOrbitIndexes.push(newOrbitIndex);
+            return newUsedOrbitIndexes;
+        });
+
+        setAddedTorus(newTorus); // 追加したリングデータ
+        return newTorus;
     }
 
     // 自分が追加するリングデータを選び直す関数
@@ -204,31 +211,22 @@ export function RingProvider({children}: {children: ReactNode}){
 
     // サーバーに送信するためのリングデータを取得する関数
     function getRingDataToAdd(newTorus: AddedTorusInfo | null = addedTorus?.torusData ?? null, nonce: string = clientId): RingData | null{
-        if(
-            (!location) ||
-            (currentLatitude === null) ||
-            (currentLongitude === null) ||
-            (!userIdRef.current) ||
-            (!newTorus)
-        ){
-            console.error({location, currentLatitude, currentLongitude, userId: userIdRef.current, newTorus});
+        if(!newTorus){
+            console.error({newTorus});
             return null;
         }
 
+        const newRandomUserId: string = uuidv4();
         const newRingData: RingData = {
-            location, // 撮影場所
-            latitude: currentLatitude, // 撮影地点の緯度
-            longitude: currentLongitude, // 撮影地点の経度
-            user: userIdRef.current, // ユーザーID
+            location: "", // 撮影場所
+            latitude: 0, // 撮影地点の緯度
+            longitude: 0, // 撮影地点の経度
+            user: newRandomUserId, // ユーザーID
             indexed: newTorus.orbitIndex, // リング軌道内の順番(DEI中の何個目か、0~70)
             hue: newTorus.ringHue, // リングの色調
             created_at: getIso8601DateTime(), // 撮影日時
             nonce // 送信者ID
         };
-
-        // TODO テスト用のランダムユーザーIDをやめる
-        const newRandomUserId: string = uuidv4();
-        newRingData.user = newRandomUserId;
 
         return newRingData;
     }
@@ -242,7 +240,8 @@ export function RingProvider({children}: {children: ReactNode}){
                 setUsedOrbitIndexes,
                 addedTorus,
                 initializeRingDraw,
-                reChoiceAddedTorus
+                reChoiceAddedTorus,
+                addNewTorus
             }}
         >
             {children}

@@ -1,7 +1,7 @@
 import { resolve } from "path"
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import basicSsl from '@vitejs/plugin-basic-ssl'
+// import basicSsl from '@vitejs/plugin-basic-ssl'
 
 const root = resolve(__dirname, 'src');
 const outDir = resolve(__dirname, 'dist');
@@ -14,18 +14,14 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    basicSsl() // HTTPSでdev serverにアクセスする
+    // basicSsl() // HTTPSでdev serverにアクセスする
   ],
   root,
   build: {
     outDir,
     rollupOptions: {
       input: {
-        main: resolve(root, 'index.html'),
-        live: resolve(root, "live", 'index.html'),
-        gallery: resolve(root, "gallery", 'index.html'),
-        trial: resolve(root, "trial", 'index.html'),
-        timelapse: resolve(root, "timelapse", 'index.html')
+        main: resolve(root, 'index.html')
       }
     }
   }
